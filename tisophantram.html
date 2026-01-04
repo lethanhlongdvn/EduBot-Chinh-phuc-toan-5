@@ -8,33 +8,33 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;700&display=swap" rel="stylesheet">
+
     <style>
         :root { --primary: #FF9800; --secondary: #2196F3; --success: #4CAF50; --bg: #FFFBF0; }
         body { font-family: 'Lexend', Arial, sans-serif; background: var(--bg); margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; }
         .container { max-width: 800px; width: 100%; background: white; padding: 20px; border-radius: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border: 3px solid #FFCC80; }
         
-        /* Giao diện Header */
-        .header-img { width: 100%; border-radius: 15px; border: 2px solid #EEE; margin-bottom: 15px; }
+        .header-img { width: 100%; border-radius: 15px; border: 2px solid #EEE; margin-bottom: 15px; height: 180px; object-fit: cover; }
         .status-bar { display: flex; justify-content: space-between; font-weight: bold; color: #555; margin-bottom: 10px; }
-        .progress-container { height: 10px; background: #EEE; border-radius: 5px; margin-bottom: 20px; }
-        .progress-bar { height: 100%; background: var(--primary); width: 0%; border-radius: 5px; transition: 0.5s; }
+        .progress-container { height: 12px; background: #EEE; border-radius: 6px; margin-bottom: 20px; overflow: hidden; }
+        .progress-bar { height: 100%; background: var(--primary); width: 0%; transition: 0.5s; }
 
-        /* Chọn chặng đường */
         .level-map { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 25px; }
-        .lvl-btn { padding: 15px 5px; border: none; border-radius: 15px; background: #F5F5F5; cursor: pointer; transition: 0.3s; font-size: 0.9rem; border-bottom: 4px solid #DDD; }
-        .lvl-btn.active { background: #FFF3E0; border-color: var(--primary); color: var(--primary); font-weight: bold; }
-        .lvl-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .lvl-btn { padding: 15px 5px; border: none; border-radius: 15px; background: #F5F5F5; font-family: 'Lexend'; font-size: 0.9rem; border-bottom: 4px solid #DDD; color: #888; }
+        .lvl-btn.active { background: #FFF3E0; border-color: var(--primary); color: var(--primary); font-weight: bold; border-bottom: 4px solid var(--primary); }
 
-        /* Vùng câu hỏi */
         .question-area { min-height: 150px; text-align: center; }
         .q-text { font-size: 1.2rem; color: #333; margin-bottom: 20px; line-height: 1.6; }
         .options { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .opt { padding: 15px; border: 2px solid #F0F0F0; border-radius: 12px; background: white; cursor: pointer; transition: 0.2s; font-size: 1rem; }
+        .opt { padding: 15px; border: 2px solid #F0F0F0; border-radius: 12px; background: white; cursor: pointer; transition: 0.2s; font-size: 1rem; font-family: 'Lexend'; }
         .opt:hover:not(:disabled) { border-color: var(--secondary); background: #E3F2FD; }
 
-        /* Robot trợ giúp */
-        .robot-box { display: flex; align-items: center; background: #E1F5FE; padding: 15px; border-radius: 15px; margin-top: 20px; gap: 10px; }
+        .robot-box { display: flex; align-items: center; background: #E1F5FE; padding: 15px; border-radius: 15px; margin-top: 20px; gap: 10px; border-left: 5px solid var(--secondary); }
         .hidden { display: none; }
+        
+        .action-btn { padding: 15px 30px; background: var(--success); color: white; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-family: 'Lexend'; font-size: 1.1rem; }
+        #result-screen input { padding: 12px; border-radius: 10px; border: 2px solid #ddd; width: 80%; font-family: 'Lexend'; margin-bottom: 15px; font-size: 1rem; }
     </style>
 </head>
 <body>
@@ -43,39 +43,45 @@
     <img src="ti-so.jpg" class="header-img" alt="Học cùng Robot">
 
     <div class="level-map">
-        <button id="btn-0" class="lvl-btn active" onclick="startLevel(0)">🏔️ CHẶNG 1<br>Khám phá</button>
-        <button id="btn-1" class="lvl-btn" onclick="startLevel(1)" disabled>🌲 CHẶNG 2<br>Luyện tập</button>
-        <button id="btn-2" class="lvl-btn" onclick="startLevel(2)" disabled>🏆 CHẶNG 3<br>Về đích</button>
+        <button id="btn-0" class="lvl-btn active">🏔️ CHẶNG 1<br>Khám phá</button>
+        <button id="btn-1" class="lvl-btn">🌲 CHẶNG 2<br>Luyện tập</button>
+        <button id="btn-2" class="lvl-btn">🏆 CHẶNG 3<br>Về đích</button>
     </div>
 
     <div class="progress-container"><div id="progress" class="progress-bar"></div></div>
 
     <div id="game-content">
         <div class="status-bar">
-            <span id="lvl-title">Sẵn sàng chưa?</span>
-            <span id="score-display">Đúng: 0/10</span>
+            <span id="lvl-title">Khởi hành thôi!</span>
+            <span id="score-display">Tổng điểm: 0/12</span>
         </div>
         
         <div class="question-area">
-            <p class="q-text" id="q-text">Nhấn vào một chặng để bắt đầu hành trình!</p>
+            <p class="q-text" id="q-text">Đang tải câu hỏi...</p>
             <div class="options" id="options"></div>
         </div>
 
         <div id="robot-hint" class="robot-box hidden">
-            <span>🤖:</span> <span id="hint-text">Gợi ý từ Robot...</span>
+            <span>🤖:</span> <span id="hint-text"></span>
         </div>
     </div>
 
-    <div id="result-screen" class="hidden" style="text-align: center;">
-        <h2 id="result-title">Kết quả</h2>
-        <p id="result-msg"></p>
-        <input type="text" id="player-name" placeholder="Nhập tên của bạn..." style="padding:10px; border-radius:5px; border:1px solid #CCC; width:60%;">
-        <button onclick="saveScoreOnline()" style="padding:10px 20px; background:var(--primary); color:white; border:none; border-radius:5px; margin-top:10px; cursor:pointer;">Lưu điểm danh dự</button>
+    <div id="next-lvl-screen" class="hidden" style="text-align: center; padding: 20px;">
+        <h2 id="lvl-msg">Tuyệt vời!</h2>
+        <p id="lvl-score-info" style="font-size: 1.2rem;"></p>
+        <button class="action-btn" onclick="continueToNext()">Tiếp tục Chặng tiếp theo ➔</button>
+    </div>
+
+    <div id="result-screen" class="hidden" style="text-align: center; padding: 30px 0;">
+        <h2 id="result-title">Hành trình hoàn tất! 🏆</h2>
+        <p id="result-msg" style="font-size: 1.8rem; color: var(--primary); font-weight: bold;"></p>
+        <input type="text" id="player-name" placeholder="Nhập Họ và Tên của em...">
+        <br>
+        <button class="action-btn" onclick="saveScoreOnline()">Ghi danh Bảng Vàng</button>
     </div>
 </div>
 
 <script>
-    // 1. CẤU HÌNH FIREBASE
     const firebaseConfig = {
         apiKey: "AIzaSyC6zlWn8BKYU7P6A2-PYq6IIWOzaqJWFhc",
         authDomain: "gamhoctap.firebaseapp.com",
@@ -85,48 +91,38 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // 2. NỘI DUNG BÀI HỌC (TỔNG HỢP TỪ SGK)
     const lessons = [
-        [ // CHẶNG 1: KHÁM PHÁ (Hình thành khái niệm)
+        [ // CHẶNG 1
             { q: "Có 3 xe điện và 7 xe xăng. Tỉ số của xe điện và xe xăng là?", a: ["3 : 7", "7 : 3", "3 : 10", "7 : 10"], c: 0, h: "Tỉ số của a và b là a : b" },
             { q: "Có 10 xe, 3 xe điện. Tỉ số của xe điện và tổng số xe là?", a: ["3/10", "10/3", "3/7", "7/10"], c: 0, h: "Lấy số xe điện chia cho tổng số xe." },
             { q: "Viết tỉ số 17/100 dưới dạng phần trăm:", a: ["1.7%", "17%", "0.17%", "170%"], c: 1, h: "Mẫu số 100 thay bằng kí hiệu %" },
             { q: "Tỉ số của 5 và 8 viết là?", a: ["5 : 8", "8 : 5", "5/8", "Cả A và C"], c: 3, h: "Tỉ số có thể viết dạng phép chia hoặc phân số." }
         ],
-        [ // CHẶNG 2: LUYỆN TẬP (Kỹ năng chuyển đổi)
+        [ // CHẶNG 2
             { q: "Chuyển phân số 2/5 thành tỉ số phần trăm:", a: ["20%", "40%", "50%", "25%"], c: 1, h: "Đưa mẫu số về 100: 2/5 = 40/100" },
             { q: "Số thập phân 0,65 viết thành phần trăm là?", a: ["6.5%", "0.65%", "65%", "650%"], c: 2, h: "0,65 = 65/100" },
             { q: "12% của 100 ô vuông là bao nhiêu ô?", a: ["1.2 ô", "12 ô", "120 ô", "10 ô"], c: 1, h: "12% của 100 chính là 12." },
             { q: "Trong vườn có 50 cây, 10 cây cam. Tỉ số phần trăm của cây cam là?", a: ["10%", "20%", "50%", "5%"], c: 1, h: "10/50 = 20/100" }
         ],
-        [ // CHẶNG 3: VỀ ĐÍCH (Vận dụng nâng cao)
+        [ // CHẶNG 3
             { q: "Lớp 5A có 30 HS, 18 HS nữ. Tỉ số phần trăm HS nữ là?", a: ["18%", "50%", "60%", "30%"], c: 2, h: "18/30 = 6/10 = 60/100" },
-            { q: "Một cửa hàng có 100 cái bánh, bán hết 75 cái. Tỉ số phần trăm bánh còn lại là?", a: ["75%", "25%", "100%", "50%"], c: 1, h: "Tính số bánh còn lại rồi chia cho 100." },
-            { q: "Cứ 100kg nước biển có 4kg muối. Tỉ số phần trăm muối là?", a: ["0.4%", "4%", "40%", "400%"], c: 1, h: "4/100 ứng với bao nhiêu %?" },
-            { q: "Giá xăng tăng từ 20k lên 22k. Số tiền tăng chiếm bao nhiêu % giá cũ?", a: ["2%", "10%", "20%", "5%"], c: 1, h: "Tiền tăng là 2k. 2/20 = ?%" }
+            { q: "Một cửa hàng có 100 cái bánh, bán hết 75 cái. Tỉ số phần trăm bánh còn lại là?", a: ["75%", "25%", "100%", "50%"], c: 1, h: "Còn lại 25 cái. 25/100 = 25%" },
+            { q: "Cứ 100kg nước biển có 4kg muối. Tỉ số phần trăm muối là?", a: ["0.4%", "4%", "40%", "400%"], c: 1, h: "4/100 chính là 4%." },
+            { q: "Giá xăng tăng từ 20k lên 22k. Số tiền tăng chiếm bao nhiêu % giá cũ?", a: ["2%", "10%", "20%", "5%"], c: 1, h: "Tăng 2k. 2/20 = 10/100 = 10%" }
         ]
     ];
 
-    let curLvl = -1, curQ = 0, curScore = 0;
-
-    function startLevel(l) {
-        curLvl = l; curQ = 0; curScore = 0;
-        document.querySelectorAll('.lvl-btn').forEach((b,i)=> b.classList.toggle('active', i===l));
-        document.getElementById('lvl-title').innerText = "Đang ở: Chặng " + (l+1);
-        document.getElementById('game-content').classList.remove('hidden');
-        document.getElementById('result-screen').classList.add('hidden');
-        updateScoreDisplay();
-        showQuestion();
-    }
+    let curLvl = 0, curQ = 0, totalScore = 0;
 
     function showQuestion() {
         let q = lessons[curLvl][curQ];
-        document.getElementById('q-text').innerText = q.q;
-        document.getElementById('progress').style.width = (curQ / lessons[curLvl].length * 100) + "%";
+        document.getElementById('q-text').innerHTML = `<b>Câu ${curLvl * 4 + curQ + 1}:</b> ${q.q}`;
+        document.getElementById('progress').style.width = ((curLvl * 4 + curQ) / 12 * 100) + "%";
         
         let html = q.a.map((opt, i) => `<button class="opt" onclick="checkAnswer(${i})">${opt}</button>`).join('');
         document.getElementById('options').innerHTML = html;
         document.getElementById('robot-hint').classList.add('hidden');
+        document.getElementById('lvl-title').innerText = "Đang ở: Chặng " + (curLvl + 1);
     }
 
     function checkAnswer(i) {
@@ -135,28 +131,28 @@
         btns.forEach(b => b.disabled = true);
 
         if(i === q.c) {
-            curScore++;
+            totalScore++;
             btns[i].style.background = "#C8E6C9";
-            showRobot("Chính xác! Bạn thông minh quá! ✨");
+            showRobot("Robot: Chính xác! +1 điểm. ✨");
         } else {
             btns[i].style.background = "#FFCDD2";
             btns[q.c].style.background = "#C8E6C9";
-            showRobot("Gợi ý: " + q.h);
+            showRobot("Robot gợi ý: " + q.h);
         }
 
         setTimeout(() => {
             curQ++;
-            if(curQ < lessons[curLvl].length) {
+            if(curQ < 4) {
                 showQuestion();
                 updateScoreDisplay();
             } else {
-                finishLevel();
+                finishStage();
             }
-        }, 2000);
+        }, 2200);
     }
 
     function updateScoreDisplay() {
-        document.getElementById('score-display').innerText = `Đúng: ${curScore}/${lessons[curLvl].length}`;
+        document.getElementById('score-display').innerText = `Tổng điểm: ${totalScore}/12`;
     }
 
     function showRobot(m) {
@@ -164,26 +160,45 @@
         document.getElementById('hint-text').innerText = m;
     }
 
-    function finishLevel() {
+    function finishStage() {
         document.getElementById('game-content').classList.add('hidden');
-        document.getElementById('result-screen').classList.remove('hidden');
-        let p = (curScore / lessons[curLvl].length) * 100;
-        document.getElementById('result-msg').innerText = `Bạn đạt ${curScore} điểm (${p}%)`;
-        
-        if(p >= 75 && curLvl < 2) {
-            document.getElementById('btn-' + (curLvl+1)).disabled = false;
-            document.getElementById('result-title').innerText = "Tuyệt vời! Đã mở khóa chặng tiếp theo! 🎉";
-        } else if (p < 75) {
-            document.getElementById('result-title').innerText = "Cần cố gắng thêm để qua chặng! 💪";
+        if (curLvl < 2) {
+            document.getElementById('next-lvl-screen').classList.remove('hidden');
+            document.getElementById('lvl-score-info').innerText = `Xong Chặng ${curLvl + 1}. Điểm hiện tại: ${totalScore}/12`;
+        } else {
+            document.getElementById('result-screen').classList.remove('hidden');
+            document.getElementById('result-msg').innerText = `${totalScore} / 12 ĐIỂM`;
+            document.getElementById('progress').style.width = "100%";
         }
     }
 
-    function saveScoreOnline() {
-        const name = document.getElementById('player-name').value || "Người chơi ẩn danh";
-        db.ref('leaderboard').push({ name, totalScore: curScore * 10, date: Date.now() });
-        alert("Đã lưu bảng vàng!");
-        location.reload();
+    function continueToNext() {
+        curLvl++;
+        curQ = 0;
+        document.querySelectorAll('.lvl-btn').forEach((b, i) => b.classList.toggle('active', i === curLvl));
+        document.getElementById('next-lvl-screen').classList.add('hidden');
+        document.getElementById('game-content').classList.remove('hidden');
+        showQuestion();
+        updateScoreDisplay();
     }
+
+    function saveScoreOnline() {
+    const name = document.getElementById('player-name').value || "Người chơi ẩn danh";
+    const GAME_ID = "Ti_So_Phan_Tram";
+    const dateNow = new Date().toLocaleString('vi-VN');
+
+    db.ref('scores/' + GAME_ID + '/' + name.replace(/\s+/g, '_')).set({
+        fullName: name,
+        score: curScore,
+        date: dateNow,
+        timestamp: firebase.database.ServerValue.TIMESTAMP
+    }).then(() => {
+        alert("Đã lưu bảng vàng!");
+        location.href = "bang-vang.html";
+    });
+}
+
+    window.onload = showQuestion;
 </script>
 </body>
 </html>
