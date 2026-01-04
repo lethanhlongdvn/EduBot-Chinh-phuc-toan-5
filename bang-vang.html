@@ -14,21 +14,28 @@
         header { background: white; padding: 1rem 5%; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; }
         .logo { font-size: 1.5rem; font-weight: bold; color: var(--primary); text-decoration: none; }
         nav a { margin-left: 20px; text-decoration: none; color: #333; font-weight: 500; }
+        
         .hero { text-align: center; padding: 40px 20px; background: linear-gradient(135deg, var(--secondary), #64B5F6); color: white; }
-        .admin-container { max-width: 1000px; margin: -30px auto 50px; padding: 0 20px; }
+        .admin-container { max-width: 1100px; margin: -30px auto 50px; padding: 0 20px; }
+        
         .game-block { background: white; border-radius: 20px; box-shadow: 0 6px 20px rgba(0,0,0,0.05); margin-bottom: 30px; overflow: hidden; border: 1px solid #eee; animation: fadeInUp 0.5s ease; }
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        
         .game-header { padding: 20px; background: #fff; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--bg); }
         .btn-excel { background: var(--primary); color: white; border: none; padding: 10px 18px; border-radius: 12px; cursor: pointer; font-family: 'Lexend'; font-weight: bold; transition: 0.3s; }
         .btn-excel:hover { background: #388E3C; transform: scale(1.05); }
-        table { width: 100%; border-collapse: collapse; }
+        
+        table { width: 100%; border-collapse: collapse; min-width: 600px; }
         th { text-align: left; padding: 15px; background: #f8f9fa; color: #7f8c8d; font-size: 0.85rem; text-transform: uppercase; }
         td { padding: 15px; border-bottom: 1px solid #f1f1f1; }
+        
         .rank { width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: #f0f0f0; font-weight: bold; }
         tr:nth-child(1) .rank { background: #FFD700; color: white; box-shadow: 0 2px 5px rgba(255,215,0,0.4); }
         tr:nth-child(2) .rank { background: #C0C0C0; color: white; }
         tr:nth-child(3) .rank { background: #CD7F32; color: white; }
+        
         .score-badge { background: #E3F2FD; color: var(--secondary); padding: 6px 15px; border-radius: 20px; font-weight: bold; display: inline-block; }
+        .class-badge { background: #F5F5F5; color: #666; padding: 4px 10px; border-radius: 6px; font-size: 0.9rem; border: 1px solid #ddd; }
     </style>
 </head>
 <body>
@@ -47,6 +54,7 @@
     </main>
 
     <script>
+        // Cấu hình Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyC6zlWn8BKYU7P6A2-PYq6IIWOzaqJWFhc",
             authDomain: "gamhoctap.firebaseapp.com",
@@ -56,13 +64,14 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
+        // Hàm xuất Excel
         function exportExcel(id, name) {
             const table = document.getElementById('table-' + id);
             const wb = XLSX.utils.table_to_book(table);
-            XLSX.writeFile(wb, `KetQua_${name.replace(/\s+/g, '_')}.xlsx`);
+            XLSX.writeFile(wb, `KetQua_HocSinh_${name.replace(/\s+/g, '_')}.xlsx`);
         }
 
-        // LẮNG NGHE DỮ LIỆU
+        // Lắng nghe dữ liệu thực tế
         db.ref('scores').on('value', (snap) => {
             const data = snap.val();
             const container = document.getElementById('main-content');
@@ -74,10 +83,12 @@
             }
 
             for (let gameId in data) {
-                // Chuyển object thành array và sắp xếp điểm từ cao xuống thấp
-                let students = Object.values(data[gameId]).sort((a,b) => b.score - a.score);
+                // Sắp xếp: Ưu tiên điểm cao, sau đó đến thời gian mới nhất
+                let students = Object.values(data[gameId]).sort((a,b) => {
+                    if (b.score !== a.score) return b.score - a.score;
+                    return b.timestamp - a.timestamp;
+                });
                 
-                // Đổi tên Game ID thành tiêu đề dễ đọc
                 let gameTitle = gameId.replace(/_/g, ' ');
                 if(gameId === "Tong_Ti_So") gameTitle = "Bài toán Tổng - Tỉ";
                 if(gameId === "Ti_Le_Ban_Do") gameTitle = "Tỉ lệ bản đồ & Ứng dụng";
@@ -93,8 +104,9 @@
                             <table id="table-${gameId}">
                                 <thead>
                                     <tr>
-                                        <th width="80">Hạng</th>
+                                        <th width="70">Hạng</th>
                                         <th>Học sinh</th>
+                                        <th width="100">Lớp</th>
                                         <th width="120">Điểm số</th>
                                         <th width="180">Ngày hoàn thành</th>
                                     </tr>
@@ -104,6 +116,7 @@
                                         <tr>
                                             <td><div class="rank">${i+1}</div></td>
                                             <td><b style="color:#333">${s.fullName || "Ẩn danh"}</b></td>
+                                            <td><span class="class-badge">${s.className || "---"}</span></td>
                                             <td><span class="score-badge">${s.score} / 12</span></td>
                                             <td style="font-size:0.85rem; color:#7f8c8d">${s.date || "---"}</td>
                                         </tr>
