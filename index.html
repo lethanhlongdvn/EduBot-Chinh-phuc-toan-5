@@ -6,7 +6,6 @@
     <title>Trang Chủ - EduRobot Chinh Phục Toán 5</title>
     <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        /* 1. Định nghĩa màu sắc và font chữ */
         :root {
             --primary-color: #4CAF50;
             --secondary-color: #2196F3;
@@ -21,7 +20,7 @@
             color: var(--text-color);
         }
 
-        /* 2. Header */
+        /* Header */
         header {
             background: white;
             padding: 1rem 5%;
@@ -49,26 +48,73 @@
             transition: 0.3s;
         }
 
-        nav a:hover {
-            color: var(--primary-color);
-        }
+        nav a:hover { color: var(--primary-color); }
 
-        /* 3. Hero Section */
+        /* HERO SECTION - ĐÃ THU NHỎ CHIỀU CAO 2/3 */
         .hero {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             text-align: center;
-            padding: 60px 20px;
+            padding: 10px 5%; /* Giảm padding để thu hẹp dãy màu xanh */
             background: linear-gradient(135deg, #4CAF50, #81C784);
             color: white;
+            overflow: hidden;
+            min-height: 180px; /* Đảm bảo độ cao cân đối */
         }
-        .hero h1 { margin: 0; font-size: 2.2rem; }
-        .hero p { opacity: 0.9; margin-top: 10px; }
 
-        /* 4. Danh sách Game (Grid) */
+        .hero-content {
+            z-index: 2;
+            max-width: 500px;
+        }
+
+        .hero h1 { margin: 0; font-size: 1.8rem; text-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        .hero p { opacity: 0.9; margin-top: 8px; font-size: 1rem; }
+
+        /* Ảnh bìa hai bên - Cân chỉnh lại kích thước */
+        .hero-img {
+            position: absolute;
+            width: 140px; /* Thu nhỏ ảnh một chút để khớp với dãy màu xanh mới */
+            height: auto;
+            border-radius: 12px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.25);
+            z-index: 1;
+            display: none;
+        }
+
+        @media (min-width: 900px) {
+            .hero-img { display: block; }
+        }
+
+        .img-left {
+            left: 8%;
+            transform: perspective(1000px) rotateY(25deg) rotateZ(-5deg);
+            animation: floatLeft 4s ease-in-out infinite;
+        }
+
+        .img-right {
+            right: 8%;
+            transform: perspective(1000px) rotateY(-25deg) rotateZ(5deg);
+            animation: floatRight 4s ease-in-out infinite;
+        }
+
+        @keyframes floatLeft {
+            0%, 100% { transform: perspective(1000px) rotateY(25deg) rotateZ(-5deg) translateY(0); }
+            50% { transform: perspective(1000px) rotateY(30deg) rotateZ(-3deg) translateY(-10px); }
+        }
+
+        @keyframes floatRight {
+            0%, 100% { transform: perspective(1000px) rotateY(-25deg) rotateZ(5deg) translateY(0); }
+            50% { transform: perspective(1000px) rotateY(-30deg) rotateZ(3deg) translateY(-10px); }
+        }
+
+        /* Danh sách Game */
         .game-container {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 30px;
-            padding: 40px 5%;
+            gap: 25px;
+            padding: 30px 5%;
             max-width: 1200px;
             margin: 0 auto;
         }
@@ -86,59 +132,41 @@
         }
 
         .game-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+            transform: translateY(-8px);
+            box-shadow: 0 12px 25px rgba(0,0,0,0.12);
         }
 
         .game-thumb {
             width: 100%;
-            height: 160px;
-            background: #ddd;
+            height: 150px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: bold;
-            font-size: 1.2rem;
             color: white;
             text-shadow: 1px 1px 4px rgba(0,0,0,0.3);
             background-size: cover;
             background-position: center;
         }
 
-        .game-info {
-            padding: 20px;
-            flex-grow: 1;
-        }
-
-        .game-info h3 { margin: 0 0 10px 0; color: #2c3e50; font-size: 1.1rem; }
-        .game-info p { font-size: 0.9rem; color: #666; line-height: 1.5; }
+        .game-info { padding: 15px; flex-grow: 1; }
+        .game-info h3 { margin: 0 0 8px 0; color: #2c3e50; font-size: 1.1rem; }
+        .game-info p { font-size: 0.9rem; color: #666; line-height: 1.4; height: 2.8em; overflow: hidden; }
 
         .play-btn {
             display: inline-block;
             background: var(--secondary-color);
             color: white;
-            padding: 12px 25px;
-            border-radius: 30px;
+            padding: 10px 20px;
+            border-radius: 25px;
             text-decoration: none;
-            margin-top: 15px;
+            margin-top: 10px;
             font-weight: bold;
             transition: 0.3s;
         }
 
-        .play-btn:hover {
-            background: #1976D2;
-            box-shadow: 0 4px 10px rgba(33, 150, 243, 0.3);
-        }
-
-        /* Ô chờ (Coming Soon) */
-        .coming-soon {
-            opacity: 0.7;
-            filter: grayscale(0.5);
-            cursor: not-allowed;
-        }
-        .coming-soon .play-btn {
-            background: #95a5a6;
-        }
+        .play-btn:hover { background: #1976D2; box-shadow: 0 4px 10px rgba(33, 150, 243, 0.3); }
+        .coming-soon { opacity: 0.7; filter: grayscale(0.6); }
     </style>
 </head>
 <body>
@@ -153,8 +181,14 @@
     </header>
 
     <section class="hero">
-        <h1>Chinh phục Toán lớp 5 cùng EduRobot!</h1>
-        <p>Hệ thống trò chơi học tập dành cho 120 học sinh tài năng.</p>
+        <img src="bia1.jpg" alt="Bìa 1" class="hero-img img-left">
+        
+        <div class="hero-content">
+            <h1>Chinh phục Toán lớp 5 cùng EduRobot!</h1>
+            <p>Học toán thật vui, nhận quà thật thích!</p>
+        </div>
+
+        <img src="bia2.jpg" alt="Bìa 2" class="hero-img img-right">
     </section>
 
     <main class="game-container">
@@ -164,8 +198,8 @@
             </div>
             <div class="game-info">
                 <h3>Robot & Tỉ Số</h3>
-                <p>Khám phá thế giới của những con số phần trăm và ứng dụng thực tế sinh động.</p>
-                <a href="tisophantram.html" class="play-btn">Bắt đầu chơi</a>
+                <p>Khám phá thế giới của những con số phần trăm sinh động.</p>
+                <a href="tisophantram.html" class="play-btn">Bắt đầu khám phá</a>
             </div>
         </div>
 
@@ -175,36 +209,36 @@
             </div>
             <div class="game-info">
                 <h3>Thám Hiểm Bản Đồ</h3>
-                <p>Trở thành nhà thám hiểm tài ba, giải mã khoảng cách thực tế qua bản vẽ thu nhỏ.</p>
-                <a href="tilebandovaungdung.html" class="play-btn">Thám hiểm ngay</a>
+                <p>Giải mã khoảng cách thực tế qua các bản vẽ thu nhỏ.</p>
+                <a href="tilebandovaungdung.html" class="play-btn">Bắt đầu khám phá</a>
             </div>
         </div>
 
         <div class="game-card">
-            <div class="game-thumb" style="background-image: linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.1)), url('tongtiso.jpg'); background-color: #FF9800;">
+            <div class="game-thumb" style="background-image: linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.1)), url('tongtiso.jpg'); background-color: #8BC34A;">
                 Tổng - Tỉ
             </div>
             <div class="game-info">
                 <h3>Tổng và Tỉ số</h3>
-                <p>Vẽ sơ đồ và chinh phục bài toán Tìm hai số khi biết Tổng và Tỉ số cùng Robot.</p>
-                <a href="tongtiso.html" class="play-btn" style="background: #FF9800;">Bắt đầu học</a>
+                <p>Vượt qua thử thách tìm hai số khi biết Tổng và Tỉ số.</p>
+                <a href="tongtiso.html" class="play-btn">Bắt đầu khám phá</a>
             </div>
         </div>
 
-        <div class="game-card coming-soon">
-            <div class="game-thumb" style="background-color: #42A5F5;">
-                ? ? ?
+        <div class="game-card">
+            <div class="game-thumb" style="background-image: linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.1)), url('hieutiso.jpg'); background-color: #673AB7;">
+                Hiệu - Tỉ
             </div>
             <div class="game-info">
-                <h3>Sắp Ra Mắt</h3>
-                <p>Thử thách kiến thức tiếp theo đang được Robot chuẩn bị. Hãy chờ xem nhé!</p>
-                <a href="#" class="play-btn" onclick="return false;">Đang khóa</a>
+                <h3>Hiệu và Tỉ số</h3>
+                <p>Thử tài vẽ sơ đồ và tính toán tìm hai số khi biết Hiệu và Tỉ số.</p>
+                <a href="hieutiso.html" class="play-btn">Bắt đầu khám phá</a>
             </div>
         </div>
     </main>
 
     <footer style="text-align: center; padding: 20px; color: #888; font-size: 0.8rem;">
-        &copy; 2024 EduRobot - Hệ thống học tập trực tuyến
+        &copy; 2024 EduRobot - Chúc các em học tập tốt!
     </footer>
 
 </body>
