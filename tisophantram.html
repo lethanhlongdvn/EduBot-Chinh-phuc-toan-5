@@ -79,7 +79,7 @@
         <p id="result-msg" style="font-size: 1.8rem; color: var(--primary); font-weight: bold;"></p>
         
         <input type="text" id="player-name" class="input-field" placeholder="Nhập Họ và Tên của em...">
-        <input type="text" id="player-class" class="input-field" placeholder="Nhập Lớp (Ví dụ: 5/4)...">
+        <input type="text" id="player-class" class="input-field" placeholder="Nhập Lớp (Ví dụ: 5/1)...">
         <br>
         <button class="action-btn" onclick="saveScoreOnline()">Ghi danh Bảng Vàng</button>
     </div>
@@ -117,6 +117,7 @@
     ];
 
     let curLvl = 0, curQ = 0, totalScore = 0;
+    let startTime = Date.now(); // 1. BẮT ĐẦU TÍNH GIỜ
 
     function showQuestion() {
         let q = lessons[curLvl][curQ];
@@ -195,25 +196,31 @@
             return;
         }
 
+        // 2. TÍNH GIÂY HOÀN THÀNH
+        const endTime = Date.now();
+        const durationSeconds = Math.floor((endTime - startTime) / 1000);
+
         const GAME_ID = "Ti_So_Phan_Tram";
         const dateNow = new Date().toLocaleString('vi-VN');
         
-        // SỬA LỖI QUAN TRỌNG: Làm sạch tên lớp và tên để Firebase không hiểu lầm dấu "/"
+        // 3. CỐ ĐỊNH ĐỊNH DẠNG TEXT CHO EXCEL
+        const excelClassName = "'" + className;
+
         const safeClassName = className.replace(/[\/.\#\$\[\]]/g, '_');
         const safeName = name.replace(/[\/.\#\$\[\]]/g, '_');
         const userKey = (safeClassName + "_" + safeName).replace(/\s+/g, '_');
 
         db.ref('scores/' + GAME_ID + '/' + userKey).set({
             fullName: name,
-            className: className, // Lưu lớp gốc (ví dụ 5/4) để hiển thị lên bảng
+            className: excelClassName, // Đã thêm dấu nháy đơn
             score: totalScore,
+            duration: durationSeconds, // Lưu thời gian để xếp hạng
             date: dateNow,
             timestamp: firebase.database.ServerValue.TIMESTAMP
         }).then(() => {
-            alert("Chúc mừng em " + name + " lớp " + className + " đã ghi danh bảng vàng!");
+            alert("Chúc mừng em " + name + " đã hoàn thành trong " + durationSeconds + " giây!");
             location.href = "bang-vang.html";
         }).catch((error) => {
-            console.error("Lỗi: ", error);
             alert("Có lỗi kết nối, em thử lại nhé!");
         });
     }
