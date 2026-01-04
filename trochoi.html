@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trang Chủ - Mini Game Học Tập</title>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* 1. Định nghĩa màu sắc và font chữ */
+        :root {
+            --primary-color: #4CAF50;
+            --secondary-color: #2196F3;
+            --bg-color: #f4f7f6;
+            --text-color: #333;
+        }
+
+        body {
+            font-family: 'Lexend', sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            color: var(--text-color);
+        }
+
+        /* 2. Header */
+        header {
+            background: white;
+            padding: 1rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        nav a {
+            margin-left: 20px;
+            text-decoration: none;
+            color: var(--text-color);
+            font-weight: 500;
+        }
+
+        /* 3. Hero Section */
+        .hero {
+            text-align: center;
+            padding: 60px 20px;
+            background: linear-gradient(135deg, #4CAF50, #81C784);
+            color: white;
+        }
+        .hero h1 { margin: 0; font-size: 2.2rem; }
+        .hero p { opacity: 0.9; margin-top: 10px; }
+
+        /* 4. Danh sách Game (Grid) */
+        .game-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            padding: 40px 5%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .game-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #eee;
+        }
+
+        .game-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+        }
+
+        .game-thumb {
+            width: 100%;
+            height: 160px;
+            background: #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: white;
+            text-shadow: 1px 1px 4px rgba(0,0,0,0.3);
+            background-size: cover;
+            background-position: center;
+        }
+
+        .game-info {
+            padding: 20px;
+            flex-grow: 1;
+        }
+
+        .game-info h3 { margin: 0 0 10px 0; color: #2c3e50; }
+        .game-info p { font-size: 0.9rem; color: #666; line-height: 1.5; }
+
+        .play-btn {
+            display: inline-block;
+            background: var(--secondary-color);
+            color: white;
+            padding: 12px 25px;
+            border-radius: 30px;
+            text-decoration: none;
+            margin-top: 15px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .play-btn:hover {
+            background: #1976D2;
+            box-shadow: 0 4px 10px rgba(33, 150, 243, 0.3);
+        }
+
+        /* Ô chờ (Coming Soon) */
+        .coming-soon {
+            opacity: 0.7;
+            filter: grayscale(0.5);
+            cursor: not-allowed;
+        }
+        .coming-soon .play-btn {
+            background: #95a5a6;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">EduGame 🎮</div>
+        <nav>
+            <a href="trochoi.html">Trang chủ</a>
+            <a href="#">Bảng vàng</a>
+            <a href="#">Hướng dẫn</a>
+        </nav>
+    </header>
+
+    <section class="hero">
+        <h1>Chào mừng bạn đến với EduGame!</h1>
+        <p>Học mà chơi - Chơi mà học. Cùng Robot chinh phục kiến thức nhé!</p>
+    </section>
+
+    <main class="game-container">
+        <div class="game-card">
+            <div class="game-thumb" style="background-image: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2)), url('ti-so.jpg'); background-color: #FFEB3B;">
+                Tỉ Số Phần Trăm
+            </div>
+            <div class="game-info">
+                <h3>Robot & Tỉ Số</h3>
+                <p>Khám phá thế giới của những con số phần trăm và ứng dụng thực tế sinh động.</p>
+                <a href="tisophantram.html" class="play-btn">Bắt đầu chơi</a>
+            </div>
+        </div>
+
+        <div class="game-card">
+            <div class="game-thumb" style="background-image: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2)), url('tilebandovaungdung.jpg'); background-color: #FF7043;">
+                Tỉ Lệ Bản Đồ
+            </div>
+            <div class="game-info">
+                <h3>Thám Hiểm Bản Đồ</h3>
+                <p>Trở thành nhà thám hiểm tài ba, giải mã khoảng cách thực tế qua bản vẽ thu nhỏ.</p>
+                <a href="tilebandovaungdung.html" class="play-btn">Thám hiểm ngay</a>
+            </div>
+        </div>
+	<div class="game-card">
+    <div class="game-thumb" style="background-image: linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.1)), url('tongtiso.jpg'); background-color: #FF9800;">
+        Tổng - Tỉ
+    </div>
+    <div class="game-info">
+        <h3>Bài 38: Tìm hai số khi biết Tổng và Tỉ số của hai số đó</h3>
+        <p>Vẽ sơ đồ và chinh phục bài toán Tìm hai số khi biết Tổng và Tỉ số cùng Robot.</p>
+        <a href="tongtiso.html" class="play-btn" style="background: #FF9800;">Bắt đầu học</a>
+    </div>
+</div>
+        <div class="game-card coming-soon">
+            <div class="game-thumb" style="background-color: #42A5F5;">
+                ? ? ?
+            </div>
+            <div class="game-info">
+                <h3>Sắp Ra Mắt</h3>
+                <p>Thử thách kiến thức tiếp theo đang được Robot chuẩn bị. Hãy chờ xem nhé!</p>
+                <a href="#" class="play-btn" onclick="return false;">Đang khóa</a>
+            </div>
+        </div>
+    </main>
+
+</body>
+</html>

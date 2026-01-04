@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nhà Thám Hiểm Tỉ Lệ Bản Đồ</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    
+    <style>
+        :root { --map-blue: #00bcd4; --map-green: #8bc34a; --map-brown: #795548; --bg: #fdfdfd; }
+        body { font-family: 'Lexend', sans-serif; background: var(--bg); margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; }
+        .container { max-width: 750px; width: 100%; background: white; padding: 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border: 3px solid var(--map-blue); }
+        
+        .header-img { width: 100%; border-radius: 15px; margin-bottom: 15px; border: 2px solid #ddd; height: 250px; object-fit: cover; }
+        
+        .map-legend { background: #fffde7; padding: 10px; border-radius: 10px; margin-bottom: 20px; border: 1px dashed #fbc02d; font-size: 0.9rem; color: #555; }
+        
+        .level-nav { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
+        .nav-btn { padding: 12px; border: none; border-radius: 10px; background: #eceff1; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .nav-btn.active { background: var(--map-blue); color: white; transform: translateY(-3px); }
+        .nav-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        .question-box { background: #f9f9f9; padding: 20px; border-radius: 15px; text-align: center; min-height: 120px; margin-bottom: 20px; }
+        .q-text { font-size: 1.2rem; margin-bottom: 20px; color: #263238; font-weight: 500; }
+        
+        .option-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .opt-btn { padding: 15px; border: 2px solid #eee; border-radius: 12px; background: white; cursor: pointer; transition: 0.2s; font-size: 1rem; }
+        .opt-btn:hover:not(:disabled) { border-color: var(--map-blue); background: #e0f7fa; }
+
+        .robot-feedback { display: flex; align-items: center; gap: 10px; padding: 15px; background: #e8f5e9; border-radius: 12px; margin-top: 15px; border-left: 5px solid #4caf50; }
+        .hidden { display: none; }
+        
+        /* Bảng xếp hạng */
+        .leaderboard { margin-top: 30px; border-top: 2px solid #eee; padding-top: 20px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #eee; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <img src="tilebandovaungdung.jpg" class="header-img" alt="Tỉ lệ bản đồ">
+
+    <div class="map-legend">
+        📍 <b>Ghi chú từ thám hiểm:</b> Tỉ lệ 1 : 10 000 nghĩa là 1cm trên bản đồ tương ứng với 10 000cm (hay 100m) trên thực tế.
+    </div>
+
+    <div class="level-nav">
+        <button id="btn-0" class="nav-btn active" onclick="startLevel(0)">1. Đọc Bản Đồ</button>
+        <button id="btn-1" class="nav-btn" onclick="startLevel(1)" disabled>2. Kỹ Sư Nhí</button>
+        <button id="btn-2" class="nav-btn" onclick="startLevel(2)" disabled>3. Thám Hiểm</button>
+    </div>
+
+    <div id="play-area">
+        <div class="question-box">
+            <p id="q-text" class="q-text">Chào mừng bạn! Hãy chọn chặng đường để bắt đầu.</p>
+            <div id="options" class="option-grid"></div>
+        </div>
+
+        <div id="feedback" class="robot-feedback hidden">
+            <span>🧭</span> <span id="feedback-text"></span>
+        </div>
+    </div>
+
+    <div id="result-box" class="hidden" style="text-align: center;">
+        <h2>Chuyến đi hoàn tất!</h2>
+        <p id="score-info"></p>
+        <input type="text" id="player-name" placeholder="Tên nhà thám hiểm..." style="padding:10px; width:60%; border-radius:8px; border:1px solid #ccc;">
+        <button onclick="saveResult()" style="padding:10px 20px; background:var(--map-blue); color:white; border:none; border-radius:8px; margin-top:10px; cursor:pointer;">Lưu tên vào Bản Đồ Sao</button>
+    </div>
+
+    <div class="leaderboard">
+        <h3>🏆 Top 10 Thám Hiểm Cao Nhất</h3>
+        <table id="lead-table">
+            <thead><tr><th>Hạng</th><th>Tên</th><th>Điểm</th></tr></thead>
+            <tbody id="lead-body"></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    // 1. CẤU HÌNH FIREBASE (Dùng chung database của bạn)
+    const firebaseConfig = {
+        apiKey: "AIzaSyC6zlWn8BKYU7P6A2-PYq6IIWOzaqJWFhc",
+        authDomain: "gamhoctap.firebaseapp.com",
+        databaseURL: "https://gamhoctap-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "gamhoctap"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // 2. DỮ LIỆU BÀI HỌC TỈ LỆ BẢN ĐỒ
+    const mapData = [
+        [ // CHẶNG 1: KHÁM PHÁ (Đọc hiểu tỉ lệ)
+            { q: "Tỉ lệ 1 : 1000 cho biết độ dài thực tế lớn gấp bao nhiêu lần độ dài trên bản đồ?", a: ["10 lần", "100 lần", "1000 lần", "10.000 lần"], c: 2, h: "Số đứng sau dấu ':' là số lần gấp." },
+            { q: "Trên bản đồ tỉ lệ 1 : 500, độ dài 1cm ứng với thực tế là bao nhiêu?", a: ["5cm", "500cm", "50cm", "5000cm"], c: 1, h: "1 x 500 = 500" },
+            { q: "Tỉ lệ bản đồ thường được ghi ở đâu?", a: ["Góc bản đồ", "Giữa bản đồ", "Trong tiêu đề", "Mặt sau"], c: 0, h: "Thường ở các góc để người xem dễ thấy." }
+        ],
+        [ // CHẶNG 2: LUYỆN TẬP (Tính độ dài thực tế)
+            { q: "Tỉ lệ 1 : 10 000. Khoảng cách bản đồ là 2cm. Khoảng cách thật là?", a: ["200m", "20.000m", "20m", "2km"], c: 0, h: "2 x 10.000 = 20.000cm = 200m." },
+            { q: "Bản đồ 1 : 2 000 000. Quãng đường 3cm ứng với thực tế là?", a: ["6km", "60km", "600km", "600m"], c: 1, h: "3 x 2.000.000 = 6.000.000cm = 60km." },
+            { q: "Để tính độ dài thật, ta lấy độ dài bản đồ ... với số đo tỉ lệ:", a: ["Cộng", "Trừ", "Nhân", "Chia"], c: 2, h: "Muốn phóng to về thực tế phải dùng phép nhân." }
+        ],
+        [ // CHẶNG 3: VẬN DỤNG (Vẽ bản đồ & Thực tế)
+            { q: "Khoảng cách thật là 50m. Vẽ bản đồ tỉ lệ 1 : 1000 thì dài bao nhiêu cm?", a: ["50cm", "5cm", "0.5cm", "500cm"], c: 1, h: "50m = 5000cm. 5000 : 1000 = 5cm." },
+            { q: "Chiều dài phòng học là 8m. Vẽ trên giấy dài 4cm. Tỉ lệ là?", a: ["1 : 2", "1 : 20", "1 : 200", "1 : 2000"], c: 2, h: "8m = 800cm. 800 : 4 = 200." },
+            { q: "Ứng dụng nào cần tỉ lệ bản đồ nhất?", a: ["Chơi game", "Xây dựng nhà", "Xem phim", "Nghe nhạc"], c: 1, h: "Kiến trúc sư dùng tỉ lệ để vẽ thiết kế nhà." }
+        ]
+    ];
+
+    let currentLvl = -1, currentQ = 0, score = 0;
+
+    function startLevel(l) {
+        currentLvl = l; currentQ = 0; score = 0;
+        document.querySelectorAll('.nav-btn').forEach((b, i) => b.classList.toggle('active', i === l));
+        document.getElementById('play-area').classList.remove('hidden');
+        document.getElementById('result-box').classList.add('hidden');
+        showQuestion();
+    }
+
+    function showQuestion() {
+        let data = mapData[currentLvl][currentQ];
+        document.getElementById('q-text').innerText = data.q;
+        let html = data.a.map((opt, i) => `<button class="opt-btn" onclick="check(${i})">${opt}</button>`).join('');
+        document.getElementById('options').innerHTML = html;
+        document.getElementById('feedback').classList.add('hidden');
+    }
+
+    function check(idx) {
+        let data = mapData[currentLvl][currentQ];
+        let btns = document.querySelectorAll('.opt-btn');
+        btns.forEach(b => b.disabled = true);
+
+        if(idx === data.c) {
+            score++;
+            btns[idx].style.background = "#c8e6c9";
+            showFeedback("Lệnh thám hiểm chính xác! ✅");
+        } else {
+            btns[idx].style.background = "#ffcdd2";
+            btns[data.c].style.background = "#c8e6c9";
+            showFeedback("La bàn chỉ sai rồi! " + data.h);
+        }
+
+        setTimeout(() => {
+            currentQ++;
+            if(currentQ < mapData[currentLvl].length) showQuestion();
+            else finishLvl();
+        }, 2500);
+    }
+
+    function showFeedback(m) {
+        document.getElementById('feedback').classList.remove('hidden');
+        document.getElementById('feedback-text').innerText = m;
+    }
+
+    function finishLvl() {
+        document.getElementById('play-area').classList.add('hidden');
+        document.getElementById('result-box').classList.remove('hidden');
+        document.getElementById('score-info').innerText = `Bạn đã thu thập được ${score}/${mapData[currentLvl].length} mảnh bản đồ!`;
+        
+        if(score >= 2) {
+            if(currentLvl < 2) document.getElementById('btn-' + (currentLvl + 1)).disabled = false;
+        }
+    }
+
+    function saveResult() {
+        const name = document.getElementById('player-name').value || "Người lạ";
+        db.ref('leaderboard_map').push({ name, score, date: Date.now() });
+        alert("Thông tin đã được lưu!");
+        location.reload();
+    }
+
+    function loadLeaderboard() {
+        db.ref('leaderboard_map').orderByChild('score').limitToLast(10).on('value', snap => {
+            let list = []; snap.forEach(c => { list.push(c.val()) });
+            document.getElementById('lead-body').innerHTML = list.reverse().map((s, i) => 
+                `<tr><td>${i+1}</td><td>${s.name}</td><td>${s.score}</td></tr>`).join('');
+        });
+    }
+    window.onload = loadLeaderboard;
+</script>
+</body>
+</html>
