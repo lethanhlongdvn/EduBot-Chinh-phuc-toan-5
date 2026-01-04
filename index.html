@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trang Chủ - Mini Game Học Tập</title>
+    <title>Trang Chủ - EduRobot Chinh Phục Toán 5</title>
     <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;700&display=swap" rel="stylesheet">
     <style>
         /* 1. Định nghĩa màu sắc và font chữ */
@@ -29,12 +29,16 @@
             justify-content: space-between;
             align-items: center;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
         }
 
         .logo {
             font-size: 1.5rem;
             font-weight: bold;
             color: var(--primary-color);
+            text-decoration: none;
         }
 
         nav a {
@@ -42,6 +46,11 @@
             text-decoration: none;
             color: var(--text-color);
             font-weight: 500;
+            transition: 0.3s;
+        }
+
+        nav a:hover {
+            color: var(--primary-color);
         }
 
         /* 3. Hero Section */
@@ -101,7 +110,7 @@
             flex-grow: 1;
         }
 
-        .game-info h3 { margin: 0 0 10px 0; color: #2c3e50; }
+        .game-info h3 { margin: 0 0 10px 0; color: #2c3e50; font-size: 1.1rem; }
         .game-info p { font-size: 0.9rem; color: #666; line-height: 1.5; }
 
         .play-btn {
@@ -135,17 +144,17 @@
 <body>
 
     <header>
-        <div class="logo">EduRobot-Chinh phuc toan 5</div>
+        <a href="index.html" class="logo">EduRobot 🤖</a>
         <nav>
-            <a href="trochoi.html">Trang chủ</a>
-            <a href="#">Bảng vàng</a>
+            <a href="index.html">Trang chủ</a>
+            <a href="bang-vang.html" style="color: var(--secondary-color); font-weight: bold;">🏆 Bảng vàng</a>
             <a href="#">Hướng dẫn</a>
         </nav>
     </header>
 
     <section class="hero">
-        <h1>Chào mừng bạn đến với EduRobot - Chinh phục toán lớp 5!</h1>
-        <p>Học mà chơi - Chơi mà học. Cùng Robot chinh phục kiến thức nhé!</p>
+        <h1>Chinh phục Toán lớp 5 cùng EduRobot!</h1>
+        <p>Hệ thống trò chơi học tập dành cho 120 học sinh tài năng.</p>
     </section>
 
     <main class="game-container">
@@ -170,16 +179,18 @@
                 <a href="tilebandovaungdung.html" class="play-btn">Thám hiểm ngay</a>
             </div>
         </div>
-	<div class="game-card">
-    <div class="game-thumb" style="background-image: linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.1)), url('tongtiso.jpg'); background-color: #FF9800;">
-        Tổng - Tỉ
-    </div>
-    <div class="game-info">
-        <h3>Bài 38: Tìm hai số khi biết Tổng và Tỉ số của hai số đó</h3>
-        <p>Vẽ sơ đồ và chinh phục bài toán Tìm hai số khi biết Tổng và Tỉ số cùng Robot.</p>
-        <a href="tongtiso.html" class="play-btn" style="background: #FF9800;">Bắt đầu học</a>
-    </div>
-</div>
+
+        <div class="game-card">
+            <div class="game-thumb" style="background-image: linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.1)), url('tongtiso.jpg'); background-color: #FF9800;">
+                Tổng - Tỉ
+            </div>
+            <div class="game-info">
+                <h3>Tổng và Tỉ số</h3>
+                <p>Vẽ sơ đồ và chinh phục bài toán Tìm hai số khi biết Tổng và Tỉ số cùng Robot.</p>
+                <a href="tongtiso.html" class="play-btn" style="background: #FF9800;">Bắt đầu học</a>
+            </div>
+        </div>
+
         <div class="game-card coming-soon">
             <div class="game-thumb" style="background-color: #42A5F5;">
                 ? ? ?
@@ -192,6 +203,9 @@
         </div>
     </main>
 
-</body>
+    <footer style="text-align: center; padding: 20px; color: #888; font-size: 0.8rem;">
+        &copy; 2024 EduRobot - Hệ thống học tập trực tuyến
+    </footer>
 
+</body>
 </html>
