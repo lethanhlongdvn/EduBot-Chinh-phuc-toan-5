@@ -21,7 +21,7 @@
         .progress-bar { height: 100%; background: var(--primary); width: 0%; transition: 0.5s; }
 
         .level-map { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 25px; }
-        .lvl-btn { padding: 15px 5px; border: none; border-radius: 15px; background: #F5F5F5; font-family: 'Lexend'; font-size: 0.9rem; border-bottom: 4px solid #DDD; color: #888; }
+        .lvl-btn { padding: 15px 5px; border: none; border-radius: 15px; background: #F5F5F5; font-family: 'Lexend'; font-size: 0.9rem; border-bottom: 4px solid #DDD; color: #888; pointer-events: none; }
         .lvl-btn.active { background: #FFF3E0; border-color: var(--primary); color: var(--primary); font-weight: bold; border-bottom: 4px solid var(--primary); }
 
         .question-area { min-height: 150px; text-align: center; }
@@ -33,8 +33,8 @@
         .robot-box { display: flex; align-items: center; background: #E1F5FE; padding: 15px; border-radius: 15px; margin-top: 20px; gap: 10px; border-left: 5px solid var(--secondary); }
         .hidden { display: none; }
         
-        .action-btn { padding: 15px 30px; background: var(--success); color: white; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-family: 'Lexend'; font-size: 1.1rem; }
-        #result-screen input { padding: 12px; border-radius: 10px; border: 2px solid #ddd; width: 80%; font-family: 'Lexend'; margin-bottom: 15px; font-size: 1rem; }
+        .action-btn { padding: 15px 30px; background: var(--success); color: white; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-family: 'Lexend'; font-size: 1.1rem; margin-top: 10px; }
+        .input-field { padding: 12px; border-radius: 10px; border: 2px solid #ddd; width: 85%; font-family: 'Lexend'; margin-bottom: 10px; font-size: 1rem; }
     </style>
 </head>
 <body>
@@ -75,11 +75,15 @@
     <div id="result-screen" class="hidden" style="text-align: center; padding: 30px 0;">
         <h2 id="result-title">Hành trình hoàn tất! 🏆</h2>
         <p id="result-msg" style="font-size: 1.8rem; color: var(--primary); font-weight: bold;"></p>
-        <input type="text" id="player-name" placeholder="Nhập Họ và Tên của em...">
+        
+        <input type="text" id="player-name" class="input-field" placeholder="Nhập Họ và Tên của em...">
+        <input type="text" id="player-class" class="input-field" placeholder="Nhập Lớp (Ví dụ: 5A1)...">
         <br>
         <button class="action-btn" onclick="saveScoreOnline()">Ghi danh Bảng Vàng</button>
     </div>
 </div>
+
+
 
 <script>
     const firebaseConfig = {
@@ -183,20 +187,34 @@
     }
 
     function saveScoreOnline() {
-    const name = document.getElementById('player-name').value || "Người chơi ẩn danh";
-    const GAME_ID = "Ti_So_Phan_Tram";
-    const dateNow = new Date().toLocaleString('vi-VN');
+        const name = document.getElementById('player-name').value.trim();
+        const className = document.getElementById('player-class').value.trim();
+        
+        if (!name || !className) {
+            alert("Em vui lòng nhập đầy đủ Họ tên và Lớp nhé!");
+            return;
+        }
 
-    db.ref('scores/' + GAME_ID + '/' + name.replace(/\s+/g, '_')).set({
-        fullName: name,
-        score: curScore,
-        date: dateNow,
-        timestamp: firebase.database.ServerValue.TIMESTAMP
-    }).then(() => {
-        alert("Đã lưu bảng vàng!");
-        location.href = "bang-vang.html";
-    });
-}
+        const GAME_ID = "Ti_So_Phan_Tram";
+        const dateNow = new Date().toLocaleString('vi-VN');
+        
+        // Tạo mã định danh kết hợp Tên và Lớp để tránh trùng lặp
+        const userKey = (className + "_" + name).replace(/\s+/g, '_');
+
+        db.ref('scores/' + GAME_ID + '/' + userKey).set({
+            fullName: name,
+            className: className,
+            score: totalScore,
+            date: dateNow,
+            timestamp: firebase.database.ServerValue.TIMESTAMP
+        }).then(() => {
+            alert("Chúc mừng " + name + " lớp " + className + " đã ghi danh bảng vàng!");
+            location.href = "bang-vang.html";
+        }).catch((error) => {
+            console.error("Lỗi khi lưu điểm: ", error);
+            alert("Có lỗi xảy ra, em thử lại nhé!");
+        });
+    }
 
     window.onload = showQuestion;
 </script>
