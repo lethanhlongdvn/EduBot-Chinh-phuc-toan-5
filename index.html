@@ -206,7 +206,7 @@
         <div class="game-card">
             <div class="game-thumb" style="background-image: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2)), url('ti-so.jpg'); background-color: #FFEB3B;">Tỉ Số Phần Trăm</div>
             <div class="game-info">
-                <h3>Robot & Tỉ Số Phần Trăm</h3>
+                <h3>Robot & Tỉ Số</h3>
                 <a href="tisophantram.html" class="play-btn">Bắt đầu khám phá</a>
             </div>
         </div>
@@ -253,7 +253,6 @@
 </footer>
 
 <script>
-    // Cấu hình Firebase (Lấy từ tài khoản của bạn)
     const firebaseConfig = {
         apiKey: "AIzaSyC6zlWn8BKYU7P6A2-PYq6IIWOzaqJWFhc",
         authDomain: "gamhoctap.firebaseapp.com",
@@ -261,12 +260,11 @@
         projectId: "gamhoctap"
     };
     firebase.initializeApp(firebaseConfig);
-
     const db = firebase.database();
 
     function updateSidebarLeaderboard() {
-        // Lấy dữ liệu từ node 'scores/Ti-So-Phan-Tram' (hoặc game bạn muốn vinh danh)
-        db.ref('scores/Ti-So-Phan-Tram').orderByChild('score').limitToLast(10).on('value', (snapshot) => {
+        // Đảm bảo đường dẫn này TRÙNG KHỚP với đường dẫn lúc bạn push điểm ở file tisophantram.html
+        db.ref('scores/Ti_So_Phan_Tram').orderByChild('score').limitToLast(10).on('value', (snapshot) => {
             const listDiv = document.getElementById('sidebar-list');
             listDiv.innerHTML = '';
             let players = [];
@@ -275,10 +273,10 @@
                 players.push(child.val());
             });
 
-            players.reverse(); // Đảo ngược để điểm cao nhất lên đầu
+            players.reverse(); 
 
             if (players.length === 0) {
-                listDiv.innerHTML = '<p style="text-align:center;">Chưa có dữ liệu</p>';
+                listDiv.innerHTML = '<p style="text-align:center; color:#999; font-size:0.9rem;">Chưa có dữ liệu thi đấu</p>';
                 return;
             }
 
@@ -300,12 +298,13 @@
                     </div>
                 `;
             });
+        }, (error) => {
+            console.error("Lỗi Firebase:", error);
+            document.getElementById('sidebar-list').innerHTML = "Lỗi tải dữ liệu";
         });
     }
 
-    // Chạy khi trang load xong
     window.onload = updateSidebarLeaderboard;
 </script>
-
 </body>
 </html>
