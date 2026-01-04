@@ -266,7 +266,7 @@
 
     function updateSidebarLeaderboard() {
         // Lấy dữ liệu từ node 'scores/Ti-So-Phan-Tram' (hoặc game bạn muốn vinh danh)
-        db.ref('scores/Hieu_Va_Ti_So').orderByChild('score').limitToLast(10).on('value', (snapshot) => {
+        db.ref('scores/Ti-So-Phan-Tram').orderByChild('score').limitToLast(10).on('value', (snapshot) => {
             const listDiv = document.getElementById('sidebar-list');
             listDiv.innerHTML = '';
             let players = [];
