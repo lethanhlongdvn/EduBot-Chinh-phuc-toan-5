@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bảng Vàng Thành Tích - EduRobot</title>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.19.2/package/dist/xlsx.full.min.js"></script>
+    <style>
+        :root { --primary: #4CAF50; --secondary: #2196F3; --bg: #f4f7f6; }
+        body { font-family: 'Lexend', sans-serif; background: var(--bg); margin: 0; }
+        header { background: white; padding: 1rem 5%; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; }
+        .logo { font-size: 1.5rem; font-weight: bold; color: var(--primary); text-decoration: none; }
+        nav a { margin-left: 20px; text-decoration: none; color: #333; font-weight: 500; }
+        .hero { text-align: center; padding: 40px 20px; background: linear-gradient(135deg, var(--secondary), #64B5F6); color: white; }
+        .admin-container { max-width: 1000px; margin: -30px auto 50px; padding: 0 20px; }
+        .game-block { background: white; border-radius: 20px; box-shadow: 0 6px 20px rgba(0,0,0,0.05); margin-bottom: 30px; overflow: hidden; border: 1px solid #eee; animation: fadeInUp 0.5s ease; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .game-header { padding: 20px; background: #fff; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--bg); }
+        .btn-excel { background: var(--primary); color: white; border: none; padding: 10px 18px; border-radius: 12px; cursor: pointer; font-family: 'Lexend'; font-weight: bold; transition: 0.3s; }
+        .btn-excel:hover { background: #388E3C; transform: scale(1.05); }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; padding: 15px; background: #f8f9fa; color: #7f8c8d; font-size: 0.85rem; text-transform: uppercase; }
+        td { padding: 15px; border-bottom: 1px solid #f1f1f1; }
+        .rank { width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: #f0f0f0; font-weight: bold; }
+        tr:nth-child(1) .rank { background: #FFD700; color: white; box-shadow: 0 2px 5px rgba(255,215,0,0.4); }
+        tr:nth-child(2) .rank { background: #C0C0C0; color: white; }
+        tr:nth-child(3) .rank { background: #CD7F32; color: white; }
+        .score-badge { background: #E3F2FD; color: var(--secondary); padding: 6px 15px; border-radius: 20px; font-weight: bold; display: inline-block; }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="index.html" class="logo">EduRobot 🤖</a>
+        <nav><a href="index.html">Trang chủ</a><a href="bang-vang.html" style="color:var(--primary)">Bảng vàng</a></nav>
+    </header>
+
+    <section class="hero">
+        <h1>🏆 Bảng Vàng Vinh Danh</h1>
+        <p>Thành tích học tập xuất sắc của các em học sinh</p>
+    </section>
+
+    <main class="admin-container" id="main-content">
+        <p style="text-align:center; padding:50px; color: #666;">Đang tải dữ liệu từ hệ thống...</p>
+    </main>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyC6zlWn8BKYU7P6A2-PYq6IIWOzaqJWFhc",
+            authDomain: "gamhoctap.firebaseapp.com",
+            databaseURL: "https://gamhoctap-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "gamhoctap"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        function exportExcel(id, name) {
+            const table = document.getElementById('table-' + id);
+            const wb = XLSX.utils.table_to_book(table);
+            XLSX.writeFile(wb, `KetQua_${name.replace(/\s+/g, '_')}.xlsx`);
+        }
+
+        // LẮNG NGHE DỮ LIỆU
+        db.ref('scores').on('value', (snap) => {
+            const data = snap.val();
+            const container = document.getElementById('main-content');
+            container.innerHTML = '';
+
+            if(!data) { 
+                container.innerHTML = "<div class='game-block' style='padding:40px; text-align:center; color:#999;'>Chưa có học sinh nào ghi danh. Hãy bắt đầu học nhé!</div>"; 
+                return; 
+            }
+
+            for (let gameId in data) {
+                // Chuyển object thành array và sắp xếp điểm từ cao xuống thấp
+                let students = Object.values(data[gameId]).sort((a,b) => b.score - a.score);
+                
+                // Đổi tên Game ID thành tiêu đề dễ đọc
+                let gameTitle = gameId.replace(/_/g, ' ');
+                if(gameId === "Tong_Ti_So") gameTitle = "Bài toán Tổng - Tỉ";
+                if(gameId === "Ti_Le_Ban_Do") gameTitle = "Tỉ lệ bản đồ & Ứng dụng";
+                if(gameId === "Ti_So_Phan_Tram") gameTitle = "Tỉ số phần trăm";
+
+                let html = `
+                    <div class="game-block">
+                        <div class="game-header">
+                            <div style="font-size:1.2rem; font-weight:bold; color:#2c3e50">📊 ${gameTitle}</div>
+                            <button class="btn-excel" onclick="exportExcel('${gameId}', '${gameTitle}')">📄 Xuất Excel</button>
+                        </div>
+                        <div style="overflow-x: auto;">
+                            <table id="table-${gameId}">
+                                <thead>
+                                    <tr>
+                                        <th width="80">Hạng</th>
+                                        <th>Học sinh</th>
+                                        <th width="120">Điểm số</th>
+                                        <th width="180">Ngày hoàn thành</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${students.map((s, i) => `
+                                        <tr>
+                                            <td><div class="rank">${i+1}</div></td>
+                                            <td><b style="color:#333">${s.fullName || "Ẩn danh"}</b></td>
+                                            <td><span class="score-badge">${s.score} / 12</span></td>
+                                            <td style="font-size:0.85rem; color:#7f8c8d">${s.date || "---"}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>`;
+                container.innerHTML += html;
+            }
+        });
+    </script>
+</body>
+</html>
