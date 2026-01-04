@@ -59,7 +59,7 @@
         <p id="total-score-info" style="font-size: 1.8rem; color: var(--map-blue); font-weight: bold;"></p>
         
         <input type="text" id="player-name" placeholder="Nhập tên Nhà thám hiểm...">
-        <input type="text" id="player-class" placeholder="Nhập Lớp của em (Ví dụ: 5/4)...">
+        <input type="text" id="player-class" placeholder="Nhập Lớp của em (Ví dụ: 5/2)...">
         <br>
         <button class="action-btn" onclick="saveResult()">Ghi danh Bảng Vàng</button>
     </div>
@@ -97,8 +97,14 @@
     ];
 
     let curLvl = 0, curQ = 0, totalScore = 0;
+    let startTime; 
+
+    function startTimer() {
+        startTime = Date.now();
+    }
 
     function show() {
+        if (!startTime) startTimer(); // Đảm bảo bắt đầu tính giờ khi câu hỏi đầu tiên hiện ra
         let q = mapData[curLvl][curQ];
         document.getElementById('q-text').innerHTML = `<b>Câu ${curLvl * 4 + curQ + 1}:</b> ${q.q}`;
         document.getElementById('options').innerHTML = q.a.map((opt, i) => `<button class="opt-btn" onclick="check(${i})">${opt}</button>`).join('');
@@ -122,7 +128,7 @@
             curQ++;
             if(curQ < 4) show();
             else finishStage();
-        }, 2500);
+        }, 2200);
     }
 
     function showFeedback(m) {
@@ -158,22 +164,29 @@
             return;
         }
 
+        // TÍNH THỜI GIAN
+        const endTime = Date.now();
+        const durationSeconds = Math.floor((endTime - startTime) / 1000);
+
         const GAME_ID = "Ti_Le_Ban_Do";
         const dateNow = new Date().toLocaleString('vi-VN');
 
-        // LÀM SẠCH KÝ TỰ ĐỂ TRÁNH LỖI DẤU "/"
+        // CHỐNG NHẢY NGÀY THÁNG TRÊN EXCEL
+        const excelClassName = "'" + className;
+
         const safeClassName = className.replace(/[\/.\#\$\[\]]/g, '_');
         const safeName = name.replace(/[\/.\#\$\[\]]/g, '_');
         const userKey = (safeClassName + "_" + safeName).replace(/\s+/g, '_');
 
         db.ref('scores/' + GAME_ID + '/' + userKey).set({
             fullName: name,
-            className: className,
-            score: totalScore, // SỬA LỖI: dùng totalScore
+            className: excelClassName, 
+            score: totalScore,
+            duration: durationSeconds,
             date: dateNow,
             timestamp: firebase.database.ServerValue.TIMESTAMP
         }).then(() => {
-            alert("Chúc mừng nhà thám hiểm " + name + " đã lưu danh!");
+            alert("Chúc mừng nhà thám hiểm " + name + " đã hoàn thành trong " + durationSeconds + " giây!");
             location.href = "bang-vang.html";
         }).catch((e) => alert("Lỗi kết nối!"));
     }
