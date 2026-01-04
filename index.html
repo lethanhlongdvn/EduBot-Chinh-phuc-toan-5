@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trang Chủ - EduRobot Chinh Phục Toán 5</title>
     <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;700&display=swap" rel="stylesheet">
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
     <style>
         :root {
             --primary-color: #4CAF50;
@@ -38,6 +42,9 @@
             font-weight: bold;
             color: var(--primary-color);
             text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         nav a {
@@ -50,32 +57,27 @@
 
         nav a:hover { color: var(--primary-color); }
 
-        /* HERO SECTION - ĐÃ THU NHỎ CHIỀU CAO 2/3 */
+        /* HERO SECTION */
         .hero {
             position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
             text-align: center;
-            padding: 10px 5%; /* Giảm padding để thu hẹp dãy màu xanh */
+            padding: 10px 5%;
             background: linear-gradient(135deg, #4CAF50, #81C784);
             color: white;
             overflow: hidden;
-            min-height: 180px; /* Đảm bảo độ cao cân đối */
+            min-height: 180px;
         }
 
-        .hero-content {
-            z-index: 2;
-            max-width: 500px;
-        }
-
+        .hero-content { z-index: 2; max-width: 500px; }
         .hero h1 { margin: 0; font-size: 1.8rem; text-shadow: 0 2px 4px rgba(0,0,0,0.2); }
         .hero p { opacity: 0.9; margin-top: 8px; font-size: 1rem; }
 
-        /* Ảnh bìa hai bên - Cân chỉnh lại kích thước */
         .hero-img {
             position: absolute;
-            width: 180px; /* Thu nhỏ ảnh một chút để khớp với dãy màu xanh mới */
+            width: 160px;
             height: auto;
             border-radius: 12px;
             box-shadow: 0 15px 30px rgba(0,0,0,0.25);
@@ -83,18 +85,16 @@
             display: none;
         }
 
-        @media (min-width: 900px) {
-            .hero-img { display: block; }
-        }
+        @media (min-width: 900px) { .hero-img { display: block; } }
 
         .img-left {
-            left: 8%;
+            left: 5%;
             transform: perspective(1000px) rotateY(25deg) rotateZ(-5deg);
             animation: floatLeft 4s ease-in-out infinite;
         }
 
         .img-right {
-            right: 8%;
+            right: 5%;
             transform: perspective(1000px) rotateY(-25deg) rotateZ(5deg);
             animation: floatRight 4s ease-in-out infinite;
         }
@@ -109,71 +109,81 @@
             50% { transform: perspective(1000px) rotateY(-30deg) rotateZ(3deg) translateY(-10px); }
         }
 
-        /* Danh sách Game */
-        .game-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 25px;
+        /* CHIA BỐ CỤC CHÍNH */
+        .content-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
             padding: 30px 5%;
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
         }
 
-        .game-card {
+        /* Phân vùng Game (70%) */
+        .game-section {
+            flex: 2.5;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        /* Phân vùng Bảng Vàng (30%) */
+        .sidebar-leaderboard {
+            flex: 1;
+            min-width: 300px;
             background: white;
             border-radius: 20px;
-            overflow: hidden;
-            transition: all 0.3s ease;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            height: fit-content;
+            border: 2px solid #e3f2fd;
+        }
+
+        .sidebar-leaderboard h2 {
+            font-size: 1.2rem;
+            color: var(--secondary-color);
             text-align: center;
-            display: flex;
-            flex-direction: column;
-            border: 1px solid #eee;
+            margin-top: 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
         }
 
-        .game-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 12px 25px rgba(0,0,0,0.12);
-        }
-
-        .game-thumb {
-            width: 100%;
-            height: 150px;
+        .top-player-item {
             display: flex;
             align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            color: white;
-            text-shadow: 1px 1px 4px rgba(0,0,0,0.3);
-            background-size: cover;
-            background-position: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f9f9f9;
         }
 
+        .rank-number {
+            width: 35px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #888;
+        }
+
+        .player-name { flex-grow: 1; font-weight: 500; font-size: 0.9rem; }
+        .player-score { font-weight: bold; color: var(--primary-color); margin-left: 10px; }
+
+        /* Game Card Styles */
+        .game-card {
+            background: white; border-radius: 20px; overflow: hidden;
+            transition: 0.3s; border: 1px solid #eee; text-align: center;
+            display: flex; flex-direction: column;
+        }
+        .game-card:hover { transform: translateY(-8px); box-shadow: 0 12px 25px rgba(0,0,0,0.12); }
+        .game-thumb { height: 150px; background-size: cover; background-position: center; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; text-shadow: 1px 1px 4px rgba(0,0,0,0.3); }
         .game-info { padding: 15px; flex-grow: 1; }
-        .game-info h3 { margin: 0 0 8px 0; color: #2c3e50; font-size: 1.1rem; }
-        .game-info p { font-size: 0.9rem; color: #666; line-height: 1.4; height: 2.8em; overflow: hidden; }
-
-        .play-btn {
-            display: inline-block;
-            background: var(--secondary-color);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 25px;
-            text-decoration: none;
-            margin-top: 10px;
-            font-weight: bold;
-            transition: 0.3s;
-        }
-
-        .play-btn:hover { background: #1976D2; box-shadow: 0 4px 10px rgba(33, 150, 243, 0.3); }
-        .coming-soon { opacity: 0.7; filter: grayscale(0.6); }
+        .game-info h3 { margin: 0 0 8px 0; font-size: 1.1rem; }
+        .play-btn { display: inline-block; background: var(--secondary-color); color: white; padding: 10px 20px; border-radius: 25px; text-decoration: none; font-weight: bold; font-size: 0.9rem; transition: 0.3s; }
+        .play-btn:hover { background: #1976D2; }
     </style>
 </head>
 <body>
 
-    <header>
-    <a href="index.html" class="logo" style="display: flex; align-items: center; gap: 8px;">
-        EduRobot <img src="robot.png" alt="Logo" style="height: 40px; width: auto; border-radius: 8px;">
+<header>
+    <a href="index.html" class="logo">
+        EduRobot <img src="robot.png" alt="Logo" style="height: 40px; border-radius: 8px;">
     </a>
     <nav>
         <a href="index.html">Trang chủ</a>
@@ -182,67 +192,120 @@
     </nav>
 </header>
 
-    <section class="hero">
-        <img src="bia1.jpg" alt="Bìa 1" class="hero-img img-left">
-        
-        <div class="hero-content">
-            <h1>Chinh phục Toán lớp 5 cùng EduRobot!</h1>
-            <p>Học toán thật vui, nhận quà thật thích!</p>
-	</div>
+<section class="hero">
+    <img src="bia1.jpg" alt="Bìa 1" class="hero-img img-left">
+    <div class="hero-content">
+        <h1>Chinh phục Toán lớp 5 cùng EduRobot!</h1>
+        <p>Học toán thật vui, nhận quà thật thích!</p>
+    </div>
+    <img src="bia2.jpg" alt="Bìa 2" class="hero-img img-right">
+</section>
 
-        <img src="bia2.jpg" alt="Bìa 2" class="hero-img img-right">
-    </section>
-
-    <main class="game-container">
+<div class="content-wrapper">
+    <main class="game-section">
         <div class="game-card">
-            <div class="game-thumb" style="background-image: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2)), url('ti-so.jpg'); background-color: #FFEB3B;">
-                Tỉ Số Phần Trăm
-            </div>
+            <div class="game-thumb" style="background-image: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2)), url('ti-so.jpg'); background-color: #FFEB3B;">Tỉ Số Phần Trăm</div>
             <div class="game-info">
-                <h3>Robot & Tỉ Số</h3>
-                <p>Khám phá thế giới của những con số phần trăm sinh động.</p>
+                <h3>Robot & Tỉ Số Phần Trăm</h3>
                 <a href="tisophantram.html" class="play-btn">Bắt đầu khám phá</a>
             </div>
         </div>
 
         <div class="game-card">
-            <div class="game-thumb" style="background-image: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2)), url('tilebandovaungdung.jpg'); background-color: #FF7043;">
-                Tỉ Lệ Bản Đồ
-            </div>
+            <div class="game-thumb" style="background-image: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2)), url('tilebandovaungdung.jpg'); background-color: #FF7043;">Tỉ Lệ Bản Đồ</div>
             <div class="game-info">
                 <h3>Thám Hiểm Bản Đồ</h3>
-                <p>Giải mã khoảng cách thực tế qua các bản vẽ thu nhỏ.</p>
                 <a href="tilebandovaungdung.html" class="play-btn">Bắt đầu khám phá</a>
             </div>
         </div>
 
         <div class="game-card">
-            <div class="game-thumb" style="background-image: linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.1)), url('tongtiso.jpg'); background-color: #8BC34A;">
-                Tổng - Tỉ
-            </div>
+            <div class="game-thumb" style="background-image: linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.1)), url('tongtiso.jpg'); background-color: #8BC34A;">Tổng - Tỉ</div>
             <div class="game-info">
                 <h3>Tổng và Tỉ số</h3>
-                <p>Vượt qua thử thách tìm hai số khi biết Tổng và Tỉ số.</p>
                 <a href="tongtiso.html" class="play-btn">Bắt đầu khám phá</a>
             </div>
         </div>
 
         <div class="game-card">
-            <div class="game-thumb" style="background-image: linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.1)), url('hieutiso.jpg'); background-color: #673AB7;">
-                Hiệu - Tỉ
-            </div>
+            <div class="game-thumb" style="background-image: linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.1)), url('hieutiso.jpg'); background-color: #673AB7;">Hiệu - Tỉ</div>
             <div class="game-info">
                 <h3>Hiệu và Tỉ số</h3>
-                <p>Thử tài vẽ sơ đồ và tính toán tìm hai số khi biết Hiệu và Tỉ số.</p>
                 <a href="hieutiso.html" class="play-btn">Bắt đầu khám phá</a>
             </div>
         </div>
     </main>
 
-    <footer style="text-align: center; padding: 20px; color: #888; font-size: 0.8rem;">
-        &copy; 2025 EduRobot - Chúc các em học tập tốt!
-	<p>Giáo viên thực hiện: Lê Thành Long</p>
-    </footer>
+    <aside class="sidebar-leaderboard">
+        <h2>🏆 TOP 10 CAO THỦ</h2>
+        <div id="sidebar-list">
+            <p style="text-align: center; color: #999;">Đang cập nhật...</p>
+        </div>
+        <div style="text-align: center; margin-top: 15px;">
+            <a href="bang-vang.html" style="font-size: 0.8rem; color: var(--secondary-color); text-decoration: none; font-weight: bold;">Xem tất cả bảng xếp hạng ➔</a>
+        </div>
+    </aside>
+</div>
+
+<footer style="text-align: center; padding: 20px; color: #888; font-size: 0.8rem;">
+    &copy; 2025 EduRobot - Chúc các em học tập tốt!
+    <p>Giáo viên thực hiện: Lê Thành Long</p>
+</footer>
+
+<script>
+    // Cấu hình Firebase (Lấy từ tài khoản của bạn)
+    const firebaseConfig = {
+        apiKey: "AIzaSyC6zlWn8BKYU7P6A2-PYq6IIWOzaqJWFhc",
+        authDomain: "gamhoctap.firebaseapp.com",
+        databaseURL: "https://gamhoctap-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "gamhoctap"
+    };
+    firebase.initializeApp(firebaseConfig);
+
+    const db = firebase.database();
+
+    function updateSidebarLeaderboard() {
+        // Lấy dữ liệu từ node 'scores/Ti-So-Phan-Tram' (hoặc game bạn muốn vinh danh)
+        db.ref('scores/Hieu_Va_Ti_So').orderByChild('score').limitToLast(10).on('value', (snapshot) => {
+            const listDiv = document.getElementById('sidebar-list');
+            listDiv.innerHTML = '';
+            let players = [];
+
+            snapshot.forEach((child) => {
+                players.push(child.val());
+            });
+
+            players.reverse(); // Đảo ngược để điểm cao nhất lên đầu
+
+            if (players.length === 0) {
+                listDiv.innerHTML = '<p style="text-align:center;">Chưa có dữ liệu</p>';
+                return;
+            }
+
+            players.forEach((p, index) => {
+                let medal = index + 1;
+                if(index === 0) medal = '🥇';
+                else if(index === 1) medal = '🥈';
+                else if(index === 2) medal = '🥉';
+                else medal = `#${index + 1}`;
+
+                listDiv.innerHTML += `
+                    <div class="top-player-item">
+                        <div class="rank-number">${medal}</div>
+                        <div class="player-name">
+                            <div style="font-weight:bold;">${p.fullName}</div>
+                            <div style="font-size:0.7rem; color:#888;">Lớp: ${p.className}</div>
+                        </div>
+                        <div class="player-score">${p.score}đ</div>
+                    </div>
+                `;
+            });
+        });
+    }
+
+    // Chạy khi trang load xong
+    window.onload = updateSidebarLeaderboard;
+</script>
 
 </body>
 </html>
