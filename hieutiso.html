@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Truy Tìm Cặp Số - Hiệu và Tỉ Số</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary-color: #673AB7; --secondary-color: #9575CD; --success: #4CAF50; --bg: #F3E5F5; }
+        body { font-family: 'Lexend', sans-serif; background: var(--bg); margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; }
+        .container { max-width: 750px; width: 100%; background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border: 3px solid var(--primary-color); }
+        .header-box { width: 100%; border-radius: 15px; height: 160px; margin-bottom: 20px; background: #EDE7F6; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+        .lvl-nav { display: flex; gap: 10px; margin-bottom: 20px; }
+        .lvl-btn { flex: 1; padding: 12px; border: none; border-radius: 10px; background: #eee; font-weight: bold; font-family: 'Lexend'; color: #999; }
+        .lvl-btn.active { background: var(--primary-color); color: white; }
+        .question-box { background: #fdfdfd; padding: 20px; border-radius: 15px; text-align: center; border: 1px solid #eee; margin-bottom: 20px; }
+        .option-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .opt-btn { padding: 15px; border: 2px solid #eee; border-radius: 12px; background: white; cursor: pointer; font-size: 1rem; font-family: 'Lexend'; transition: 0.2s; }
+        .opt-btn:hover:not(:disabled) { border-color: var(--primary-color); background: #F3E5F5; }
+        .robot-feedback { display: flex; align-items: center; gap: 10px; padding: 15px; background: #E8F5E9; border-radius: 12px; margin-top: 15px; border-left: 5px solid #4CAF50; }
+        .hidden { display: none; }
+        .action-btn { padding: 15px 30px; background: var(--success); color: white; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-family: 'Lexend'; font-size: 1.1rem; }
+        input { padding: 12px; border-radius: 10px; border: 2px solid #ddd; width: 85%; font-family: 'Lexend'; margin-bottom: 15px; font-size: 1rem; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header-box">
+        <h2 style="color: var(--primary-color); margin: 0;">🔍 TRUY TÌM CẶP SỐ</h2>
+        <p style="color: #666; font-size: 0.9rem;">Toán 5 - Bài 39: Hiệu và Tỉ số</p>
+    </div>
+
+    <div class="lvl-nav">
+        <button id="btn-0" class="lvl-btn active">Chặng 1: Lý thuyết</button>
+        <button id="btn-1" class="lvl-btn">Chặng 2: Tính toán</button>
+        <button id="btn-2" class="lvl-btn">Chặng 3: Ứng dụng</button>
+    </div>
+
+    <div id="play-area">
+        <div class="question-box">
+            <p id="q-text" style="font-size: 1.1rem; font-weight: 500;"></p>
+            <div id="options" class="option-grid"></div>
+        </div>
+        <div id="feedback" class="robot-feedback hidden">
+            <span>💡</span> <span id="feedback-text"></span>
+        </div>
+    </div>
+
+    <div id="next-lvl-screen" class="hidden" style="text-align: center;">
+        <h2>Vượt chặng thành công! 🌟</h2>
+        <p id="lvl-score-info" style="font-size: 1.2rem;"></p>
+        <button class="action-btn" onclick="continueToNext()">Tiếp tục ➔</button>
+    </div>
+
+    <div id="result-box" class="hidden" style="text-align: center;">
+        <h2>Kết thúc hành trình! 🏆</h2>
+        <p id="total-score-info" style="font-size: 1.8rem; color: var(--primary-color); font-weight: bold;"></p>
+        <input type="text" id="player-name" placeholder="Nhập tên của em...">
+        <input type="text" id="player-class" placeholder="Nhập lớp (Ví dụ: 5/1)...">
+        <br>
+        <button class="action-btn" onclick="saveResult()">Lưu kết quả Bảng Vàng</button>
+    </div>
+</div>
+
+<script>
+    // Cấu hình Firebase
+    const firebaseConfig = {
+        apiKey: "AIzaSyC6zlWn8BKYU7P6A2-PYq6IIWOzaqJWFhc",
+        authDomain: "gamhoctap.firebaseapp.com",
+        databaseURL: "https://gamhoctap-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "gamhoctap"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    const quizData = [
+        [ // Chặng 1: Quy trình giải
+            { q: "Bước đầu tiên khi giải bài toán tìm hai số khi biết hiệu và tỉ số là gì?", a: ["Tìm hiệu số phần", "Vẽ sơ đồ đoạn thẳng", "Tìm giá trị một phần", "Tìm số lớn"], c: 1, h: "SGK dạy: Trước hết nên vẽ sơ đồ để dễ hình dung." },
+            { q: "Nếu tỉ số là 3/5, hiệu số phần bằng nhau là bao nhiêu?", a: ["2 phần", "8 phần", "15 phần", "3 phần"], c: 0, h: "Lấy số phần lớn trừ số phần bé: 5 - 3 = 2." },
+            { q: "Muốn tìm giá trị một phần, ta lấy Hiệu chia cho...?", a: ["Tổng số phần", "Số bé", "Hiệu số phần bằng nhau", "Số phần số lớn"], c: 2, h: "Giá trị 1 phần = Hiệu : Hiệu số phần." },
+            { q: "Công thức tìm Số bé là:", a: ["Giá trị 1 phần × số phần số lớn", "Hiệu × số phần số bé", "Giá trị 1 phần × số phần số bé", "Hiệu : số phần số bé"], c: 2, h: "Số bé ứng với bao nhiêu phần thì nhân bấy nhiêu." }
+        ],
+        [ // Chặng 2: Tính toán (Dựa trên bài tập SGK)
+            { q: "Hiệu là 24, tỉ số là 1/3. Số bé là bao nhiêu?", a: ["8", "12", "6", "24"], c: 1, h: "Hiệu số phần: 3-1=2. Một phần: 24:2=12. Số bé: 12x1=12." },
+            { q: "Hiệu của hai số là 150. Số lớn gấp 3 lần số bé. Số lớn là:", a: ["225", "75", "150", "300"], c: 0, h: "Hiệu số phần: 3-1=2. Một phần: 150:2=75. Số lớn: 75x3=225." },
+            { q: "Tỉ số là 5/2, hiệu là 21. Số bé là:", a: ["14", "35", "7", "21"], c: 0, h: "Hiệu số phần: 5-2=3. Một phần: 21:3=7. Số bé: 7x2=14." },
+            { q: "Hiệu là 12. Tỉ số là 7/4. Số lớn là:", a: ["16", "28", "4", "36"], c: 1, h: "Hiệu số phần: 7-4=3. Một phần: 12:3=4. Số lớn: 4x7=28." }
+        ],
+        [ // Chặng 3: Ứng dụng thực tế
+            { q: "Mẹ hơn con 28 tuổi. Tuổi con bằng 1/5 tuổi mẹ. Tuổi con là:", a: ["5 tuổi", "6 tuổi", "7 tuổi", "8 tuổi"], c: 2, h: "Hiệu 28. Hiệu số phần 5-1=4. Tuổi con: 28:4x1=7." },
+            { q: "Chiều dài hơn chiều rộng 15m. Tỉ số là 5/2. Chiều dài là:", a: ["25m", "10m", "5m", "30m"], c: 0, h: "Hiệu số phần 5-2=3. Một phần 15:3=5. Chiều dài: 5x5=25." },
+            { q: "Có hai túi rác, túi A nặng hơn túi B 6kg. Túi B bằng 2/3 túi A. Túi A nặng:", a: ["12kg", "18kg", "6kg", "24kg"], c: 1, h: "Hiệu số phần 3-2=1. Một phần 6:1=6. Túi A: 6x3=18." },
+            { q: "Hiệu hai số là số bé nhất có hai chữ số (10), tỉ số là 3/1. Số lớn là:", a: ["15", "10", "30", "5"], c: 0, h: "Hiệu 10. Hiệu số phần 3-1=2. Một phần 10:2=5. Số lớn 5x3=15." }
+        ]
+    ];
+
+    let curLvl = 0, curQ = 0, totalScore = 0;
+    let startTime = Date.now();
+
+    function show() {
+        let q = quizData[curLvl][curQ];
+        document.getElementById('q-text').innerHTML = `<b>Câu ${curLvl * 4 + curQ + 1}:</b> ${q.q}`;
+        document.getElementById('options').innerHTML = q.a.map((opt, i) => `<button class="opt-btn" onclick="check(${i})">${opt}</button>`).join('');
+        document.getElementById('feedback').classList.add('hidden');
+    }
+
+    function check(idx) {
+        let q = quizData[curLvl][curQ];
+        let btns = document.querySelectorAll('.opt-btn');
+        btns.forEach(b => b.disabled = true);
+        if(idx === q.c) {
+            totalScore++;
+            btns[idx].style.background = "#C8E6C9";
+            showFeedback("Giỏi lắm! Đúng rồi. ✅");
+        } else {
+            btns[idx].style.background = "#FFCDD2";
+            btns[q.c].style.background = "#C8E6C9";
+            showFeedback("Gợi ý: " + q.h);
+        }
+        setTimeout(() => {
+            curQ++;
+            if(curQ < 4) show();
+            else finishStage();
+        }, 2500);
+    }
+
+    function showFeedback(m) {
+        document.getElementById('feedback').classList.remove('hidden');
+        document.getElementById('feedback-text').innerText = m;
+    }
+
+    function finishStage() {
+        document.getElementById('play-area').classList.add('hidden');
+        if (curLvl < 2) {
+            document.getElementById('next-lvl-screen').classList.remove('hidden');
+            document.getElementById('lvl-score-info').innerText = `Điểm hiện tại: ${totalScore}/12`;
+        } else {
+            document.getElementById('result-box').classList.remove('hidden');
+            document.getElementById('total-score-info').innerText = `${totalScore} / 12 ĐIỂM`;
+        }
+    }
+
+    function continueToNext() {
+        curLvl++; curQ = 0;
+        document.querySelectorAll('.lvl-btn').forEach((b, i) => b.classList.toggle('active', i === curLvl));
+        document.getElementById('next-lvl-screen').classList.add('hidden');
+        document.getElementById('play-area').classList.remove('hidden');
+        show();
+    }
+
+    function saveResult() {
+        const name = document.getElementById('player-name').value.trim();
+        const className = document.getElementById('player-class').value.trim();
+
+        if (!name || !className) {
+            alert("Em hãy nhập tên và lớp để ghi danh nhé!");
+            return;
+        }
+
+        const endTime = Date.now();
+        const durationSeconds = Math.floor((endTime - startTime) / 1000);
+        const GAME_ID = "Hieu_Va_Ti_So";
+        const dateNow = new Date().toLocaleString('vi-VN');
+
+        // Thêm dấu nháy đơn cho Excel
+        const excelClassName = "'" + className;
+
+        const safeClassName = className.replace(/[\/.\#\$\[\]]/g, '_');
+        const safeName = name.replace(/[\/.\#\$\[\]]/g, '_');
+        const userKey = (safeClassName + "_" + safeName).replace(/\s+/g, '_');
+
+        db.ref('scores/' + GAME_ID + '/' + userKey).set({
+            fullName: name,
+            className: excelClassName,
+            score: totalScore,
+            duration: durationSeconds,
+            date: dateNow,
+            timestamp: firebase.database.ServerValue.TIMESTAMP
+        }).then(() => {
+            alert("Chúc mừng " + name + " đã hoàn thành trong " + durationSeconds + " giây!");
+            location.href = "bang-vang.html";
+        }).catch(() => alert("Lỗi kết nối!"));
+    }
+
+    window.onload = show;
+</script>
+</body>
+</html>
