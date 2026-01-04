@@ -7,27 +7,26 @@
     
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;700&display=swap" rel="stylesheet">
     
     <style>
-        :root { --primary: #FF9800; --secondary: #2196F3; --bg: #fff9f0; }
+        :root { --primary: #FF9800; --secondary: #2196F3; --bg: #fff9f0; --success: #4CAF50; }
         body { font-family: 'Lexend', sans-serif; background: var(--bg); margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
         .container { max-width: 750px; width: 100%; background: white; padding: 25px; border-radius: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border-top: 10px solid var(--primary); }
-        
         .header-title { text-align: center; color: var(--primary); margin-bottom: 20px; }
         .progress-bar { height: 10px; background: #eee; border-radius: 5px; margin-bottom: 20px; overflow: hidden; }
         .progress-fill { height: 100%; background: var(--primary); width: 0%; transition: 0.5s; }
-
         .lvl-nav { display: flex; gap: 10px; margin-bottom: 20px; }
-        .lvl-btn { flex: 1; padding: 12px; border: none; border-radius: 10px; background: #f5f5f5; cursor: pointer; font-weight: bold; }
+        .lvl-btn { flex: 1; padding: 12px; border: none; border-radius: 10px; background: #f5f5f5; font-weight: bold; font-family: 'Lexend'; color: #888; }
         .lvl-btn.active { background: var(--primary); color: white; }
-
-        .question-box { background: #fdf2e9; padding: 20px; border-radius: 15px; border: 2px dashed var(--primary); margin-bottom: 20px; font-size: 1.1rem; line-height: 1.6; }
+        .question-box { background: #fdf2e9; padding: 20px; border-radius: 15px; border: 2px dashed var(--primary); margin-bottom: 20px; font-size: 1.1rem; }
         .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .opt-btn { padding: 15px; border: 2px solid #eee; border-radius: 12px; background: white; cursor: pointer; font-size: 1rem; transition: 0.2s; text-align: left; }
+        .opt-btn { padding: 15px; border: 2px solid #eee; border-radius: 12px; background: white; cursor: pointer; font-size: 1rem; font-family: 'Lexend'; }
         .opt-btn:hover:not(:disabled) { border-color: var(--primary); background: #fff8f0; }
-
         .robot-hint { background: #e3f2fd; padding: 15px; border-radius: 12px; margin-top: 20px; display: flex; align-items: center; gap: 10px; border-left: 5px solid var(--secondary); }
         .hidden { display: none; }
+        #res-box input { padding: 12px; border-radius: 10px; border: 2px solid #ddd; width: 80%; font-family: 'Lexend'; margin-bottom: 15px; }
+        .action-btn { padding: 15px 30px; background: var(--success); color: white; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-family: 'Lexend'; font-size: 1.1rem; }
     </style>
 </head>
 <body>
@@ -35,30 +34,37 @@
 <div class="container">
     <div class="header-title">
         <h2>🤖 Thử Thách Tổng - Tỉ</h2>
-        <p>Học cách tìm hai số theo sơ đồ đoạn thẳng</p>
+        <p>Hành trình 12 điểm Bảng Vàng</p>
     </div>
 
     <div class="lvl-nav">
-        <button id="btn-0" class="lvl-btn active" onclick="startLvl(0)">Chặng 1</button>
-        <button id="btn-1" class="lvl-btn" onclick="startLvl(1)" disabled>Chặng 2</button>
-        <button id="btn-2" class="lvl-btn" onclick="startLvl(2)" disabled>Chặng 3</button>
+        <button id="btn-0" class="lvl-btn active">Chặng 1</button>
+        <button id="btn-1" class="lvl-btn">Chặng 2</button>
+        <button id="btn-2" class="lvl-btn">Chặng 3</button>
     </div>
 
     <div class="progress-bar"><div id="fill" class="progress-fill"></div></div>
 
     <div id="quiz-area">
-        <div class="question-box" id="q-text">Bấm vào "Chặng 1" để bắt đầu.</div>
+        <div class="question-box" id="q-text">Bắt đầu hành trình nào!</div>
         <div class="options-grid" id="q-opts"></div>
         <div id="hint-box" class="robot-hint hidden">
             <span>🤖:</span> <span id="hint-text"></span>
         </div>
     </div>
 
+    <div id="next-lvl-screen" class="hidden" style="text-align: center; padding: 20px;">
+        <h2 id="lvl-msg">Tuyệt vời!</h2>
+        <p id="lvl-score-info" style="font-size: 1.2rem;"></p>
+        <button class="action-btn" onclick="continueToNext()">Tiếp tục Chặng tiếp theo ➔</button>
+    </div>
+
     <div id="res-box" class="hidden" style="text-align: center;">
-        <h2>Vượt chặng thành công!</h2>
-        <p id="res-score"></p>
-        <input type="text" id="p-name" placeholder="Nhập tên kĩ sư nhí..." style="padding:12px; border-radius:8px; border:1px solid #ccc; width:70%;">
-        <button class="opt-btn" style="background: var(--primary); color: white; margin-top:15px; text-align:center; width:100%" onclick="save()">Lưu Bảng Vàng</button>
+        <h2>Chúc mừng em đã hoàn thành 12 câu hỏi! 🏆</h2>
+        <p id="total-score-info" style="font-size: 1.5rem; color: var(--primary); font-weight: bold;"></p>
+        <input type="text" id="p-name" placeholder="Nhập Họ và Tên của em...">
+        <br>
+        <button class="action-btn" onclick="save()">Lưu Bảng Vàng</button>
     </div>
 </div>
 
@@ -72,39 +78,33 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // Dữ liệu bám sát Bài 38 SGK trang 11
     const data = [
-        [ // CHẶNG 1: LÝ THUYẾT & SƠ ĐỒ
-            { q: "Tổng hai số là 15. Tỉ số của hai số là 2/3. Tổng số phần bằng nhau là:", a: ["2 phần", "3 phần", "5 phần", "6 phần"], c: 2, h: "Lấy tử số cộng mẫu số: 2 + 3 = 5 phần." },
-            { q: "Nếu tổng là 20, tổng số phần là 4. Giá trị của một phần là:", a: ["4", "5", "80", "16"], c: 1, h: "Giá trị 1 phần = Tổng : Tổng số phần = 20 : 4 = 5." },
-            { q: "Hai số có tỉ số 1/4. Số bé chiếm mấy phần?", a: ["1 phần", "4 phần", "5 phần", "3 phần"], c: 0, h: "Tử số là số phần của số bé." }
+        [ // Chặng 1
+            { q: "Tổng hai số là 15, tỉ số là 2/3. Tổng số phần bằng nhau là:", a: ["2 phần", "3 phần", "5 phần", "6 phần"], c: 2, h: "2 + 3 = 5 phần." },
+            { q: "Tổng là 20, tổng số phần là 4. Giá trị một phần là:", a: ["4", "5", "80", "16"], c: 1, h: "20 : 4 = 5." },
+            { q: "Số bé chiếm 1 phần, số lớn chiếm 4 phần. Tỉ số của số bé và số lớn là:", a: ["1/4", "4/1", "1/5", "4/5"], c: 0, h: "Tỉ số là 1/4." },
+            { q: "Số bé chiếm 2 phần, số lớn chiếm 7 phần. Tổng số phần là:", a: ["7 phần", "2 phần", "9 phần", "5 phần"], c: 2, h: "2 + 7 = 9 phần." }
         ],
-        [ // CHẶNG 2: TÍNH TOÁN CƠ BẢN
-            { q: "Tổng hai số là 45, tỉ số là 2/3. Số bé là:", a: ["18", "27", "15", "9"], c: 0, h: "Tổng phần: 5. Một phần: 45:5=9. Số bé: 9x2=18." },
-            { q: "Tổng hai số là 72, tỉ số là 1/5. Số lớn là:", a: ["12", "60", "62", "50"], c: 1, h: "Tổng phần: 6. Một phần: 72:6=12. Số lớn: 12x5=60." },
-            { q: "Một sợi dây dài 28m được cắt thành 2 đoạn có tỉ lệ 3/4. Đoạn dài hơn là:", a: ["12m", "16m", "4m", "7m"], c: 1, h: "Tổng phần: 7. Một phần: 28:7=4. Đoạn dài: 4x4=16m." }
+        [ // Chặng 2
+            { q: "Tổng hai số là 45, tỉ số là 2/3. Số bé là:", a: ["18", "27", "15", "9"], c: 0, h: "45:5x2 = 18." },
+            { q: "Tổng hai số là 72, tỉ số là 1/5. Số lớn là:", a: ["12", "60", "62", "50"], c: 1, h: "72:6x5 = 60." },
+            { q: "Sợi dây dài 28m, cắt 2 đoạn tỉ lệ 3/4. Đoạn dài hơn là:", a: ["12m", "16m", "4m", "7m"], c: 1, h: "28:7x4 = 16m." },
+            { q: "Tổng là 100, tỉ số 1/1. Hai số đó là:", a: ["40 và 60", "50 và 50", "30 và 70", "0 và 100"], c: 1, h: "100:2 = 50." }
         ],
-        [ // CHẶNG 3: VẬN DỤNG (BÀI TẬP TRANG 12)
-            { q: "Lớp 5A có 35 học sinh. Số học sinh nam bằng 3/4 số học sinh nữ. Số học sinh nữ là:", a: ["15 bạn", "20 bạn", "12 bạn", "23 bạn"], c: 1, h: "Tổng phần: 7. Một phần: 35:7=5. Nữ chiếm 4 phần: 5x4=20." },
-            { q: "Chu vi hình chữ nhật là 40cm. Chiều rộng bằng 2/3 chiều dài. Nửa chu vi là:", a: ["40cm", "20cm", "10cm", "8cm"], c: 1, h: "Nửa chu vi = Tổng chiều dài + chiều rộng = 40 : 2 = 20cm." },
-            { q: "Từ câu trên (Tổng là 20, tỉ lệ 2/3), chiều dài hình chữ nhật đó là:", a: ["8cm", "12cm", "10cm", "15cm"], c: 1, h: "Tổng phần: 5. Một phần: 20:5=4. Dài (3 phần): 4x3=12cm." }
+        [ // Chặng 3
+            { q: "Lớp 5A có 35 học sinh. Nam bằng 3/4 Nữ. Số học sinh Nữ là:", a: ["15 bạn", "20 bạn", "12 bạn", "25 bạn"], c: 1, h: "35:7x4 = 20." },
+            { q: "Chu vi HCN 40cm. Rộng bằng 2/3 Dài. Nửa chu vi là:", a: ["40cm", "20cm", "10cm", "8cm"], c: 1, h: "40 : 2 = 20cm." },
+            { q: "Mẹ hơn con 24 tuổi. Tuổi con bằng 1/3 tuổi mẹ. Tổng tuổi hai người là:", a: ["36", "48", "40", "32"], c: 1, h: "Con 12, Mẹ 36. Tổng = 48." },
+            { q: "Hai kho có 150 tấn. Kho A bằng 2/3 kho B. Kho B có:", a: ["60 tấn", "90 tấn", "100 tấn", "50 tấn"], c: 1, h: "150:5x3 = 90." }
         ]
     ];
 
-    let curLvl = -1, curQ = 0, score = 0;
-
-    function startLvl(l) {
-        curLvl = l; curQ = 0; score = 0;
-        document.querySelectorAll('.lvl-btn').forEach((b, i) => b.classList.toggle('active', i === l));
-        document.getElementById('quiz-area').classList.remove('hidden');
-        document.getElementById('res-box').classList.add('hidden');
-        show();
-    }
+    let curLvl = 0, curQ = 0, totalScore = 0;
 
     function show() {
         let q = data[curLvl][curQ];
-        document.getElementById('q-text').innerText = q.q;
-        document.getElementById('fill').style.width = (curQ / data[curLvl].length * 100) + "%";
+        document.getElementById('q-text').innerHTML = `<b>Chặng ${curLvl + 1} - Câu ${curQ + 1}:</b> ${q.q}`;
+        document.getElementById('fill').style.width = ((curLvl * 4 + curQ) / 12 * 100) + "%";
         document.getElementById('q-opts').innerHTML = q.a.map((o, i) => `<button class="opt-btn" onclick="check(${i})">${o}</button>`).join('');
         document.getElementById('hint-box').classList.add('hidden');
     }
@@ -114,17 +114,18 @@
         let btns = document.querySelectorAll('.opt-btn');
         btns.forEach(b => b.disabled = true);
         if(i === q.c) {
-            score++; btns[i].style.background = "#c8e6c9";
-            hint("Chính xác! Bạn giải toán rất tốt. 🌟");
+            totalScore++; 
+            btns[i].style.background = "#c8e6c9";
+            hint("Robot: Đúng rồi! +1 điểm. 🌟");
         } else {
             btns[i].style.background = "#ffcdd2";
             btns[q.c].style.background = "#c8e6c9";
-            hint(q.h);
+            hint("Gợi ý: " + q.h);
         }
         setTimeout(() => {
             curQ++;
-            if(curQ < data[curLvl].length) show();
-            else finish();
+            if(curQ < 4) show();
+            else finishStage();
         }, 2500);
     }
 
@@ -133,18 +134,45 @@
         document.getElementById('hint-text').innerText = m;
     }
 
-    function finish() {
+    function finishStage() {
         document.getElementById('quiz-area').classList.add('hidden');
-        document.getElementById('res-box').classList.remove('hidden');
-        document.getElementById('res-score').innerText = `Kết quả: ${score}/${data[curLvl].length} câu đúng.`;
-        if(score >= 2 && curLvl < 2) document.getElementById('btn-' + (curLvl + 1)).disabled = false;
+        if (curLvl < 2) {
+            document.getElementById('next-lvl-screen').classList.remove('hidden');
+            document.getElementById('lvl-score-info').innerText = `Xong Chặng ${curLvl + 1}. Điểm hiện tại: ${totalScore}/12`;
+        } else {
+            document.getElementById('res-box').classList.remove('hidden');
+            document.getElementById('total-score-info').innerText = `${totalScore} / 12 ĐIỂM`;
+            document.getElementById('fill').style.width = "100%";
+        }
+    }
+
+    function continueToNext() {
+        curLvl++;
+        curQ = 0;
+        document.querySelectorAll('.lvl-btn').forEach((b, i) => b.classList.toggle('active', i === curLvl));
+        document.getElementById('next-lvl-screen').classList.add('hidden');
+        document.getElementById('quiz-area').classList.remove('hidden');
+        show();
     }
 
     function save() {
-        const name = document.getElementById('p-name').value || "Ẩn danh";
-        db.ref('leaderboard_tongtiso').push({ name, score, date: Date.now() });
-        alert("Đã lưu điểm thành công!"); location.reload();
-    }
+    const name = document.getElementById('p-name').value || "Ẩn danh";
+    const GAME_ID = "Tong_Ti_So"; // Đặt ID để phân loại trong bảng vàng
+    const dateNow = new Date().toLocaleString('vi-VN');
+    
+    // Lưu vào thư mục scores/Tên_Game/Tên_Học_Sinh
+    db.ref('scores/' + GAME_ID + '/' + name.replace(/\s+/g, '_')).set({
+        fullName: name, // Sửa thành fullName để bang-vang.html đọc được
+        score: score,
+        date: dateNow,
+        timestamp: firebase.database.ServerValue.TIMESTAMP
+    }).then(() => {
+        alert("Đã lưu điểm thành công!");
+        location.href = "bang-vang.html";
+    });
+}
+
+    window.onload = show;
 </script>
 </body>
 </html>
