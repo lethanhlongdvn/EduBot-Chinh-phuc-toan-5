@@ -167,31 +167,33 @@
     }
 
     function save() {
-        const name = document.getElementById('p-name').value.trim();
-        const className = document.getElementById('p-class').value.trim();
-        
-        if (!name || !className) {
-            alert("Em vui lòng nhập đầy đủ Họ tên và Lớp nhé!");
-            return;
-        }
-
-        const GAME_ID = "Tong_Ti_So"; 
-        const dateNow = new Date().toLocaleString('vi-VN');
-        const userKey = (className + "_" + name).replace(/\s+/g, '_');
-
-        db.ref('scores/' + GAME_ID + '/' + userKey).set({
-            fullName: name,
-            className: className,
-            score: totalScore, // Đã sửa từ score thành totalScore
-            date: dateNow,
-            timestamp: firebase.database.ServerValue.TIMESTAMP
-        }).then(() => {
-            alert("Chúc mừng em đã ghi danh bảng vàng!");
-            location.href = "bang-vang.html";
-        }).catch((e) => {
-            alert("Lỗi kết nối mạng, em thử lại nhé!");
-        });
+    // 1. Lấy dữ liệu từ ô nhập (Phải khớp với ID p-name và p-class trong HTML)
+    const name = document.getElementById('p-name').value.trim();
+    const className = document.getElementById('p-class').value.trim(); 
+    
+    if (!name || !className) {
+        alert("Em vui lòng nhập đầy đủ Họ tên và Lớp nhé!");
+        return;
     }
+
+    const GAME_ID = "Tong_Ti_So"; 
+    const dateNow = new Date().toLocaleString('vi-VN');
+    
+    // Tạo ID riêng biệt để không bị trùng lặp dữ liệu
+    const userKey = (className + "_" + name).replace(/\s+/g, '_');
+
+    // 2. Gửi dữ liệu lên Firebase
+    db.ref('scores/' + GAME_ID + '/' + userKey).set({
+        fullName: name,    // Trang bang-vang đọc biến này
+        className: className, // Trang bang-vang đọc biến này
+        score: totalScore, // Dùng totalScore mới đúng
+        date: dateNow,
+        timestamp: firebase.database.ServerValue.TIMESTAMP
+    }).then(() => {
+        alert("Chúc mừng " + name + " lớp " + className + " đã ghi danh!");
+        location.href = "bang-vang.html";
+    }).catch((e) => alert("Lỗi kết nối Firebase!"));
+}
 
     window.onload = show;
 </script>
