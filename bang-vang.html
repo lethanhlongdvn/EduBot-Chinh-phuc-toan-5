@@ -26,6 +26,7 @@
         tr:nth-child(2) .rank { background: #C0C0C0; color: white; }
         tr:nth-child(3) .rank { background: #CD7F32; color: white; }
         .score-badge { background: #E3F2FD; color: var(--secondary); padding: 6px 15px; border-radius: 20px; font-weight: bold; }
+        .time-badge { color: #e67e22; font-weight: bold; font-size: 0.9rem; }
         .class-badge { background: #f1f1f1; padding: 4px 10px; border-radius: 5px; font-size: 0.9rem; color: #555; border: 1px solid #ddd; }
     </style>
 </head>
@@ -37,7 +38,7 @@
 
     <section class="hero">
         <h1>🏆 Bảng Vàng Vinh Danh</h1>
-        <p>Thành tích học tập xuất sắc của các em học sinh</p>
+        <p>Ai nhanh hơn - Ai giỏi hơn?</p>
     </section>
 
     <main class="admin-container" id="main-content">
@@ -53,6 +54,13 @@
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
+
+        function formatTime(seconds) {
+            if (!seconds) return "---";
+            const m = Math.floor(seconds / 60);
+            const s = seconds % 60;
+            return m > 0 ? `${m}ph ${s}s` : `${s}s`;
+        }
 
         function exportExcel(id, name) {
             const table = document.getElementById('table-' + id);
@@ -71,10 +79,15 @@
             }
 
             for (let gameId in data) {
-                // Sắp xếp theo điểm cao trước, thời gian gần nhất sau
+                // THAY ĐỔI LOGIC SẮP XẾP TẠI ĐÂY
                 let students = Object.values(data[gameId]).sort((a,b) => {
+                    // 1. So sánh điểm (Điểm cao đứng trước)
                     if(b.score !== a.score) return b.score - a.score;
-                    return b.timestamp - a.timestamp;
+                    // 2. Nếu bằng điểm, so sánh thời gian (Ít giây hơn đứng trước)
+                    // Lưu ý: Nếu dữ liệu cũ không có duration, coi như cực lớn
+                    let timeA = a.duration || 9999;
+                    let timeB = b.duration || 9999;
+                    return timeA - timeB; 
                 });
 
                 let gameTitle = gameId.replace(/_/g, ' ');
@@ -89,10 +102,11 @@
                             <table id="table-${gameId}">
                                 <thead>
                                     <tr>
-                                        <th width="80">Hạng</th>
+                                        <th width="60">Hạng</th>
                                         <th>Học sinh</th>
                                         <th>Lớp</th>
-                                        <th>Điểm số</th>
+                                        <th>Điểm</th>
+                                        <th>Thời gian</th>
                                         <th>Ngày hoàn thành</th>
                                     </tr>
                                 </thead>
@@ -101,8 +115,9 @@
                                         <tr>
                                             <td><div class="rank">${i+1}</div></td>
                                             <td><b>${s.fullName || "---"}</b></td>
-                                            <td><span class="class-badge">${s.className || "Chưa nhập"}</span></td>
+                                            <td><span class="class-badge">${s.className || "---"}</span></td>
                                             <td><span class="score-badge">${s.score} / 12</span></td>
+                                            <td><span class="time-badge">⏱ ${formatTime(s.duration)}</span></td>
                                             <td style="font-size:0.85rem; color:#888">${s.date || "---"}</td>
                                         </tr>
                                     `).join('')}
