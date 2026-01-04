@@ -166,7 +166,7 @@
         show();
     }
 
-   function save() {
+  function save() {
     const name = document.getElementById('p-name').value.trim();
     const className = document.getElementById('p-class').value.trim();
     
@@ -178,19 +178,24 @@
     const GAME_ID = "Tong_Ti_So"; 
     const dateNow = new Date().toLocaleString('vi-VN');
     
-    // SỬA TẠI ĐÂY: Loại bỏ các cấp trung gian không cần thiết
-    const userKey = (className + "_" + name).replace(/\s+/g, '_');
+    // SỬA LỖI TẠI ĐÂY: Loại bỏ dấu "/" và các ký tự đặc biệt để Firebase chạy đúng
+    const safeClassName = className.replace(/[\/.\#\$\[\]]/g, '_');
+    const safeName = name.replace(/[\/.\#\$\[\]]/g, '_');
+    const userKey = (safeClassName + "_" + safeName).replace(/\s+/g, '_');
 
     db.ref('scores/' + GAME_ID + '/' + userKey).set({
         fullName: name,
-        className: className,
-        score: totalScore, // Đảm bảo biến này là totalScore
+        className: className, // Lưu tên lớp gốc để hiển thị (ví dụ 5/4)
+        score: totalScore,    // Đảm bảo dùng đúng biến totalScore
         date: dateNow,
         timestamp: firebase.database.ServerValue.TIMESTAMP
     }).then(() => {
-        alert("Đã lưu điểm thành công!");
+        alert("Chúc mừng em " + name + " lớp " + className + " đã ghi danh!");
         location.href = "bang-vang.html";
-    }).catch((e) => alert("Lỗi kết nối!"));
+    }).catch((e) => {
+        console.error(e);
+        alert("Lỗi kết nối Firebase!");
+    });
 }
 
     window.onload = show;
