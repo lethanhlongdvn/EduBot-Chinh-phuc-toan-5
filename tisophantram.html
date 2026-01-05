@@ -7,7 +7,6 @@
     
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    
     <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;700&display=swap" rel="stylesheet">
 
     <style>
@@ -15,20 +14,7 @@
         body { font-family: 'Lexend', Arial, sans-serif; background: var(--bg); margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; }
         .container { max-width: 750px; width: 100%; background: white; padding: 20px; border-radius: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border-top: 10px solid var(--primary); }
         
-        /* HEADER ĐÃ ĐỒNG BỘ */
-        .header-box { 
-            width: 100%; 
-            border-radius: 15px; 
-            height: 80px; 
-            margin-bottom: 20px; 
-            background: linear-gradient(135deg, #FFF3E0, #FFE0B2); 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-            text-align: center;
-            border: 1px solid #EEE;
-        }
+        .header-box { width: 100%; border-radius: 15px; height: 80px; margin-bottom: 20px; background: linear-gradient(135deg, #FFF3E0, #FFE0B2); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; border: 1px solid #EEE; }
         .header-box h2 { color: var(--primary); margin: 0; font-size: 1.4rem; }
         .header-box p { color: #888; font-size: 0.85rem; margin: 2px 0 0 0; }
 
@@ -50,7 +36,6 @@
         
         .action-btn { padding: 12px 25px; background: var(--success); color: white; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-family: 'Lexend'; font-size: 1rem; margin-top: 10px; }
         .input-field { padding: 12px; border-radius: 10px; border: 2px solid #ddd; width: 85%; font-family: 'Lexend'; margin-bottom: 10px; font-size: 1rem; }
-        
         footer { text-align: center; padding: 20px; color: #888; font-size: 0.8rem; width: 100%; }
     </style>
 </head>
@@ -59,7 +44,7 @@
 <div class="container">
     <div class="header-box">
         <h2>🤖 HÀNH TRÌNH TÌM TỈ SỐ PHẦN TRĂM</h2>
-        <p>Toán 5 - Khám phá thế giới phần trăm</p>
+        <p>Thử thách thông minh - Mỗi lượt một bộ câu hỏi khác nhau</p>
     </div>
 
     <div class="level-map">
@@ -87,7 +72,7 @@
     </div>
 
     <div id="next-lvl-screen" class="hidden" style="text-align: center; padding: 20px;">
-        <h2>Tuyệt vời! 🎉</h2>
+        <h2>Vượt chặng thành công! 🎉</h2>
         <p id="lvl-score-info" style="font-size: 1.2rem;"></p>
         <button class="action-btn" onclick="continueToNext()">Tiếp tục Chặng tiếp theo ➔</button>
     </div>
@@ -103,13 +88,12 @@
     </div>
 </div>
 
-
-
 <footer style="text-align: center; padding: 20px; color: #888; font-size: 0.8rem;">
     &copy; 2025 EduRobot - Phát triển bởi GV. Lê Thành Long
 </footer>
 
 <script>
+    // Firebase Config
     const firebaseConfig = {
         apiKey: "AIzaSyC6zlWn8BKYU7P6A2-PYq6IIWOzaqJWFhc",
         authDomain: "gamhoctap.firebaseapp.com",
@@ -119,32 +103,62 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    const lessons = [
-        [ // CHẶNG 1
+    // DỮ LIỆU 8 CÂU MỖI CHẶNG
+    const allQuestions = [
+        [ // CHẶNG 1: KHÁM PHÁ (8 CÂU)
             { q: "Có 3 xe điện và 7 xe xăng. Tỉ số của xe điện và xe xăng là?", a: ["3 : 7", "7 : 3", "3 : 10", "7 : 10"], c: 0, h: "Tỉ số của a và b là a : b" },
             { q: "Có 10 xe, 3 xe điện. Tỉ số của xe điện và tổng số xe là?", a: ["3/10", "10/3", "3/7", "7/10"], c: 0, h: "Lấy số xe điện chia cho tổng số xe." },
             { q: "Viết tỉ số 17/100 dưới dạng phần trăm:", a: ["1.7%", "17%", "0.17%", "170%"], c: 1, h: "Mẫu số 100 thay bằng kí hiệu %" },
-            { q: "Tỉ số của 5 và 8 viết là?", a: ["5 : 8", "8 : 5", "5/8", "Cả A và C"], c: 3, h: "Tỉ số có thể viết dạng phép chia hoặc phân số." }
+            { q: "Tỉ số của 5 và 8 viết là?", a: ["5 : 8", "8 : 5", "5/8", "Cả A và C"], c: 3, h: "Tỉ số có thể viết dạng phép chia hoặc phân số." },
+            { q: "Tỉ số của 12 và 100 viết là?", a: ["12%", "1.2%", "0.12%", "120%"], c: 0, h: "Mẫu số 100 là %" },
+            { q: "Trong hộp có 4 bi đỏ và 6 bi xanh. Tỉ số bi đỏ và bi xanh là?", a: ["4/6", "6/4", "4/10", "6/10"], c: 0, h: "Số bi đỏ chia cho bi xanh" },
+            { q: "Viết số thập phân 0,09 dưới dạng phần trăm:", a: ["0.9%", "9%", "90%", "0.09%"], c: 1, h: "0,09 = 9/100" },
+            { q: "Tỉ số của 1 và 4 là bao nhiêu phần trăm?", a: ["25%", "20%", "40%", "10%"], c: 0, h: "1/4 = 25/100" }
         ],
-        [ // CHẶNG 2
+        [ // CHẶNG 2: LUYỆN TẬP (8 CÂU)
             { q: "Chuyển phân số 2/5 thành tỉ số phần trăm:", a: ["20%", "40%", "50%", "25%"], c: 1, h: "Đưa mẫu số về 100: 2/5 = 40/100" },
             { q: "Số thập phân 0,65 viết thành phần trăm là?", a: ["6.5%", "0.65%", "65%", "650%"], c: 2, h: "0,65 = 65/100" },
             { q: "12% của 100 ô vuông là bao nhiêu ô?", a: ["1.2 ô", "12 ô", "120 ô", "10 ô"], c: 1, h: "12% của 100 chính là 12." },
-            { q: "Trong vườn có 50 cây, 10 cây cam. Tỉ số phần trăm của cây cam là?", a: ["10%", "20%", "50%", "5%"], c: 1, h: "10/50 = 20/100" }
+            { q: "Trong vườn có 50 cây, 10 cây cam. Tỉ số phần trăm của cây cam là?", a: ["10%", "20%", "50%", "5%"], c: 1, h: "10/50 = 20/100" },
+            { q: "Viết phân số 3/4 thành tỉ số phần trăm:", a: ["34%", "75%", "30%", "40%"], c: 1, h: "3/4 = 75/100" },
+            { q: "Số thập phân 0,8 viết thành phần trăm là?", a: ["8%", "80%", "0.8%", "800%"], c: 1, h: "0,8 = 80/100" },
+            { q: "Tỉ số phần trăm của 13 và 25 là?", a: ["13%", "26%", "52%", "48%"], c: 2, h: "13/25 = 52/100" },
+            { q: "Lớp có 20 bạn, 10 bạn nữ. Tỉ số phần trăm bạn nữ là?", a: ["10%", "20%", "50%", "100%"], c: 2, h: "10/20 = 50/100" }
         ],
-        [ // CHẶNG 3
+        [ // CHẶNG 3: VỀ ĐÍCH (8 CÂU)
             { q: "Lớp 5A có 30 HS, 18 HS nữ. Tỉ số phần trăm HS nữ là?", a: ["18%", "50%", "60%", "30%"], c: 2, h: "18/30 = 6/10 = 60/100" },
-            { q: "Một cửa hàng có 100 cái bánh, bán hết 75 cái. Tỉ số phần trăm bánh còn lại là?", a: ["75%", "25%", "100%", "50%"], c: 1, h: "Còn lại 25 cái. 25/100 = 25%" },
+            { q: "Cửa hàng có 100 cái bánh, bán hết 75 cái. Tỉ số phần trăm bánh còn lại là?", a: ["75%", "25%", "100%", "50%"], c: 1, h: "Còn lại 25 cái. 25/100 = 25%" },
             { q: "Cứ 100kg nước biển có 4kg muối. Tỉ số phần trăm muối là?", a: ["0.4%", "4%", "40%", "400%"], c: 1, h: "4/100 chính là 4%." },
-            { q: "Giá xăng tăng từ 20k lên 22k. Số tiền tăng chiếm bao nhiêu % giá cũ?", a: ["2%", "10%", "20%", "5%"], c: 1, h: "Tăng 2k. 2/20 = 10/100 = 10%" }
+            { q: "Giá xăng tăng từ 20k lên 22k. Số tiền tăng chiếm bao nhiêu % giá cũ?", a: ["2%", "10%", "20%", "5%"], c: 1, h: "Tăng 2k. 2/20 = 10/100 = 10%" },
+            { q: "Một thư viện có 1000 cuốn sách, 200 cuốn truyện tranh. Truyện tranh chiếm bao nhiêu %?", a: ["2%", "20%", "200%", "0.2%"], c: 1, h: "200/1000 = 20/100" },
+            { q: "Tỉ số phần trăm của 1,2 và 4 là?", a: ["30%", "12%", "3%", "1.2%"], c: 0, h: "1,2 : 4 = 0,3 = 30%" },
+            { q: "Mua 500k giảm giá 10% là giảm bao nhiêu tiền?", a: ["10k", "50k", "5k", "100k"], c: 1, h: "10% của 500 là 50" },
+            { q: "Một trường có 400 HS, 25% là HS giỏi. Số HS giỏi là?", a: ["100 em", "25 em", "40 em", "200 em"], c: 0, h: "400 x 25 / 100 = 100" }
         ]
     ];
 
     let curLvl = 0, curQ = 0, totalScore = 0;
+    let currentLvlQuestions = []; // Lưu 4 câu đã chọn ngẫu nhiên cho chặng hiện tại
     let startTime = Date.now();
 
+    // Hàm tráo mảng
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+    }
+
+    // Chọn ngẫu nhiên 4 câu từ 8 câu
+    function prepareQuestionsForLevel() {
+        let pool = [...allQuestions[curLvl]];
+        shuffleArray(pool);
+        currentLvlQuestions = pool.slice(0, 4);
+        curQ = 0;
+    }
+
     function showQuestion() {
-        let q = lessons[curLvl][curQ];
+        let q = currentLvlQuestions[curQ];
         document.getElementById('q-text').innerHTML = `<b>Câu ${curLvl * 4 + curQ + 1}:</b> ${q.q}`;
         document.getElementById('progress').style.width = ((curLvl * 4 + curQ) / 12 * 100) + "%";
         
@@ -155,7 +169,7 @@
     }
 
     function checkAnswer(i) {
-        let q = lessons[curLvl][curQ];
+        let q = currentLvlQuestions[curQ];
         let btns = document.querySelectorAll('.opt');
         btns.forEach(b => b.disabled = true);
 
@@ -203,7 +217,7 @@
 
     function continueToNext() {
         curLvl++;
-        curQ = 0;
+        prepareQuestionsForLevel();
         document.querySelectorAll('.lvl-btn').forEach((b, i) => b.classList.toggle('active', i === curLvl));
         document.getElementById('next-lvl-screen').classList.add('hidden');
         document.getElementById('game-content').classList.remove('hidden');
@@ -232,7 +246,10 @@
         });
     }
 
-    window.onload = showQuestion;
+    window.onload = () => {
+        prepareQuestionsForLevel();
+        showQuestion();
+    };
 </script>
 </body>
 </html>
