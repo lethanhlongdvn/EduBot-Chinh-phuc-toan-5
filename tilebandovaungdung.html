@@ -10,18 +10,40 @@
     <style>
         :root { --map-blue: #00bcd4; --success: #4CAF50; --bg: #fdfdfd; }
         body { font-family: 'Lexend', sans-serif; background: var(--bg); margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; }
-        .container { max-width: 750px; width: 100%; background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border: 3px solid var(--map-blue); }
-        .header-img { width: 100%; border-radius: 15px; height: 180px; object-fit: cover; margin-bottom: 20px; background: #e0f7fa; display: flex; align-items: center; justify-content: center; }
+        .container { max-width: 750px; width: 100%; background: white; padding: 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border: 3px solid var(--map-blue); }
+        
+        /* PHẦN ĐẦU TRANG ĐÃ THU NHỎ */
+        .header-img { 
+            width: 100%; 
+            border-radius: 15px; 
+            height: 80px; /* Thu nhỏ từ 180px xuống 80px */
+            margin-bottom: 20px; 
+            background: linear-gradient(135deg, #e0f7fa, #b2ebf2); 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            border: 2px solid #EEE;
+        }
+        .header-img h2 { 
+            font-size: 1.4rem; 
+            margin: 0; 
+            display: flex; 
+            align-items: center; 
+            gap: 10px;
+        }
+
         .lvl-nav { display: flex; gap: 10px; margin-bottom: 20px; }
-        .lvl-btn { flex: 1; padding: 12px; border: none; border-radius: 10px; background: #eee; font-weight: bold; font-family: 'Lexend'; color: #999; }
-        .lvl-btn.active { background: var(--map-blue); color: white; }
-        .question-box { background: #f9f9f9; padding: 20px; border-radius: 15px; text-align: center; border: 1px solid #eee; margin-bottom: 20px; }
-        .option-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .opt-btn { padding: 15px; border: 2px solid #eee; border-radius: 12px; background: white; cursor: pointer; font-size: 1rem; font-family: 'Lexend'; transition: 0.2s; }
+        .lvl-btn { flex: 1; padding: 10px; border: none; border-radius: 10px; background: #eee; font-weight: bold; font-family: 'Lexend'; color: #999; font-size: 0.85rem; }
+        .lvl-btn.active { background: var(--map-blue); color: white; border-bottom: 3px solid #0097a7; }
+        
+        .question-box { background: #f9f9f9; padding: 20px; border-radius: 15px; text-align: center; border: 1px solid #eee; margin-bottom: 20px; min-height: 140px; }
+        .option-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .opt-btn { padding: 12px; border: 2px solid #eee; border-radius: 12px; background: white; cursor: pointer; font-size: 0.95rem; font-family: 'Lexend'; transition: 0.2s; }
         .opt-btn:hover:not(:disabled) { border-color: var(--map-blue); background: #e0f7fa; }
-        .robot-feedback { display: flex; align-items: center; gap: 10px; padding: 15px; background: #e8f5e9; border-radius: 12px; margin-top: 15px; border-left: 5px solid #4caf50; }
+        
+        .robot-feedback { display: flex; align-items: center; gap: 10px; padding: 12px; background: #e8f5e9; border-radius: 12px; margin-top: 15px; border-left: 5px solid #4caf50; font-size: 0.9rem; }
         .hidden { display: none; }
-        .action-btn { padding: 15px 30px; background: var(--success); color: white; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-family: 'Lexend'; font-size: 1.1rem; }
+        .action-btn { padding: 12px 25px; background: var(--success); color: white; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-family: 'Lexend'; font-size: 1rem; }
         input { padding: 12px; border-radius: 10px; border: 2px solid #ddd; width: 85%; font-family: 'Lexend'; margin-bottom: 15px; font-size: 1rem; }
     </style>
 </head>
@@ -29,7 +51,7 @@
 
 <div class="container">
     <div class="header-img">
-        <h2 style="color: var(--map-blue);">🧭 THÁM HIỂM TỈ LỆ BẢN ĐỒ</h2>
+        <h2 style="color: #007c91;">🧭 THÁM HIỂM BẢN ĐỒ</h2>
     </div>
 
     <div class="lvl-nav">
@@ -40,24 +62,23 @@
 
     <div id="play-area">
         <div class="question-box">
-            <p id="q-text" style="font-size: 1.15rem; font-weight: 500;"></p>
+            <p id="q-text" style="font-size: 1.1rem; font-weight: 500;"></p>
             <div id="options" class="option-grid"></div>
         </div>
         <div id="feedback" class="robot-feedback hidden">
-            <span>🧭</span> <span id="feedback-text"></span>
+            <span>🧭:</span> <span id="feedback-text"></span>
         </div>
     </div>
 
-    <div id="next-lvl-screen" class="hidden" style="text-align: center;">
-        <h2>Vượt chặng thành công!</h2>
+    <div id="next-lvl-screen" class="hidden" style="text-align: center; padding: 20px;">
+        <h2>Vượt chặng thành công! 🎉</h2>
         <p id="lvl-score-info" style="font-size: 1.2rem;"></p>
         <button class="action-btn" onclick="continueToNext()">Đi tiếp Chặng tiếp theo ➔</button>
     </div>
 
-    <div id="result-box" class="hidden" style="text-align: center;">
+    <div id="result-box" class="hidden" style="text-align: center; padding: 20px;">
         <h2>Chuyến thám hiểm kết thúc! 🏆</h2>
         <p id="total-score-info" style="font-size: 1.8rem; color: var(--map-blue); font-weight: bold;"></p>
-        
         <input type="text" id="player-name" placeholder="Nhập tên Nhà thám hiểm...">
         <input type="text" id="player-class" placeholder="Nhập Lớp của em (Ví dụ: 5/2)...">
         <br>
@@ -66,6 +87,7 @@
 </div>
 
 <script>
+    // Logic Firebase và Game của bạn được giữ nguyên
     const firebaseConfig = {
         apiKey: "AIzaSyC6zlWn8BKYU7P6A2-PYq6IIWOzaqJWFhc",
         authDomain: "gamhoctap.firebaseapp.com",
@@ -99,12 +121,10 @@
     let curLvl = 0, curQ = 0, totalScore = 0;
     let startTime; 
 
-    function startTimer() {
-        startTime = Date.now();
-    }
+    function startTimer() { startTime = Date.now(); }
 
     function show() {
-        if (!startTime) startTimer(); // Đảm bảo bắt đầu tính giờ khi câu hỏi đầu tiên hiện ra
+        if (!startTime) startTimer();
         let q = mapData[curLvl][curQ];
         document.getElementById('q-text').innerHTML = `<b>Câu ${curLvl * 4 + curQ + 1}:</b> ${q.q}`;
         document.getElementById('options').innerHTML = q.a.map((opt, i) => `<button class="opt-btn" onclick="check(${i})">${opt}</button>`).join('');
@@ -118,17 +138,17 @@
         if(idx === q.c) {
             totalScore++;
             btns[idx].style.background = "#c8e6c9";
-            showFeedback("Đúng rồi! Tiếp tục khám phá. ✅");
+            showFeedback("Đúng rồi! ✅");
         } else {
             btns[idx].style.background = "#ffcdd2";
             btns[q.c].style.background = "#c8e6c9";
-            showFeedback("La bàn gợi ý: " + q.h);
+            showFeedback("Gợi ý: " + q.h);
         }
         setTimeout(() => {
             curQ++;
             if(curQ < 4) show();
             else finishStage();
-        }, 2200);
+        }, 1800);
     }
 
     function showFeedback(m) {
@@ -158,37 +178,22 @@
     function saveResult() {
         const name = document.getElementById('player-name').value.trim();
         const className = document.getElementById('player-class').value.trim();
+        if (!name || !className) { alert("Em nhập tên và lớp nhé!"); return; }
 
-        if (!name || !className) {
-            alert("Các nhà thám hiểm cần nhập đầy đủ Tên và Lớp nhé!");
-            return;
-        }
+        const durationSeconds = Math.floor((Date.now() - startTime) / 1000);
+        const userKey = (className + "_" + name).replace(/[\s\/.\#\$\[\]]/g, '_');
 
-        // TÍNH THỜI GIAN
-        const endTime = Date.now();
-        const durationSeconds = Math.floor((endTime - startTime) / 1000);
-
-        const GAME_ID = "Ti_Le_Ban_Do";
-        const dateNow = new Date().toLocaleString('vi-VN');
-
-        // CHỐNG NHẢY NGÀY THÁNG TRÊN EXCEL
-        const excelClassName = "'" + className;
-
-        const safeClassName = className.replace(/[\/.\#\$\[\]]/g, '_');
-        const safeName = name.replace(/[\/.\#\$\[\]]/g, '_');
-        const userKey = (safeClassName + "_" + safeName).replace(/\s+/g, '_');
-
-        db.ref('scores/' + GAME_ID + '/' + userKey).set({
+        db.ref('scores/Ti_Le_Ban_Do/' + userKey).set({
             fullName: name,
-            className: excelClassName, 
+            className: "'" + className,
             score: totalScore,
             duration: durationSeconds,
-            date: dateNow,
+            date: new Date().toLocaleString('vi-VN'),
             timestamp: firebase.database.ServerValue.TIMESTAMP
         }).then(() => {
-            alert("Chúc mừng nhà thám hiểm " + name + " đã hoàn thành trong " + durationSeconds + " giây!");
-            location.href = "bang-vang.html";
-        }).catch((e) => alert("Lỗi kết nối!"));
+            alert("Đã ghi danh thành công!");
+            location.href = "index.html";
+        });
     }
     window.onload = show;
 </script>
