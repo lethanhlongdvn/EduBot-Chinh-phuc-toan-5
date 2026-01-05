@@ -3,307 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trang Chủ - EduRobot Chinh Phục Toán 5</title>
-    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;700&display=swap" rel="stylesheet">
-    
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-
-    <style>
-        :root {
-            --primary-color: #4CAF50;
-            --secondary-color: #2196F3;
-            --bg-color: #f4f7f6;
-            --text-color: #333;
-        }
-
-        body {
-            font-family: 'Lexend', sans-serif;
-            background-color: var(--bg-color);
-            margin: 0;
-            color: var(--text-color);
-        }
-
-        /* Header */
-        header {
-            background: white;
-            padding: 1rem 5%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-
-        .logo {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: var(--primary-color);
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        nav a {
-            margin-left: 20px;
-            text-decoration: none;
-            color: var(--text-color);
-            font-weight: 500;
-            transition: 0.3s;
-        }
-
-        nav a:hover { color: var(--primary-color); }
-
-        /* HERO SECTION */
-        .hero {
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 10px 5%;
-            background: linear-gradient(135deg, #4CAF50, #81C784);
-            color: white;
-            overflow: hidden;
-            min-height: 180px;
-        }
-
-        .hero-content { z-index: 2; max-width: 500px; }
-        .hero h1 { margin: 0; font-size: 1.8rem; text-shadow: 0 2px 4px rgba(0,0,0,0.2); }
-        .hero p { opacity: 0.9; margin-top: 8px; font-size: 1rem; }
-
-        .hero-img {
-            position: absolute;
-            width: 160px;
-            height: auto;
-            border-radius: 12px;
-            box-shadow: 0 15px 30px rgba(0,0,0,0.25);
-            z-index: 1;
-            display: none;
-        }
-
-        @media (min-width: 900px) { .hero-img { display: block; } }
-
-        .img-left {
-            left: 5%;
-            transform: perspective(1000px) rotateY(25deg) rotateZ(-5deg);
-            animation: floatLeft 4s ease-in-out infinite;
-        }
-
-        .img-right {
-            right: 5%;
-            transform: perspective(1000px) rotateY(-25deg) rotateZ(5deg);
-            animation: floatRight 4s ease-in-out infinite;
-        }
-
-        @keyframes floatLeft {
-            0%, 100% { transform: perspective(1000px) rotateY(25deg) rotateZ(-5deg) translateY(0); }
-            50% { transform: perspective(1000px) rotateY(30deg) rotateZ(-3deg) translateY(-10px); }
-        }
-
-        @keyframes floatRight {
-            0%, 100% { transform: perspective(1000px) rotateY(-25deg) rotateZ(5deg) translateY(0); }
-            50% { transform: perspective(1000px) rotateY(-30deg) rotateZ(3deg) translateY(-10px); }
-        }
-
-        /* CHIA BỐ CỤC CHÍNH */
-        .content-wrapper {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            padding: 30px 5%;
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        /* Phân vùng Game (70%) */
-        .game-section {
-            flex: 2.5;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px;
-        }
-
-        /* Phân vùng Bảng Vàng (30%) */
-        .sidebar-leaderboard {
-            flex: 1;
-            min-width: 300px;
-            background: white;
-            border-radius: 20px;
-            padding: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            height: fit-content;
-            border: 2px solid #e3f2fd;
-        }
-
-        .sidebar-leaderboard h2 {
-            font-size: 1.2rem;
-            color: var(--secondary-color);
-            text-align: center;
-            margin-top: 0;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #f0f0f0;
-        }
-
-        .top-player-item {
-            display: flex;
-            align-items: center;
-            padding: 12px 0;
-            border-bottom: 1px solid #f9f9f9;
-        }
-
-        .rank-number {
-            width: 35px;
-            font-weight: bold;
-            font-size: 1.1rem;
-            color: #888;
-        }
-
-        .player-name { flex-grow: 1; font-weight: 500; font-size: 0.9rem; }
-        .player-score { font-weight: bold; color: var(--primary-color); margin-left: 10px; }
-
-        /* Game Card Styles */
-        .game-card {
-            background: white; border-radius: 20px; overflow: hidden;
-            transition: 0.3s; border: 1px solid #eee; text-align: center;
-            display: flex; flex-direction: column;
-        }
-        .game-card:hover { transform: translateY(-8px); box-shadow: 0 12px 25px rgba(0,0,0,0.12); }
-        .game-thumb { height: 150px; background-size: cover; background-position: center; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; text-shadow: 1px 1px 4px rgba(0,0,0,0.3); }
-        .game-info { padding: 15px; flex-grow: 1; }
-        .game-info h3 { margin: 0 0 8px 0; font-size: 1.1rem; }
-        .play-btn { display: inline-block; background: var(--secondary-color); color: white; padding: 10px 20px; border-radius: 25px; text-decoration: none; font-weight: bold; font-size: 0.9rem; transition: 0.3s; }
-        .play-btn:hover { background: #1976D2; }
-    </style>
+    <title>EduRobot: Chinh phục Toán 5</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-<header>
-    <a href="index.html" class="logo">
-        EduRobot <img src="robot.png" alt="Logo" style="height: 40px; border-radius: 8px;">
-    </a>
-    <nav>
-        <a href="index.html">Trang chủ</a>
-        <a href="bang-vang.html" style="color: var(--secondary-color); font-weight: bold;">🏆 Bảng vàng</a>
-        <a href="#">Hướng dẫn</a>
-    </nav>
-</header>
-
-<section class="hero">
-    <img src="bia1.jpg" alt="Bìa 1" class="hero-img img-left">
-    <div class="hero-content">
-        <h1>Chinh phục Toán lớp 5 cùng EduRobot!</h1>
-        <p>Học toán thật vui, nhận quà thật thích!</p>
-    </div>
-    <img src="bia2.jpg" alt="Bìa 2" class="hero-img img-right">
-</section>
-
-<div class="content-wrapper">
-    <main class="game-section">
-        <div class="game-card">
-            <div class="game-thumb" style="background-image: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2)), url('ti-so.jpg'); background-color: #FFEB3B;">Tỉ Số Phần Trăm</div>
-            <div class="game-info">
-                <h3>Robot & Tỉ Số Phần Trăm</h3>
-                <a href="tisophantram.html" class="play-btn">Bắt đầu khám phá</a>
+    <header class="game-header">
+        <div class="player-profile">
+            <img src="assets/robot-head.png" alt="Robot Avatar" class="avatar">
+            <div class="stats">
+                <h2 id="student-name">Đang tải...</h2>
+                <div class="score-bar">
+                    <span>⭐ Điểm tích lũy: <strong id="total-score">0</strong></span>
+                </div>
             </div>
         </div>
-
-        <div class="game-card">
-            <div class="game-thumb" style="background-image: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2)), url('tilebandovaungdung.jpg'); background-color: #FF7043;">Tỉ Lệ Bản Đồ</div>
-            <div class="game-info">
-                <h3>Thám Hiểm Bản Đồ</h3>
-                <a href="tilebandovaungdung.html" class="play-btn">Bắt đầu khám phá</a>
-            </div>
+        <div class="game-logo">
+            <h1>EDURobot</h1>
+            <p>Hành trình Toán học</p>
         </div>
+    </header>
 
-        <div class="game-card">
-            <div class="game-thumb" style="background-image: linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.1)), url('tongtiso.jpg'); background-color: #8BC34A;">Tổng - Tỉ</div>
-            <div class="game-info">
-                <h3>Tổng và Tỉ số</h3>
-                <a href="tongtiso.html" class="play-btn">Bắt đầu khám phá</a>
+    <main class="map-area">
+        <div class="map-path" id="map-path">
             </div>
-        </div>
-
-        <div class="game-card">
-            <div class="game-thumb" style="background-image: linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.1)), url('hieutiso.jpg'); background-color: #673AB7;">Hiệu - Tỉ</div>
-            <div class="game-info">
-                <h3>Hiệu và Tỉ số</h3>
-                <a href="hieutiso.html" class="play-btn">Bắt đầu khám phá</a>
-            </div>
-        </div>
     </main>
 
-    <aside class="sidebar-leaderboard">
-        <h2>🏆 TOP 10 CAO THỦ</h2>
-        <div id="sidebar-list">
-            <p style="text-align: center; color: #999;">Đang cập nhật...</p>
-        </div>
-        <div style="text-align: center; margin-top: 15px;">
-            <a href="bang-vang.html" style="font-size: 0.8rem; color: var(--secondary-color); text-decoration: none; font-weight: bold;">Xem tất cả bảng xếp hạng ➔</a>
-        </div>
-    </aside>
-</div>
-
-<footer style="text-align: center; padding: 20px; color: #888; font-size: 0.8rem;">
-    &copy; 2025 EduRobot - Phát triển bởi GV. Lê Thành Long
+    <footer class="game-footer">
+        <button class="btn-nav">🏆 Bảng vàng</button>
+        <button class="btn-nav">🛒 Cửa hàng</button>
+        <button class="btn-nav">⚙️ Cài đặt</button>
     </footer>
 
-<script>
-    const firebaseConfig = {
-        apiKey: "AIzaSyC6zlWn8BKYU7P6A2-PYq6IIWOzaqJWFhc",
-        authDomain: "gamhoctap.firebaseapp.com",
-        databaseURL: "https://gamhoctap-default-rtdb.asia-southeast1.firebasedatabase.app",
-        projectId: "gamhoctap"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-
-    function updateSidebarLeaderboard() {
-        // Đảm bảo đường dẫn này TRÙNG KHỚP với đường dẫn lúc bạn push điểm ở file tisophantram.html
-        db.ref('scores/Ti_So_Phan_Tram').orderByChild('score').limitToLast(10).on('value', (snapshot) => {
-            const listDiv = document.getElementById('sidebar-list');
-            listDiv.innerHTML = '';
-            let players = [];
-
-            snapshot.forEach((child) => {
-                players.push(child.val());
-            });
-
-            players.reverse(); 
-
-            if (players.length === 0) {
-                listDiv.innerHTML = '<p style="text-align:center; color:#999; font-size:0.9rem;">Chưa có dữ liệu thi đấu</p>';
-                return;
-            }
-
-            players.forEach((p, index) => {
-                let medal = index + 1;
-                if(index === 0) medal = '🥇';
-                else if(index === 1) medal = '🥈';
-                else if(index === 2) medal = '🥉';
-                else medal = `#${index + 1}`;
-
-                listDiv.innerHTML += `
-                    <div class="top-player-item">
-                        <div class="rank-number">${medal}</div>
-                        <div class="player-name">
-                            <div style="font-weight:bold;">${p.fullName}</div>
-                            <div style="font-size:0.7rem; color:#888;">Lớp: ${p.className}</div>
-                        </div>
-                        <div class="player-score">${p.score}đ</div>
-                    </div>
-                `;
-            });
-        }, (error) => {
-            console.error("Lỗi Firebase:", error);
-            document.getElementById('sidebar-list').innerHTML = "Lỗi tải dữ liệu";
-        });
-    }
-
-    window.onload = updateSidebarLeaderboard;
-</script>
+    <script type="module" src="js/main.js"></script>
 </body>
 </html>
