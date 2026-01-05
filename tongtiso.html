@@ -14,16 +14,7 @@
         body { font-family: 'Lexend', sans-serif; background: var(--bg); margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; }
         .container { max-width: 750px; width: 100%; background: white; padding: 20px; border-radius: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border-top: 10px solid var(--primary); }
         
-        /* HEADER THU NHỎ */
-        .header-title { 
-            text-align: center; 
-            color: var(--primary); 
-            margin-bottom: 15px; 
-            height: 60px; /* Thu nhỏ chiều cao */
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
+        .header-title { text-align: center; color: var(--primary); margin-bottom: 15px; height: 60px; display: flex; flex-direction: column; justify-content: center; }
         .header-title h2 { margin: 0; font-size: 1.4rem; }
         .header-title p { margin: 0; font-size: 0.85rem; color: #888; }
 
@@ -43,8 +34,6 @@
         .hidden { display: none; }
         .input-field { padding: 12px; border-radius: 10px; border: 2px solid #ddd; width: 85%; font-family: 'Lexend'; margin-bottom: 10px; font-size: 1rem; }
         .action-btn { padding: 12px 25px; background: var(--success); color: white; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-family: 'Lexend'; font-size: 1rem; margin-top: 10px; }
-
-        /* FOOTER BẢN QUYỀN */
         footer { margin-top: 30px; text-align: center; font-size: 0.8rem; color: #999; width: 100%; }
     </style>
 </head>
@@ -92,10 +81,7 @@
     <p>© 2025 EduRobot - Giáo viên thực hiện: <b>Lê Thành Long</b></p>
 </footer>
 
-
-
 <script>
-    // Giữ nguyên phần logic Firebase và Game của bạn
     const firebaseConfig = {
         apiKey: "AIzaSyC6zlWn8BKYU7P6A2-PYq6IIWOzaqJWFhc",
         authDomain: "gamhoctap.firebaseapp.com",
@@ -105,31 +91,51 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    const data = [
-        [ // Chặng 1
+    const allData = [
+        [ // Chặng 1: Lý thuyết cơ bản
             { q: "Tổng hai số là 15, tỉ số là 2/3. Tổng số phần bằng nhau là:", a: ["2 phần", "3 phần", "5 phần", "6 phần"], c: 2, h: "Lấy tử số cộng mẫu số: 2 + 3 = 5 phần." },
             { q: "Tổng là 20, tổng số phần là 4. Giá trị một phần là:", a: ["4", "5", "80", "16"], c: 1, h: "Giá trị một phần = Tổng : Tổng số phần = 20 : 4 = 5." },
             { q: "Số bé chiếm 1 phần, số lớn chiếm 4 phần. Tỉ số của số bé và số lớn là:", a: ["1/4", "4/1", "1/5", "4/5"], c: 0, h: "Số bé là tử số, số lớn là mẫu số: 1/4." },
-            { q: "Số bé chiếm 2 phần, số lớn chiếm 7 phần. Tổng số phần là:", a: ["7 phần", "2 phần", "9 phần", "5 phần"], c: 2, h: "Tổng số phần = 2 + 7 = 9 phần." }
+            { q: "Số bé chiếm 2 phần, số lớn chiếm 7 phần. Tổng số phần là:", a: ["7 phần", "2 phần", "9 phần", "5 phần"], c: 2, h: "Tổng số phần = 2 + 7 = 9 phần." },
+            { q: "Trong bài toán Tổng - Tỉ, sau khi tìm được giá trị 1 phần, muốn tìm số lớn ta làm gì?", a: ["Lấy giá trị 1 phần nhân với số phần số lớn", "Lấy giá trị 1 phần chia số phần số lớn", "Lấy Tổng trừ đi giá trị 1 phần", "Lấy Tổng nhân số phần số lớn"], c: 0, h: "Nhân giá trị 1 phần với số phần tương ứng của số lớn." },
+            { q: "Tỉ số của hai số là 3/5. Nếu số bé là 3 phần thì số lớn là mấy phần?", a: ["3 phần", "5 phần", "8 phần", "2 phần"], c: 1, h: "Mẫu số chỉ số phần của số lớn." },
+            { q: "Bước đầu tiên khi giải bài toán tìm hai số khi biết Tổng và Tỉ là gì?", a: ["Tìm số lớn", "Tìm giá trị 1 phần", "Vẽ sơ đồ đoạn thẳng", "Tìm tổng số phần"], c: 2, h: "Vẽ sơ đồ giúp chúng ta dễ hình dung bài toán hơn." },
+            { q: "Nếu số bé bằng 1/2 số lớn, tổng số phần bằng nhau là:", a: ["1 phần", "2 phần", "3 phần", "4 phần"], c: 2, h: "1 + 2 = 3 phần." }
         ],
-        [ // Chặng 2
-            { q: "Tổng hai số là 45, tỉ số là 2/3. Số bé là:", a: ["18", "27", "15", "9"], c: 0, h: "Tổng số phần: 5. Giá trị 1 phần: 45:5=9. Số bé: 9x2=18." },
-            { q: "Tổng hai số là 72, tỉ số là 1/5. Số lớn là:", a: ["12", "60", "62", "50"], c: 1, h: "Tổng số phần: 6. Giá trị 1 phần: 72:6=12. Số lớn: 12x5=60." },
-            { q: "Sợi dây dài 28m, cắt 2 đoạn tỉ lệ 3/4. Đoạn dài hơn là:", a: ["12m", "16m", "4m", "7m"], c: 1, h: "Tổng số phần: 7. Giá trị 1 phần: 28:7=4. Đoạn dài: 4x4=16m." },
-            { q: "Tổng là 100, tỉ số 1/1. Hai số đó là:", a: ["40 và 60", "50 và 50", "30 và 70", "0 và 100"], c: 1, h: "Tỉ số 1/1 nghĩa là hai số bằng nhau. 100:2=50." }
+        [ // Chặng 2: Tính toán
+            { q: "Tổng hai số là 45, tỉ số là 2/3. Số bé là:", a: ["18", "27", "15", "9"], c: 0, h: "Tổng số phần: 5. Một phần: 45:5=9. Số bé: 9x2=18." },
+            { q: "Tổng hai số là 72, tỉ số là 1/5. Số lớn là:", a: ["12", "60", "62", "50"], c: 1, h: "Tổng số phần: 6. Một phần: 72:6=12. Số lớn: 12x5=60." },
+            { q: "Sợi dây dài 28m, cắt thành 2 đoạn tỉ lệ 3/4. Đoạn dài hơn là:", a: ["12m", "16m", "4m", "7m"], c: 1, h: "Tổng số phần: 7. Một phần: 4. Đoạn dài: 4x4=16m." },
+            { q: "Tổng là 100, tỉ số 1/1. Hai số đó là:", a: ["40 và 60", "50 và 50", "30 và 70", "0 và 100"], c: 1, h: "Tỉ số 1/1 nghĩa là hai số bằng nhau." },
+            { q: "Hai số có tổng là 40, tỉ số là 1/3. Số lớn là:", a: ["10", "20", "30", "40"], c: 2, h: "Tổng phần: 4. Một phần: 10. Số lớn: 10x3=30." },
+            { q: "Tổng hai số là 120, tỉ số là 5/7. Số bé là:", a: ["50", "70", "12", "60"], c: 0, h: "Tổng phần: 12. Một phần: 10. Số bé: 10x5=50." },
+            { q: "Tìm hai số có tổng là 15 và tỉ số là 2. Hai số đó là:", a: ["5 và 10", "2 và 13", "3 và 12", "7 và 8"], c: 0, h: "Tỉ số là 2 nghĩa là 2/1. Tổng phần: 3." },
+            { q: "Tổng hai số là 21, số bé bằng 3/4 số lớn. Số lớn là:", a: ["9", "12", "7", "14"], c: 1, h: "Tổng phần: 7. Một phần: 3. Số lớn: 3x4=12." }
         ],
-        [ // Chặng 3
+        [ // Chặng 3: Ứng dụng thực tế
             { q: "Lớp 5A có 35 học sinh. Nam bằng 3/4 Nữ. Số học sinh Nữ là:", a: ["15 bạn", "20 bạn", "12 bạn", "25 bạn"], c: 1, h: "Tổng số phần: 7. Nữ chiếm 4 phần. (35:7)x4=20." },
-            { q: "Chu vi HCN 40cm. Rộng bằng 2/3 Dài. Nửa chu vi là:", a: ["40cm", "20cm", "10cm", "8cm"], c: 1, h: "Nửa chu vi = Chu vi : 2 = 40 : 2 = 20cm." },
-            { q: "Mẹ hơn con 24 tuổi. Tuổi con bằng 1/3 tuổi mẹ. Tổng tuổi hai người là:", a: ["36", "48", "40", "32"], c: 1, h: "Hiệu số phần: 2. Một phần: 24:2=12. Con 12, Mẹ 36. Tổng = 48." },
-            { q: "Hai kho có 150 tấn. Kho A bằng 2/3 kho B. Kho B có:", a: ["60 tấn", "90 tấn", "100 tấn", "50 tấn"], c: 1, h: "Tổng số phần: 5. Kho B chiếm 3 phần. (150:5)x3=90." }
+            { q: "Chu vi HCN 40cm. Rộng bằng 2/3 Dài. Chiều dài là:", a: ["12cm", "8cm", "24cm", "16cm"], c: 0, h: "Nửa chu vi: 20cm. Tổng phần: 5. Một phần: 4. Dài: 4x3=12cm." },
+            { q: "Mẹ và con tổng 48 tuổi. Tuổi con bằng 1/3 tuổi mẹ. Tuổi mẹ là:", a: ["36", "12", "40", "32"], c: 0, h: "Tổng phần: 4. Một phần: 12. Mẹ: 12x3=36 tuổi." },
+            { q: "Hai kho có 150 tấn. Kho A bằng 2/3 kho B. Kho B có:", a: ["60 tấn", "90 tấn", "100 tấn", "50 tấn"], c: 1, h: "Tổng số phần: 5. Kho B chiếm 3 phần. (150:5)x3=90." },
+            { q: "Một nông trại có 120 con gà và vịt. Số gà bằng 1/5 số vịt. Có bao nhiêu gà?", a: ["20 con", "100 con", "24 con", "60 con"], c: 0, h: "Tổng phần: 6. Một phần: 20. Gà: 20 con." },
+            { q: "Tổng của hai số là số lớn nhất có hai chữ số (99). Tỉ số là 4/5. Số bé là:", a: ["44", "55", "45", "54"], c: 0, h: "Tổng phần: 9. Một phần: 11. Số bé: 11x4=44." },
+            { q: "An và Bình có 30 viên bi. Số bi của An bằng 1/2 của Bình. An có mấy viên?", a: ["10 viên", "20 viên", "15 viên", "5 viên"], c: 0, h: "Tổng phần: 3. An: 30:3=10 viên." },
+            { q: "Nửa chu vi một khu đất là 60m. Rộng bằng 1/2 Dài. Chiều rộng là:", a: ["20m", "40m", "30m", "10m"], c: 0, h: "Tổng phần: 3. Rộng: 60:3=20m." }
         ]
     ];
 
     let curLvl = 0, curQ = 0, totalScore = 0;
+    let currentQuestions = [];
+
+    function shuffleQuestions() {
+        let pool = [...allData[curLvl]];
+        pool.sort(() => Math.random() - 0.5);
+        currentQuestions = pool.slice(0, 4);
+        curQ = 0;
+    }
 
     function show() {
-        let q = data[curLvl][curQ];
+        let q = currentQuestions[curQ];
         document.getElementById('q-text').innerHTML = `<b>Câu ${curLvl * 4 + curQ + 1}:</b> ${q.q}`;
         document.getElementById('fill').style.width = ((curLvl * 4 + curQ) / 12 * 100) + "%";
         document.getElementById('q-opts').innerHTML = q.a.map((o, i) => `<button class="opt-btn" onclick="check(${i})">${o}</button>`).join('');
@@ -137,7 +143,7 @@
     }
 
     function check(i) {
-        let q = data[curLvl][curQ];
+        let q = currentQuestions[curQ];
         let btns = document.querySelectorAll('.opt-btn');
         btns.forEach(b => b.disabled = true);
         
@@ -145,7 +151,7 @@
             totalScore++; 
             btns[i].style.background = "#c8e6c9";
             btns[i].style.borderColor = "#4CAF50";
-            hint("Chính xác! +1 điểm. ✨");
+            hint("Chính xác! ✨");
         } else {
             btns[i].style.background = "#ffcdd2";
             btns[i].style.borderColor = "#f44336";
@@ -169,7 +175,7 @@
         document.getElementById('quiz-area').classList.add('hidden');
         if (curLvl < 2) {
             document.getElementById('next-lvl-screen').classList.remove('hidden');
-            document.getElementById('lvl-score-info').innerText = `Xong Chặng ${curLvl + 1}. Điểm: ${totalScore}/12`;
+            document.getElementById('lvl-score-info').innerText = `Xong Chặng ${curLvl + 1}. Tổng điểm: ${totalScore}/12`;
         } else {
             document.getElementById('res-box').classList.remove('hidden');
             document.getElementById('total-score-info').innerText = `${totalScore} / 12 ĐIỂM`;
@@ -178,7 +184,8 @@
     }
 
     function continueToNext() {
-        curLvl++; curQ = 0;
+        curLvl++;
+        shuffleQuestions();
         document.querySelectorAll('.lvl-btn').forEach((b, i) => b.classList.toggle('active', i === curLvl));
         document.getElementById('next-lvl-screen').classList.add('hidden');
         document.getElementById('quiz-area').classList.remove('hidden');
@@ -188,25 +195,26 @@
     function save() {
         const name = document.getElementById('p-name').value.trim();
         const className = document.getElementById('p-class').value.trim();
-        if (!name || !className) { alert("Em nhập tên và lớp nhé!"); return; }
+        if (!name || !className) { alert("Em hãy nhập tên và lớp nhé!"); return; }
 
-        const safeClassName = className.replace(/[\/.\#\$\[\]]/g, '_');
-        const safeName = name.replace(/[\/.\#\$\[\]]/g, '_');
-        const userKey = (safeClassName + "_" + safeName).replace(/\s+/g, '_');
+        const userKey = (className + "_" + name).replace(/[\s\/.\#\$\[\]]/g, '_');
 
         db.ref('scores/Tong_Ti_So/' + userKey).set({
             fullName: name,
-            className: className,
+            className: "'" + className,
             score: totalScore,
             date: new Date().toLocaleString('vi-VN'),
             timestamp: firebase.database.ServerValue.TIMESTAMP
         }).then(() => {
-            alert("Đã ghi danh thành công!");
+            alert("Ghi danh Bảng Vàng thành công!");
             location.href = "index.html";
         });
     }
 
-    window.onload = show;
+    window.onload = () => {
+        shuffleQuestions();
+        show();
+    };
 </script>
 </body>
 </html>
