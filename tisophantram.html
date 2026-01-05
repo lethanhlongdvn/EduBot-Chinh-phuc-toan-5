@@ -233,6 +233,7 @@
         const duration = Math.floor((Date.now() - startTime) / 1000);
         const userKey = (className + "_" + name).replace(/[\s\/.\#\$\[\]]/g, '_');
 
+        // Lưu lên Firebase của riêng trang con này
         db.ref('scores/Ti_So_Phan_Tram/' + userKey).set({
             fullName: name,
             className: "'" + className,
@@ -241,8 +242,24 @@
             date: new Date().toLocaleString('vi-VN'),
             timestamp: firebase.database.ServerValue.TIMESTAMP
         }).then(() => {
-            alert("Đã lưu điểm thành công!");
-            location.href = "index.html";
+            alert("Đã ghi danh Bảng Vàng thành công!");
+
+            // --- ĐOẠN CODE QUAN TRỌNG CHO CÁCH B ---
+            // Gửi thông điệp báo cho trang play.html (trang mẹ) biết đã xong
+            if (window.parent !== window) {
+                window.parent.postMessage({
+                    type: 'GAME_COMPLETE',
+                    score: totalScore,
+                    week: 19 // Đây là tuần của trang này (ví dụ 19)
+                }, '*');
+            } else {
+                // Nếu chạy độc lập không qua iframe thì quay về index
+                location.href = "index.html";
+            }
+            // ---------------------------------------
+        }).catch(err => {
+            console.error("Lỗi lưu điểm:", err);
+            alert("Có lỗi xảy ra, em thử lại nhé!");
         });
     }
 
