@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đang chinh phục thử thách...</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .game-container { padding: 20px; text-align: center; }
+        iframe { border: 3px solid #4cc9f0; border-radius: 15px; width: 100%; max-width: 900px; height: 600px; }
+        .action-bar { margin-top: 20px; }
+        .btn-finish { 
+            background: #4af2a1; color: #000; padding: 15px 30px; 
+            border-radius: 30px; font-family: 'Bungee'; border: none; cursor: pointer;
+            box-shadow: 0 5px 15px rgba(74, 242, 161, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <header class="game-header">
+        <button onclick="location.href='index.html'" style="background:none; border:none; color:white; cursor:pointer;">⬅ Trở về</button>
+        <h2 id="week-title">Tuần ...</h2>
+        <div id="user-display">Đang tải...</div>
+    </header>
+
+    <main class="game-container">
+        <div id="game-frame-area">
+            </div>
+
+        <div class="action-bar">
+            <p>Sau khi hoàn thành trò chơi, hãy nhấn nút bên dưới để lưu kết quả!</p>
+            <button class="btn-finish" id="btn-save">Xác nhận hoàn thành 🏆</button>
+        </div>
+    </main>
+
+    <script type="module" src="js/play.js"></script>
+</body>
+</html>
