@@ -12,42 +12,36 @@
 
     <style>
         :root { --primary: #FF9800; --secondary: #2196F3; --success: #4CAF50; --bg: #FFFBF0; }
-        body { font-family: 'Lexend', Arial, sans-serif; background: var(--bg); margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; }
-        .container { max-width: 800px; width: 100%; background: white; padding: 15px; border-radius: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border: 3px solid #FFCC80; }
+        body { font-family: 'Lexend', Arial, sans-serif; background: var(--bg); margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; }
+        .container { max-width: 750px; width: 100%; background: white; padding: 20px; border-radius: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border-top: 10px solid var(--primary); }
         
-        /* HEADER THU NHỎ - CẬP NHẬT TẠI ĐÂY */
-        .header-img { 
+        /* HEADER ĐÃ ĐỒNG BỘ */
+        .header-box { 
             width: 100%; 
             border-radius: 15px; 
-            border: 2px solid #EEE; 
-            margin-bottom: 15px; 
-            height: 80px; /* Đã giảm từ 180px xuống 80px */
-            object-fit: cover; 
+            height: 80px; 
+            margin-bottom: 20px; 
             background: linear-gradient(135deg, #FFF3E0, #FFE0B2); 
             display: flex; 
+            flex-direction: column; 
             align-items: center; 
             justify-content: center; 
-            overflow: hidden; 
+            text-align: center;
+            border: 1px solid #EEE;
         }
-        .header-img h2 { 
-            font-size: 1.4rem; /* Giảm cỡ chữ tiêu đề */
-            margin: 0;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+        .header-box h2 { color: var(--primary); margin: 0; font-size: 1.4rem; }
+        .header-box p { color: #888; font-size: 0.85rem; margin: 2px 0 0 0; }
 
-        .status-bar { display: flex; justify-content: space-between; font-weight: bold; color: #555; margin-bottom: 10px; font-size: 0.9rem; }
-        .progress-container { height: 10px; background: #EEE; border-radius: 6px; margin-bottom: 15px; overflow: hidden; }
+        .progress-container { height: 10px; background: #EEE; border-radius: 6px; margin-bottom: 20px; overflow: hidden; }
         .progress-bar { height: 100%; background: var(--primary); width: 0%; transition: 0.5s; }
 
-        .level-map { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
-        .lvl-btn { padding: 10px 5px; border: none; border-radius: 12px; background: #F5F5F5; font-family: 'Lexend'; font-size: 0.8rem; border-bottom: 4px solid #DDD; color: #888; pointer-events: none; }
-        .lvl-btn.active { background: #FFF3E0; border-color: var(--primary); color: var(--primary); font-weight: bold; border-bottom: 4px solid var(--primary); }
+        .level-map { display: flex; gap: 10px; margin-bottom: 20px; }
+        .lvl-btn { flex: 1; padding: 10px 5px; border: none; border-radius: 12px; background: #F5F5F5; font-family: 'Lexend'; font-size: 0.8rem; color: #888; pointer-events: none; }
+        .lvl-btn.active { background: var(--primary); color: white; font-weight: bold; border-bottom: 3px solid #E68A00; }
 
         .question-area { min-height: 140px; text-align: center; }
         .q-text { font-size: 1.1rem; color: #333; margin-bottom: 15px; line-height: 1.5; }
-        .options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .options { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         .opt { padding: 12px; border: 2px solid #F0F0F0; border-radius: 12px; background: white; cursor: pointer; transition: 0.2s; font-size: 0.95rem; font-family: 'Lexend'; }
         .opt:hover:not(:disabled) { border-color: var(--secondary); background: #E3F2FD; }
 
@@ -56,13 +50,16 @@
         
         .action-btn { padding: 12px 25px; background: var(--success); color: white; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-family: 'Lexend'; font-size: 1rem; margin-top: 10px; }
         .input-field { padding: 12px; border-radius: 10px; border: 2px solid #ddd; width: 85%; font-family: 'Lexend'; margin-bottom: 10px; font-size: 1rem; }
+        
+        footer { text-align: center; padding: 20px; color: #888; font-size: 0.8rem; width: 100%; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div class="header-img">
-        <h2 style="color: var(--primary);">🤖 HÀNH TRÌNH TÌM TỈ SỐ PHẦN TRĂM</h2>
+    <div class="header-box">
+        <h2>🤖 HÀNH TRÌNH TÌM TỈ SỐ PHẦN TRĂM</h2>
+        <p>Toán 5 - Khám phá thế giới phần trăm</p>
     </div>
 
     <div class="level-map">
@@ -74,9 +71,9 @@
     <div class="progress-container"><div id="progress" class="progress-bar"></div></div>
 
     <div id="game-content">
-        <div class="status-bar">
+        <div style="display: flex; justify-content: space-between; font-weight: bold; color: #555; margin-bottom: 10px; font-size: 0.9rem;">
             <span id="lvl-title">Khởi hành thôi!</span>
-            <span id="score-display">Tổng điểm: 0/12</span>
+            <span id="score-display">Điểm: 0/12</span>
         </div>
         
         <div class="question-area">
@@ -90,14 +87,14 @@
     </div>
 
     <div id="next-lvl-screen" class="hidden" style="text-align: center; padding: 20px;">
-        <h2 id="lvl-msg">Tuyệt vời!</h2>
+        <h2>Tuyệt vời! 🎉</h2>
         <p id="lvl-score-info" style="font-size: 1.2rem;"></p>
         <button class="action-btn" onclick="continueToNext()">Tiếp tục Chặng tiếp theo ➔</button>
     </div>
 
     <div id="result-screen" class="hidden" style="text-align: center; padding: 30px 0;">
-        <h2 id="result-title">Hành trình hoàn tất! 🏆</h2>
-        <p id="result-msg" style="font-size: 1.8rem; color: var(--primary); font-weight: bold;"></p>
+        <h2>Hành trình hoàn tất! 🏆</h2>
+        <p id="result-msg" style="font-size: 2rem; color: var(--primary); font-weight: bold; margin: 15px 0;"></p>
         
         <input type="text" id="player-name" class="input-field" placeholder="Nhập Họ và Tên của em...">
         <input type="text" id="player-class" class="input-field" placeholder="Nhập Lớp (Ví dụ: 5/1)...">
@@ -106,8 +103,13 @@
     </div>
 </div>
 
+
+
+<footer style="text-align: center; padding: 20px; color: #888; font-size: 0.8rem;">
+    &copy; 2025 EduRobot - Phát triển bởi GV. Lê Thành Long
+</footer>
+
 <script>
-    // Giữ nguyên phần Firebase và Logic xử lý game của bạn...
     const firebaseConfig = {
         apiKey: "AIzaSyC6zlWn8BKYU7P6A2-PYq6IIWOzaqJWFhc",
         authDomain: "gamhoctap.firebaseapp.com",
@@ -191,7 +193,7 @@
         document.getElementById('game-content').classList.add('hidden');
         if (curLvl < 2) {
             document.getElementById('next-lvl-screen').classList.remove('hidden');
-            document.getElementById('lvl-score-info').innerText = `Xong Chặng ${curLvl + 1}. Điểm hiện tại: ${totalScore}/12`;
+            document.getElementById('lvl-score-info').innerText = `Xong Chặng ${curLvl + 1}. Điểm: ${totalScore}/12`;
         } else {
             document.getElementById('result-screen').classList.remove('hidden');
             document.getElementById('result-msg').innerText = `${totalScore} / 12 ĐIỂM`;
@@ -214,16 +216,14 @@
         const className = document.getElementById('player-class').value.trim();
         if (!name || !className) { alert("Em nhập tên và lớp nhé!"); return; }
 
-        const endTime = Date.now();
-        const durationSeconds = Math.floor((endTime - startTime) / 1000);
-        const excelClassName = "'" + className;
+        const duration = Math.floor((Date.now() - startTime) / 1000);
         const userKey = (className + "_" + name).replace(/[\s\/.\#\$\[\]]/g, '_');
 
         db.ref('scores/Ti_So_Phan_Tram/' + userKey).set({
             fullName: name,
-            className: excelClassName,
+            className: "'" + className,
             score: totalScore,
-            duration: durationSeconds,
+            duration: duration,
             date: new Date().toLocaleString('vi-VN'),
             timestamp: firebase.database.ServerValue.TIMESTAMP
         }).then(() => {
