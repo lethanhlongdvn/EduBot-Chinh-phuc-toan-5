@@ -186,8 +186,7 @@
         document.getElementById('play-area').classList.remove('hidden');
         show();
     }
-
-    function saveResult() {
+function saveResult() {
         const name = document.getElementById('player-name').value.trim();
         const className = document.getElementById('player-class').value.trim();
         if (!name || !className) { alert("Em nhập tên và lớp nhé!"); return; }
@@ -195,6 +194,7 @@
         const durationSeconds = Math.floor((Date.now() - startTime) / 1000);
         const userKey = (className + "_" + name).replace(/[\s\/.\#\$\[\]]/g, '_');
 
+        // Lưu vào Firebase của trang nội dung (Bảng vàng riêng của bài này)
         db.ref('scores/Ti_Le_Ban_Do/' + userKey).set({
             fullName: name,
             className: "'" + className,
@@ -204,7 +204,23 @@
             timestamp: firebase.database.ServerValue.TIMESTAMP
         }).then(() => {
             alert("Đã ghi danh Bảng Vàng thành công!");
-            location.href = "index.html";
+
+            // --- ĐOẠN CODE KẾT NỐI VỚI HỆ THỐNG EDURobot ---
+            // Kiểm tra xem trang này có đang được nhúng trong trang play.html không
+            if (window.parent !== window) {
+                window.parent.postMessage({
+                    type: 'GAME_COMPLETE',
+                    score: totalScore,
+                    week: 20 // Ví dụ: Tỉ lệ bản đồ thuộc tuần 20
+                }, '*');
+            } else {
+                // Nếu giáo viên mở link trực tiếp thì mới quay về index.html
+                location.href = "index.html";
+            }
+            // ----------------------------------------------
+        }).catch(err => {
+            console.error("Lỗi lưu điểm:", err);
+            alert("Có lỗi xảy ra, em thử lại nhé!");
         });
     }
 
