@@ -193,7 +193,7 @@
         show();
     }
 
-    function saveResult() {
+   function saveResult() {
         const name = document.getElementById('player-name').value.trim();
         const className = document.getElementById('player-class').value.trim();
         if (!name || !className) { alert("Nhập tên và lớp nhé!"); return; }
@@ -201,6 +201,7 @@
         const duration = Math.floor((Date.now() - startTime) / 1000);
         const userKey = (className + "_" + name).replace(/[\s\/.\#\$\[\]]/g, '_');
 
+        // 1. Lưu vào Firebase của riêng trang Hiệu - Tỉ
         db.ref('scores/Hieu_Va_Ti_So/' + userKey).set({
             fullName: name,
             className: "'" + className,
@@ -209,8 +210,24 @@
             date: new Date().toLocaleString('vi-VN'),
             timestamp: firebase.database.ServerValue.TIMESTAMP
         }).then(() => {
-            alert("Đã ghi danh thành công!");
-            location.href = "index.html";
+            alert("Đã ghi danh thành công! 🏆");
+
+            // 2. --- ĐOẠN CODE KẾT NỐI HỆ THỐNG EDURobot (CÁCH B) ---
+            if (window.parent !== window) {
+                // Báo cho trang play.html biết đã xong tuần 22
+                window.parent.postMessage({
+                    type: 'GAME_COMPLETE',
+                    score: totalScore,
+                    week: 22 // Tuần 22: Bài toán Hiệu - Tỉ
+                }, '*');
+            } else {
+                // Nếu chạy link trực tiếp
+                location.href = "index.html";
+            }
+            // ---------------------------------------------------
+        }).catch((err) => {
+            console.error("Lỗi:", err);
+            alert("Không thể kết nối với hệ thống!");
         });
     }
 
