@@ -199,6 +199,7 @@
 
         const userKey = (className + "_" + name).replace(/[\s\/.\#\$\[\]]/g, '_');
 
+        // 1. Lưu vào Firebase của riêng bài Tổng - Tỉ
         db.ref('scores/Tong_Ti_So/' + userKey).set({
             fullName: name,
             className: "'" + className,
@@ -206,8 +207,24 @@
             date: new Date().toLocaleString('vi-VN'),
             timestamp: firebase.database.ServerValue.TIMESTAMP
         }).then(() => {
-            alert("Ghi danh Bảng Vàng thành công!");
-            location.href = "index.html";
+            alert("Ghi danh Bảng Vàng thành công! 🏆");
+
+            // 2. --- ĐOẠN CODE KẾT NỐI HỆ THỐNG EDURobot (CÁCH B) ---
+            if (window.parent !== window) {
+                // Gửi dữ liệu về trang play.html
+                window.parent.postMessage({
+                    type: 'GAME_COMPLETE',
+                    score: totalScore,
+                    week: 21 // Tuần 21: Bài toán Tổng - Tỉ
+                }, '*');
+            } else {
+                // Nếu học sinh chơi link lẻ thì quay về index.html
+                location.href = "index.html";
+            }
+            // ---------------------------------------------------
+        }).catch((err) => {
+            console.error("Lỗi:", err);
+            alert("Không thể lưu điểm, em kiểm tra kết nối mạng nhé!");
         });
     }
 
