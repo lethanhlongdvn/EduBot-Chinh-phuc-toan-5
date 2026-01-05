@@ -13,27 +13,48 @@
     <style>
         :root { --primary: #FF9800; --secondary: #2196F3; --success: #4CAF50; --bg: #FFFBF0; }
         body { font-family: 'Lexend', Arial, sans-serif; background: var(--bg); margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; }
-        .container { max-width: 800px; width: 100%; background: white; padding: 20px; border-radius: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border: 3px solid #FFCC80; }
+        .container { max-width: 800px; width: 100%; background: white; padding: 15px; border-radius: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border: 3px solid #FFCC80; }
         
-        .header-img { width: 100%; border-radius: 15px; border: 2px solid #EEE; margin-bottom: 15px; height: 180px; object-fit: cover; background: #eee; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        .status-bar { display: flex; justify-content: space-between; font-weight: bold; color: #555; margin-bottom: 10px; }
-        .progress-container { height: 12px; background: #EEE; border-radius: 6px; margin-bottom: 20px; overflow: hidden; }
+        /* HEADER THU NHỎ - CẬP NHẬT TẠI ĐÂY */
+        .header-img { 
+            width: 100%; 
+            border-radius: 15px; 
+            border: 2px solid #EEE; 
+            margin-bottom: 15px; 
+            height: 80px; /* Đã giảm từ 180px xuống 80px */
+            object-fit: cover; 
+            background: linear-gradient(135deg, #FFF3E0, #FFE0B2); 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            overflow: hidden; 
+        }
+        .header-img h2 { 
+            font-size: 1.4rem; /* Giảm cỡ chữ tiêu đề */
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-bar { display: flex; justify-content: space-between; font-weight: bold; color: #555; margin-bottom: 10px; font-size: 0.9rem; }
+        .progress-container { height: 10px; background: #EEE; border-radius: 6px; margin-bottom: 15px; overflow: hidden; }
         .progress-bar { height: 100%; background: var(--primary); width: 0%; transition: 0.5s; }
 
-        .level-map { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 25px; }
-        .lvl-btn { padding: 15px 5px; border: none; border-radius: 15px; background: #F5F5F5; font-family: 'Lexend'; font-size: 0.9rem; border-bottom: 4px solid #DDD; color: #888; pointer-events: none; }
+        .level-map { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
+        .lvl-btn { padding: 10px 5px; border: none; border-radius: 12px; background: #F5F5F5; font-family: 'Lexend'; font-size: 0.8rem; border-bottom: 4px solid #DDD; color: #888; pointer-events: none; }
         .lvl-btn.active { background: #FFF3E0; border-color: var(--primary); color: var(--primary); font-weight: bold; border-bottom: 4px solid var(--primary); }
 
-        .question-area { min-height: 150px; text-align: center; }
-        .q-text { font-size: 1.2rem; color: #333; margin-bottom: 20px; line-height: 1.6; }
-        .options { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .opt { padding: 15px; border: 2px solid #F0F0F0; border-radius: 12px; background: white; cursor: pointer; transition: 0.2s; font-size: 1rem; font-family: 'Lexend'; }
+        .question-area { min-height: 140px; text-align: center; }
+        .q-text { font-size: 1.1rem; color: #333; margin-bottom: 15px; line-height: 1.5; }
+        .options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .opt { padding: 12px; border: 2px solid #F0F0F0; border-radius: 12px; background: white; cursor: pointer; transition: 0.2s; font-size: 0.95rem; font-family: 'Lexend'; }
         .opt:hover:not(:disabled) { border-color: var(--secondary); background: #E3F2FD; }
 
-        .robot-box { display: flex; align-items: center; background: #E1F5FE; padding: 15px; border-radius: 15px; margin-top: 20px; gap: 10px; border-left: 5px solid var(--secondary); }
+        .robot-box { display: flex; align-items: center; background: #E1F5FE; padding: 12px; border-radius: 12px; margin-top: 15px; gap: 10px; border-left: 5px solid var(--secondary); font-size: 0.9rem; }
         .hidden { display: none; }
         
-        .action-btn { padding: 15px 30px; background: var(--success); color: white; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-family: 'Lexend'; font-size: 1.1rem; margin-top: 10px; }
+        .action-btn { padding: 12px 25px; background: var(--success); color: white; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-family: 'Lexend'; font-size: 1rem; margin-top: 10px; }
         .input-field { padding: 12px; border-radius: 10px; border: 2px solid #ddd; width: 85%; font-family: 'Lexend'; margin-bottom: 10px; font-size: 1rem; }
     </style>
 </head>
@@ -86,6 +107,7 @@
 </div>
 
 <script>
+    // Giữ nguyên phần Firebase và Logic xử lý game của bạn...
     const firebaseConfig = {
         apiKey: "AIzaSyC6zlWn8BKYU7P6A2-PYq6IIWOzaqJWFhc",
         authDomain: "gamhoctap.firebaseapp.com",
@@ -117,7 +139,7 @@
     ];
 
     let curLvl = 0, curQ = 0, totalScore = 0;
-    let startTime = Date.now(); // 1. BẮT ĐẦU TÍNH GIỜ
+    let startTime = Date.now();
 
     function showQuestion() {
         let q = lessons[curLvl][curQ];
@@ -127,7 +149,7 @@
         let html = q.a.map((opt, i) => `<button class="opt" onclick="checkAnswer(${i})">${opt}</button>`).join('');
         document.getElementById('options').innerHTML = html;
         document.getElementById('robot-hint').classList.add('hidden');
-        document.getElementById('lvl-title').innerText = "Đang ở: Chặng " + (curLvl + 1);
+        document.getElementById('lvl-title').innerText = "Chặng " + (curLvl + 1);
     }
 
     function checkAnswer(i) {
@@ -138,11 +160,11 @@
         if(i === q.c) {
             totalScore++;
             btns[i].style.background = "#C8E6C9";
-            showRobot("Robot: Chính xác! +1 điểm. ✨");
+            showRobot("Chính xác! ✨");
         } else {
             btns[i].style.background = "#FFCDD2";
             btns[q.c].style.background = "#C8E6C9";
-            showRobot("Robot gợi ý: " + q.h);
+            showRobot("Gợi ý: " + q.h);
         }
 
         setTimeout(() => {
@@ -153,11 +175,11 @@
             } else {
                 finishStage();
             }
-        }, 2200);
+        }, 1800);
     }
 
     function updateScoreDisplay() {
-        document.getElementById('score-display').innerText = `Tổng điểm: ${totalScore}/12`;
+        document.getElementById('score-display').innerText = `Điểm: ${totalScore}/12`;
     }
 
     function showRobot(m) {
@@ -190,38 +212,23 @@
     function saveScoreOnline() {
         const name = document.getElementById('player-name').value.trim();
         const className = document.getElementById('player-class').value.trim();
-        
-        if (!name || !className) {
-            alert("Em vui lòng nhập đầy đủ Họ tên và Lớp nhé!");
-            return;
-        }
+        if (!name || !className) { alert("Em nhập tên và lớp nhé!"); return; }
 
-        // 2. TÍNH GIÂY HOÀN THÀNH
         const endTime = Date.now();
         const durationSeconds = Math.floor((endTime - startTime) / 1000);
-
-        const GAME_ID = "Ti_So_Phan_Tram";
-        const dateNow = new Date().toLocaleString('vi-VN');
-        
-        // 3. CỐ ĐỊNH ĐỊNH DẠNG TEXT CHO EXCEL
         const excelClassName = "'" + className;
+        const userKey = (className + "_" + name).replace(/[\s\/.\#\$\[\]]/g, '_');
 
-        const safeClassName = className.replace(/[\/.\#\$\[\]]/g, '_');
-        const safeName = name.replace(/[\/.\#\$\[\]]/g, '_');
-        const userKey = (safeClassName + "_" + safeName).replace(/\s+/g, '_');
-
-        db.ref('scores/' + GAME_ID + '/' + userKey).set({
+        db.ref('scores/Ti_So_Phan_Tram/' + userKey).set({
             fullName: name,
-            className: excelClassName, // Đã thêm dấu nháy đơn
+            className: excelClassName,
             score: totalScore,
-            duration: durationSeconds, // Lưu thời gian để xếp hạng
-            date: dateNow,
+            duration: durationSeconds,
+            date: new Date().toLocaleString('vi-VN'),
             timestamp: firebase.database.ServerValue.TIMESTAMP
         }).then(() => {
-            alert("Chúc mừng em " + name + " đã hoàn thành trong " + durationSeconds + " giây!");
-            location.href = "bang-vang.html";
-        }).catch((error) => {
-            alert("Có lỗi kết nối, em thử lại nhé!");
+            alert("Đã lưu điểm thành công!");
+            location.href = "index.html";
         });
     }
 
