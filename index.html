@@ -14,7 +14,6 @@
             --primary: #FF9800; 
             --dark-green: #2e7d32; 
             --gold: #ffd700; 
-            --accent-blue: #00d2ff; 
             --bg-dark: #1a1a1a;
         }
 
@@ -27,7 +26,7 @@
             overflow-x: hidden;
         }
 
-        /* BANNER CHÀO MỪNG */
+        /* BANNER */
         .welcome-banner {
             background: linear-gradient(90deg, #1a1a1a, #333, #1a1a1a);
             padding: 15px 20px;
@@ -42,166 +41,129 @@
             margin: 0; text-align: center;
         }
 
-        .robot-head-top { width: 50px; height: auto; object-fit: contain; }
+        .robot-head-top { width: 50px; height: auto; }
 
-        /* HEADER DASHBOARD */
+        /* HEADER */
         .game-header {
             background: #222; color: white; padding: 10px 20px;
             display: flex; justify-content: space-between; align-items: center;
             border-bottom: 1px solid #333;
         }
 
-        /* BỐ CỤC CHÍNH */
+        /* MAIN CONTENT */
         .game-content-wrapper {
-            display: flex;
-            flex-direction: row; 
-            gap: 15px;
-            padding: 15px;
-            flex: 1;
+            display: flex; gap: 15px; padding: 15px; flex: 1;
         }
 
         .map-container {
-            flex: 7; 
-            position: relative;
-            display: flex;
-            justify-content: center;
-            background: #2c2c2c;
-            border-radius: 15px;
-            padding: 10px;
-            height: fit-content;
+            flex: 7; position: relative; display: flex; justify-content: center;
+            background: #2c2c2c; border-radius: 15px; padding: 10px;
             box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
         }
 
-        .map-relative-box {
-            position: relative;
-            width: 100%;
-            max-width: 850px;
-            height: fit-content;
-        }
-
+        .map-relative-box { position: relative; width: 100%; max-width: 850px; }
         .map-image { width: 100%; height: auto; display: block; border-radius: 10px; }
+
+        /* TRẠM DỪNG (MÁY TÍNH) */
+        .station {
+            position: absolute; width: 5%; aspect-ratio: 1/1;
+            background: white; border: 2.5px solid var(--dark-green);
+            border-radius: 50%; display: flex; justify-content: center; align-items: center;
+            font-weight: bold; color: var(--dark-green); text-decoration: none;
+            font-size: 1.1vw; z-index: 10; transition: all 0.2s;
+        }
+        .station:hover { transform: scale(1.2); box-shadow: 0 0 15px var(--gold); z-index: 20; }
+
+        .landmark-tag {
+            position: absolute; background: rgba(0, 0, 0, 0.7);
+            color: var(--gold); padding: 3px 8px; border-radius: 20px;
+            font-size: 0.7vw; border: 1px solid var(--gold); pointer-events: none;
+        }
 
         /* BẢNG VÀNG SIDEBAR */
         .leaderboard-sidebar {
-            flex: 3;
-            background: #222;
-            border: 2px solid var(--primary);
-            border-radius: 15px;
-            padding: 15px;
-            min-width: 280px;
-            height: fit-content;
+            flex: 3; background: #222; border: 2px solid var(--primary);
+            border-radius: 15px; padding: 15px; min-width: 280px; height: fit-content;
         }
 
-        .leaderboard-title {
-            color: var(--gold);
-            text-align: center;
-            font-family: 'Bungee', cursive;
-            font-size: 1.1rem;
-            margin: 0 0 15px 0;
-        }
-
+        .leaderboard-title { color: var(--gold); text-align: center; font-family: 'Bungee'; font-size: 1.1rem; margin-bottom: 15px; }
         table { width: 100%; border-collapse: collapse; color: white; }
-        th { background: var(--primary); color: #000; padding: 8px; font-size: 0.85rem; }
+        th { background: var(--primary); color: #000; padding: 8px; font-size: 0.8rem; }
         td { padding: 8px; border-bottom: 1px solid #333; text-align: center; font-size: 0.85rem; }
-        td:nth-child(2) { text-align: left; }
-        td:nth-child(3) { color: var(--gold); font-weight: bold; }
 
-        /* TRẠM DỪNG */
-        .station {
-            position: absolute; width: 5.5%; aspect-ratio: 1/1;
-            background: white; border: 3px solid var(--dark-green);
-            border-radius: 50%; display: flex; justify-content: center; align-items: center;
-            font-weight: bold; color: var(--dark-green); text-decoration: none;
-            font-size: 1.1vw; z-index: 10;
-            transition: all 0.2s ease;
-        }
-        .station:hover { transform: scale(1.2); box-shadow: 0 0 15px var(--gold); }
-
-        .landmark-tag {
-            position: absolute; background: rgba(0, 0, 0, 0.8);
-            color: var(--gold); padding: 4px 10px; border-radius: 20px;
-            font-size: 0.75vw; border: 1px solid var(--gold); font-weight: bold;
-            pointer-events: none;
-        }
-
-        /* FOOTER ĐỒNG BỘ */
+        /* FOOTER CAPSULE */
         .game-footer {
-            background: #222; padding: 15px 20px;
-            display: flex; justify-content: center; gap: 20px;
-            border-top: 3px solid var(--primary);
-            position: sticky; bottom: 0; z-index: 1000;
+            background: #222; padding: 15px; display: flex; justify-content: center; 
+            gap: 15px; border-top: 3px solid var(--primary); position: sticky; bottom: 0; z-index: 1000;
         }
 
         .btn-nav {
-            background: #333; border: 2px solid var(--primary);
-            color: var(--primary); padding: 10px 25px; border-radius: 50px;
-            font-family: 'Lexend', sans-serif; font-weight: bold; font-size: 0.9rem;
-            cursor: pointer; text-decoration: none;
-            display: flex; align-items: center; gap: 10px;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 0px rgba(0,0,0,0.3);
+            background: #333; border: 2px solid var(--primary); color: var(--primary);
+            padding: 10px 22px; border-radius: 50px; font-weight: bold; font-size: 0.9rem;
+            cursor: pointer; text-decoration: none; display: flex; align-items: center; gap: 8px;
+            transition: 0.3s; box-shadow: 0 4px 0 rgba(0,0,0,0.3);
         }
+        .btn-nav:hover { background: var(--primary); color: white; transform: translateY(-2px); }
 
-        .btn-nav:hover {
-            background: var(--primary); color: white;
-            transform: translateY(-3px);
-            box-shadow: 0 6px 15px rgba(255, 152, 0, 0.4);
-        }
-
-        /* RESPONSIVE */
+        /* --- RESPONSIVE MOBILE (THU NHỎ TRẠM) --- */
         @media (max-width: 1024px) {
-            .welcome-text { font-size: 1.2rem; }
-            .game-content-wrapper { flex-direction: column; align-items: center; }
+            .welcome-text { font-size: 1.1rem; }
+            .game-content-wrapper { flex-direction: column; }
             .map-container, .leaderboard-sidebar { width: 100%; flex: none; }
-            .station { width: 9%; font-size: 3.5vw; }
-            .landmark-tag { font-size: 2vw; }
-            .btn-nav { padding: 8px 15px; font-size: 0.75rem; gap: 5px; }
+            
+            /* Thu nhỏ trạm để không bị đè nhau */
+            .station { 
+                width: 22px !important; height: 22px !important; 
+                font-size: 10px !important; border-width: 1.5px;
+            }
+            .landmark-tag { font-size: 7px; padding: 2px 5px; opacity: 0.9; }
+            
+            .btn-nav { padding: 8px 15px; font-size: 0.75rem; }
         }
 
-        /* TỌA ĐỘ TRẠM */
+        /* TỌA ĐỘ */
         #st-19 { top: 5%; left: 30%; }   #tag-19 { top: 3.5%; left: 22%; }
+        #st-20 { top: 8%; left: 45%; }   #st-21 { top: 13%; left: 38%; }
         #st-22 { top: 18%; left: 47%; }  #tag-22 { top: 16.5%; left: 54%; }
-        #st-25 { top: 40%; left: 53%; }  #tag-25 { top: 38.5%; left: 60%; }
-        #st-30 { top: 82%; left: 48%; }  #tag-30 { top: 80.5%; left: 55%; }
-        #st-33 { top: 95%; left: 42%; }  #tag-33 { top: 94%; left: 30%; }
-        
-        #st-20 { top: 8%; left: 45%; }   #st-21 { top: 13%; left: 38%; } 
         #st-23 { top: 25%; left: 43%; }  #st-24 { top: 32%; left: 48%; }
+        #st-25 { top: 40%; left: 53%; }  #tag-25 { top: 38.5%; left: 60%; }
         #st-26 { top: 48%; left: 58%; }  #st-27 { top: 56%; left: 60%; }
         #st-28 { top: 65%; left: 54%; }  #st-29 { top: 74%; left: 58%; }
+        #st-30 { top: 82%; left: 48%; }  #tag-30 { top: 80.5%; left: 55%; }
         #st-31 { top: 87%; left: 40%; }  #st-32 { top: 92%; left: 35%; }
+        #st-33 { top: 95%; left: 42%; }  #tag-33 { top: 94%; left: 30%; }
     </style>
 </head>
 <body>
 
     <div class="welcome-banner">
         <h1 class="welcome-text">THÁM HIỂM XUYÊN VIỆT CÙNG ROBOT</h1>
-        <img src="robot-head.png" alt="Robot Mascot" class="robot-head-top">
+        <img src="robot-head.png" alt="Robot" class="robot-head-top">
     </div>
 
     <header class="game-header">
-        <div style="display:flex; align-items:center; gap:12px;">
-            <div style="width:35px; height:35px; border-radius:50%; background:var(--gold); border: 2px solid white;"></div>
+        <div style="display:flex; align-items:center; gap:10px;">
+            <div style="width:30px; height:30px; border-radius:50%; background:var(--gold); border:2px solid #fff;"></div>
             <div>
-                <h2 style="margin:0; font-size: 0.85rem; color: var(--gold);">NHÀ THÁM HIỂM</h2>
-                <span style="font-size: 0.7rem; color: #ccc;">💎 Cấp độ: <span id="student-display-name">Khách</span></span>
+                <h2 style="margin:0; font-size:0.8rem; color:var(--gold);">NHÀ THÁM HIỂM</h2>
+                <span style="font-size:0.7rem; color:#ccc;">💎 Cấp độ: <span id="user-lv">Đang tải</span></span>
             </div>
         </div>
-        <div style="text-align: right;">
-            <p style="margin:0; font-size: 0.8rem; color: var(--primary); font-weight: bold;">⭐ ĐIỂM CAO NHẤT: <span id="top-score-val">0</span></p>
+        <div style="text-align:right;">
+            <p style="margin:0; font-size:0.8rem; color:var(--primary); font-weight:bold;">⭐ TOP ĐIỂM: <span id="high-score">0</span></p>
         </div>
     </header>
 
     <main class="game-content-wrapper">
         <div class="map-container">
             <div class="map-relative-box">
-                <img src="Bandogame.jpg" alt="Bản đồ Việt Nam" class="map-image">
+                <img src="Bandogame.jpg" alt="Bản đồ" class="map-image">
                 
-                <div class="landmark-tag" id="tag-19">📍 Cột cờ Lũng Cú</div>
-                <div class="landmark-tag" id="tag-22">🏛️ Thủ đô Hà Nội</div>
-                <div class="landmark-tag" id="tag-25">🕌 Cố đô Huế</div>
-                <div class="landmark-tag" id="tag-30">🏢 TP. Hồ Chí Minh</div>
-                <div class="landmark-tag" id="tag-33">🛶 Mũi Cà Mau</div>
+                <div class="landmark-tag" id="tag-19">📍 Lũng Cú</div>
+                <div class="landmark-tag" id="tag-22">🏛️ Hà Nội</div>
+                <div class="landmark-tag" id="tag-25">🕌 Huế</div>
+                <div class="landmark-tag" id="tag-30">🏢 TP.HCM</div>
+                <div class="landmark-tag" id="tag-33">🛶 Cà Mau</div>
 
                 <a href="tisophantram.html" class="station" id="st-19">19</a>
                 <a href="tilebandovaungdung.html" class="station" id="st-20">20</a>
@@ -223,93 +185,53 @@
 
         <section class="leaderboard-sidebar">
             <h3 class="leaderboard-title">🏆 BẢNG VÀNG TOP 10</h3>
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th width="20%">Hạng</th>
-                            <th width="55%">Tên</th>
-                            <th width="25%">Điểm</th>
-                        </tr>
-                    </thead>
-                    <tbody id="leaderboard-body">
-                        <tr><td colspan="3">Đang kết nối...</td></tr>
-                    </tbody>
-                </table>
-            </div>
+            <table>
+                <thead>
+                    <tr><th width="20%">Hạng</th><th width="55%">Tên</th><th width="25%">Điểm</th></tr>
+                </thead>
+                <tbody id="leaderboard-body">
+                    <tr><td colspan="3">Đang cập nhật...</td></tr>
+                </tbody>
+            </table>
         </section>
     </main>
 
     <footer class="game-footer">
-        <a href="bang-vang.html" class="btn-nav">
-            <span>🏆</span> BẢNG VÀNG
-        </a>
-        <button class="btn-nav" onclick="alert('Tính năng Túi Đồ đang được Robot hoàn thiện!')">
-            <span>🎒</span> TÚI ĐỒ
-        </button>
-        <button class="btn-nav" onclick="alert('Cài đặt hệ thống')">
-            <span>⚙️</span> CÀI ĐẶT
-        </button>
+        <a href="bang-vang.html" class="btn-nav"><span>🏆</span> BẢNG VÀNG</a>
+        <button class="btn-nav" onclick="alert('Tính năng Túi Đồ sắp ra mắt!')"><span>🎒</span> TÚI ĐỒ</button>
+        <button class="btn-nav" onclick="alert('Cài đặt hệ thống')"><span>⚙️</span> CÀI ĐẶT</button>
     </footer>
 
     <script>
-        // Cấu hình Firebase đồng bộ với bang-vang.html
         const firebaseConfig = {
             apiKey: "AIzaSyC6zlWn8BKYU7P6A2-PYq6IIWOzaqJWFhc",
             authDomain: "gamhoctap.firebaseapp.com",
             databaseURL: "https://gamhoctap-default-rtdb.asia-southeast1.firebasedatabase.app",
             projectId: "gamhoctap"
         };
-        
-        // Khởi tạo Firebase
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-        }
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // Hàm cập nhật Bảng Vàng tự động
+        // Lấy dữ liệu Bảng Vàng thời gian thực
         db.ref('scores').on('value', (snapshot) => {
             const data = snapshot.val();
             const tbody = document.getElementById('leaderboard-body');
-            
-            if (!data) {
-                tbody.innerHTML = '<tr><td colspan="3">Chưa có dữ liệu</td></tr>';
-                return;
+            if (!data) { tbody.innerHTML = '<tr><td colspan="3">Trống</td></tr>'; return; }
+
+            let list = [];
+            for (let gId in data) {
+                for (let sId in data[gId]) { list.push(data[gId][sId]); }
             }
 
-            let allStudents = [];
-            // Thu thập dữ liệu từ tất cả các bài tập
-            for (let gameId in data) {
-                for (let studentId in data[gameId]) {
-                    allStudents.push(data[gameId][studentId]);
-                }
-            }
+            list.sort((a, b) => (b.score - a.score) || ((a.duration || 999) - (b.duration || 999)));
+            const top10 = list.slice(0, 10);
 
-            // Sắp xếp: Điểm cao trước -> Thời gian ngắn sau
-            allStudents.sort((a, b) => {
-                if (b.score !== a.score) return b.score - a.score;
-                return (a.duration || 9999) - (b.duration || 9999);
-            });
-
-            // Lấy Top 10 duy nhất (lọc trùng tên nếu cần, ở đây lấy theo lượt nộp bài tốt nhất)
-            const top10 = allStudents.slice(0, 10);
-
-            // Cập nhật giao diện
             tbody.innerHTML = top10.map((s, i) => `
-                <tr>
-                    <td>${i + 1}</td>
-                    <td>${s.fullName || "---"}</td>
-                    <td>${s.score}</td>
-                </tr>
+                <tr><td>${i+1}</td><td style="text-align:left">${s.fullName || "---"}</td><td>${s.score}</td></tr>
             `).join('');
-
-            // Cập nhật điểm cao nhất hệ thống lên header cho sinh động
-            if(top10.length > 0) {
-                document.getElementById('top-score-val').innerText = top10[0].score;
-            }
+            
+            if(top10.length > 0) document.getElementById('high-score').innerText = top10[0].score;
         });
     </script>
-    
-    <script type="module" src="js/main.js"></script>
 </body>
 </html>
