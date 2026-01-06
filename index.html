@@ -67,7 +67,6 @@
             font-size: 1.1vw; z-index: 10; transition: all 0.2s;
         }
         
-        /* TRẠNG THÁI KHÓA */
         .station.locked {
             background: #333 !important; border-color: #555 !important;
             color: #777 !important; cursor: not-allowed; opacity: 0.6;
@@ -82,7 +81,7 @@
             font-size: 0.7vw; border: 1px solid var(--gold); pointer-events: none;
         }
 
-        /* SIDEBAR & FOOTER */
+        /* SIDEBAR */
         .leaderboard-sidebar {
             flex: 3; background: #222; border: 2px solid var(--primary);
             border-radius: 15px; padding: 15px; min-width: 280px; height: fit-content;
@@ -92,6 +91,7 @@
         th { background: var(--primary); color: #000; padding: 8px; font-size: 0.8rem; }
         td { padding: 8px; border-bottom: 1px solid #333; text-align: center; font-size: 0.85rem; }
 
+        /* FOOTER */
         .game-footer {
             background: #222; padding: 15px 10px; display: flex; 
             flex-direction: column; align-items: center; gap: 10px;
@@ -105,13 +105,30 @@
         }
         .footer-copyright { color: #888; font-size: 0.7rem; margin-top: 5px; }
 
-        /* RESPONSIVE MOBILE */
+        /* --- POPUP HƯỚNG DẪN --- */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); display: none; justify-content: center;
+            align-items: center; z-index: 9999;
+        }
+        .modal-content {
+            background: #2c2c2c; width: 90%; max-width: 500px; padding: 25px;
+            border-radius: 20px; border: 3px solid var(--primary); color: white;
+            text-align: left; position: relative; box-shadow: 0 0 30px var(--primary);
+        }
+        .modal-title { font-family: 'Bungee'; color: var(--gold); font-size: 1.3rem; margin-bottom: 15px; text-align: center; }
+        .modal-body p { margin: 10px 0; font-size: 0.9rem; line-height: 1.5; }
+        .modal-footer { margin-top: 20px; display: flex; flex-direction: column; align-items: center; gap: 15px; }
+        .btn-ok { 
+            background: var(--primary); border: none; padding: 10px 40px; 
+            border-radius: 50px; color: black; font-weight: bold; cursor: pointer; font-family: 'Lexend';
+        }
+        .no-repeat-box { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; color: #bbb; cursor: pointer; }
+
         @media (max-width: 1024px) {
             .welcome-text { font-size: 1.1rem; }
             .game-content-wrapper { flex-direction: column; }
-            .map-container, .leaderboard-sidebar { width: 100%; flex: none; }
             .station { width: 22px !important; height: 22px !important; font-size: 10px !important; }
-            .station.locked::after { font-size: 8px; }
             .btn-nav { font-size: 0.75rem; padding: 6px 10px; }
         }
 
@@ -129,6 +146,27 @@
     </style>
 </head>
 <body>
+
+    <div id="guideModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-title">🤖 CẨM NANG THÁM HIỂM</div>
+            <div class="modal-body">
+                <p>1. 👤 <b>Nhập tên:</b> Bấm vào nút "Nhập tên" (phía trên, bên trái) để Robot ghi nhận điểm.</p>
+                <p>2. 🔒 <b>Khóa vòng:</b> Bạn phải đạt ít nhất <b>85 điểm</b> ở vòng trước để mở vòng tiếp theo.</p>
+                <p>3. 🏆 <b>Bảng vàng:</b> Cố gắng làm bài thật nhanh và chính xác để lên Top 10 nhé!</p>
+                
+                <p style="font-family: 'Bungee'; color: var(--gold); text-align: center; margin-top: 20px; font-size: 1.1rem; text-shadow: 1px 1px 2px rgba(0,0,0,0.5);">
+                    CHÚC BẠN NHẬN ĐƯỢC CÚP VÀNG
+                </p>
+            </div>
+            <div class="modal-footer">
+                <label class="no-repeat-box">
+                    <input type="checkbox" id="dontShowAgain"> Không nhắc lại ở lần sau.
+                </label>
+                <button class="btn-ok" onclick="closeGuide()">OK!</button>
+            </div>
+        </div>
+    </div>
 
     <div class="welcome-banner">
         <h1 class="welcome-text">THÁM HIỂM XUYÊN VIỆT CÙNG ROBOT</h1>
@@ -178,7 +216,6 @@
 
         <section class="leaderboard-sidebar">
             <h3 class="leaderboard-title">🏆 BẢNG VÀNG TOP 10</h3>
-            <tbody id="leaderboard-body"> </tbody>
             <table>
                 <thead>
                     <tr><th width="20%">Hạng</th><th width="55%">Tên</th><th width="25%">Điểm</th></tr>
@@ -213,16 +250,31 @@
 
         let currentStudent = localStorage.getItem('studentName');
 
-        // Khởi chạy khi load trang
         window.onload = function() {
+            // Kiểm tra xem người dùng có chọn "Không nhắc lại" không
+            if (localStorage.getItem('hideGuide') !== 'true') {
+                document.getElementById('guideModal').style.display = 'flex';
+            } else if (!currentStudent) {
+                // Nếu đã ẩn hướng dẫn mà chưa có tên thì hiện bảng nhập tên
+                setTimeout(setStudentName, 500);
+            }
+
             if (currentStudent) {
                 document.getElementById('user-lv').innerText = currentStudent;
             }
             checkProgression();
         };
 
+        function closeGuide() {
+            if (document.getElementById('dontShowAgain').checked) {
+                localStorage.setItem('hideGuide', 'true');
+            }
+            document.getElementById('guideModal').style.display = 'none';
+            if (!currentStudent) setStudentName();
+        }
+
         function setStudentName() {
-            const name = prompt("🤖 Nhập Họ và Tên để Robot ghi nhận điểm và mở khóa các vòng tiếp theo:");
+            const name = prompt("🤖 Nhập Họ và Tên để thám hiểm Việt Nam:");
             if (name && name.trim().length > 3) {
                 localStorage.setItem('studentName', name.trim());
                 location.reload();
@@ -230,8 +282,9 @@
         }
 
         function clearData() {
-            if(confirm("Bạn muốn đăng xuất?")) {
+            if(confirm("Đăng xuất để người khác chơi?")) {
                 localStorage.removeItem('studentName');
+                localStorage.removeItem('hideGuide'); // Reset cả hướng dẫn
                 location.reload();
             }
         }
@@ -243,15 +296,13 @@
                 
                 stations.forEach(st => {
                     const stepNum = parseInt(st.getAttribute('data-step'));
-                    if (stepNum === 19) return; // Vòng 19 luôn mở
+                    if (stepNum === 19) return;
 
-                    // NẾU KHÔNG CÓ TÊN -> KHÓA HẾT TỪ 20-33
                     if (!currentStudent) {
-                        lockStation(st, "🤖 Hãy NHẬP TÊN để Robot mở khóa hành trình của bạn!");
+                        lockStation(st, "🤖 Hãy NHẬP TÊN để Robot mở khóa hành trình!");
                         return;
                     }
 
-                    // NẾU CÓ TÊN -> KIỂM TRA ĐIỂM VÒNG TRƯỚC
                     const gameKeys = { 20: "tisophantram", 21: "tilebandovaungdung", 22: "tongtiso", 23: "hieutiso" };
                     let prevKey = gameKeys[stepNum] || "bai" + (stepNum - 1);
                     let passed = false;
@@ -259,8 +310,7 @@
                     for (let gId in data) {
                         if (gId.toLowerCase().includes(prevKey.toLowerCase())) {
                             for (let id in data[gId]) {
-                                let record = data[gId][id];
-                                if (record.fullName === currentStudent && record.score >= 85) {
+                                if (data[gId][id].fullName === currentStudent && data[gId][id].score >= 85) {
                                     passed = true; break;
                                 }
                             }
@@ -268,7 +318,7 @@
                     }
 
                     if (!passed) {
-                        lockStation(st, `🤖 ${currentStudent} ơi! Bạn cần đạt 85đ ở vòng ${stepNum - 1} để đi tiếp.`);
+                        lockStation(st, `🤖 ${currentStudent} ơi! Bạn cần 85đ ở vòng ${stepNum - 1} để đi tiếp.`);
                     }
                 });
             });
@@ -283,7 +333,6 @@
             };
         }
 
-        // Bảng vàng
         db.ref('scores').on('value', (snapshot) => {
             const data = snapshot.val();
             const tbody = document.getElementById('leaderboard-body-list');
@@ -296,6 +345,7 @@
             tbody.innerHTML = list.slice(0, 10).map((s, i) => `
                 <tr><td>${i+1}</td><td style="text-align:left">${s.fullName || "---"}</td><td>${s.score}</td></tr>
             `).join('');
+            if(list.length > 0) document.getElementById('high-score').innerText = list[0].score;
         });
     </script>
 </body>
