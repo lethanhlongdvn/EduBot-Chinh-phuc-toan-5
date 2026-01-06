@@ -11,33 +11,34 @@
             --dark-green: #2e7d32; 
             --gold: #ffd700; 
             --accent-blue: #00d2ff; 
+            --bg-dark: #1a1a1a;
         }
 
         body {
             margin: 0; padding: 0;
             font-family: 'Lexend', sans-serif;
-            background-color: #1a1a1a;
-            min-height: 100vh; /* Sửa từ height: 100vh để có thể cuộn */
+            background-color: var(--bg-dark);
+            min-height: 100vh;
             display: flex; flex-direction: column;
-            overflow-x: hidden; /* Chỉ khóa cuộn ngang */
+            overflow-x: hidden;
         }
 
         /* BANNER CHÀO MỪNG */
         .welcome-banner {
             background: linear-gradient(90deg, #1a1a1a, #333, #1a1a1a);
-            padding: 20px;
+            padding: 15px 20px;
             display: flex; justify-content: center; align-items: center;
             gap: 20px; border-bottom: 2px solid var(--primary);
         }
 
         .welcome-text {
             font-family: 'Bungee', cursive;
-            font-size: 2rem; color: white; /* Giảm nhẹ size chữ cho cân đối */
+            font-size: 1.8rem; color: white;
             text-shadow: 3px 3px 0px var(--primary);
             margin: 0; text-align: center;
         }
 
-        .robot-head-top { width: 60px; height: auto; object-fit: contain; }
+        .robot-head-top { width: 50px; height: auto; object-fit: contain; }
 
         /* HEADER DASHBOARD */
         .game-header {
@@ -49,7 +50,7 @@
         /* BỐ CỤC CHÍNH */
         .game-content-wrapper {
             display: flex;
-            flex-direction: row; /* Máy tính: Bản đồ trái, Bảng vàng phải */
+            flex-direction: row; 
             gap: 15px;
             padding: 15px;
             flex: 1;
@@ -64,6 +65,7 @@
             border-radius: 15px;
             padding: 10px;
             height: fit-content;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
         }
 
         .map-relative-box {
@@ -73,7 +75,7 @@
             height: fit-content;
         }
 
-        .map-image { width: 100%; height: auto; display: block; border-radius: 15px; }
+        .map-image { width: 100%; height: auto; display: block; border-radius: 10px; }
 
         /* BẢNG VÀNG SIDEBAR */
         .leaderboard-sidebar {
@@ -107,24 +109,65 @@
             border-radius: 50%; display: flex; justify-content: center; align-items: center;
             font-weight: bold; color: var(--dark-green); text-decoration: none;
             font-size: 1.1vw; z-index: 10;
+            transition: all 0.2s ease;
         }
+        .station:hover { transform: scale(1.2); box-shadow: 0 0 15px var(--gold); }
 
         .landmark-tag {
             position: absolute; background: rgba(0, 0, 0, 0.8);
             color: var(--gold); padding: 4px 10px; border-radius: 20px;
             font-size: 0.75vw; border: 1px solid var(--gold); font-weight: bold;
+            pointer-events: none;
         }
 
-        /* RESPONSIVE CHO ĐIỆN THOẠI */
+        /* FOOTER ĐỒNG BỘ THEO ẢNH MẪU */
+        .game-footer {
+            background: #222; 
+            padding: 15px 20px;
+            display: flex; 
+            justify-content: center; 
+            gap: 20px;
+            border-top: 3px solid var(--primary);
+            position: sticky; 
+            bottom: 0; 
+            z-index: 1000;
+        }
+
+        .btn-nav {
+            background: #333; 
+            border: 2px solid var(--primary);
+            color: var(--primary); 
+            padding: 10px 25px; 
+            border-radius: 50px; /* Bo tròn hoàn toàn (Capsule) */
+            font-family: 'Lexend', sans-serif;
+            font-weight: bold; 
+            font-size: 0.9rem;
+            cursor: pointer;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 0px rgba(0,0,0,0.3);
+        }
+
+        .btn-nav:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(255, 152, 0, 0.4);
+        }
+
+        .btn-nav:active { transform: translateY(0); }
+
+        /* RESPONSIVE */
         @media (max-width: 1024px) {
-            body { overflow-y: auto; }
-            .game-content-wrapper {
-                flex-direction: column; /* Đưa bảng vàng xuống dưới */
-                align-items: center;
-            }
+            .welcome-text { font-size: 1.2rem; }
+            .game-content-wrapper { flex-direction: column; align-items: center; }
             .map-container, .leaderboard-sidebar { width: 100%; flex: none; }
             .station { width: 9%; font-size: 3.5vw; }
             .landmark-tag { font-size: 2vw; }
+            .btn-nav { padding: 8px 15px; font-size: 0.75rem; gap: 5px; }
         }
 
         /* TỌA ĐỘ TRẠM */
@@ -138,21 +181,8 @@
         #st-23 { top: 25%; left: 43%; }  #st-24 { top: 32%; left: 48%; }
         #st-26 { top: 48%; left: 58%; }  #st-27 { top: 56%; left: 60%; }
         #st-28 { top: 65%; left: 54%; }  #st-29 { top: 74%; left: 58%; }
-        #st-31 { top: 87%; left: 40%; }  #st-31 { top: 87%; left: 40%; }
+        #st-31 { top: 87%; left: 40%; }
         #st-32 { top: 92%; left: 35%; }
-
-        /* FOOTER */
-        .game-footer {
-            background: #222; padding: 12px;
-            display: flex; justify-content: space-around;
-            border-top: 3px solid var(--primary);
-            position: sticky; bottom: 0;
-        }
-        .btn-nav {
-            background: #333; border: 2px solid var(--primary);
-            color: var(--primary); padding: 8px 15px; border-radius: 20px;
-            font-weight: bold; cursor: pointer; font-size: 0.8rem;
-        }
     </style>
 </head>
 <body>
@@ -167,7 +197,7 @@
             <div style="width:35px; height:35px; border-radius:50%; background:var(--gold); border: 2px solid white;"></div>
             <div>
                 <h2 style="margin:0; font-size: 0.85rem; color: var(--gold);">NHÀ THÁM HIỂM</h2>
-                <span style="font-size: 0.7rem; color: #ccc;">💎 Cấp độ: <span id="student-name">Đang tải...</span></span>
+                <span style="font-size: 0.7rem; color: #ccc;">💎 Cấp độ: <span id="student-name">Nhà thám hiểm</span></span>
             </div>
         </div>
         <div style="text-align: right;">
@@ -184,7 +214,7 @@
                 <div class="landmark-tag" id="tag-22">🏛️ Thủ đô Hà Nội</div>
                 <div class="landmark-tag" id="tag-25">🕌 Cố đô Huế</div>
                 <div class="landmark-tag" id="tag-30">🏢 TP. Hồ Chí Minh</div>
-                <div class="landmark-tag" id="tag-33">🛶 Mũi Cà Mau</div>
+                <div class="landmark-tag" id="tag-33"> Canoe Mũi Cà Mau</div>
 
                 <a href="tisophantram.html" class="station" id="st-19">19</a>
                 <a href="tilebandovaungdung.html" class="station" id="st-20">20</a>
@@ -223,15 +253,19 @@
         </section>
     </main>
 
-   <footer class="game-footer">
-    <a href="bang-vang.html" style="text-decoration: none;">
-        <button class="btn-nav">🏆 BẢNG VÀNG</button>
-    </a>
+    <footer class="game-footer">
+        <a href="bang-vang.html" class="btn-nav">
+            <span>🏆</span> BẢNG VÀNG
+        </a>
 
-    <button class="btn-nav" onclick="alert('Tính năng Túi Đồ đang được Robot hoàn thiện!')">🎒 TÚI ĐỒ</button>
+        <button class="btn-nav" onclick="alert('Tính năng Túi Đồ đang được Robot hoàn thiện!')">
+            <span>🎒</span> TÚI ĐỒ
+        </button>
 
-    <button class="btn-nav" onclick="alert('Cài đặt hệ thống')">⚙️ CÀI ĐẶT</button>
-</footer>
+        <button class="btn-nav" onclick="alert('Cài đặt hệ thống')">
+            <span>⚙️</span> CÀI ĐẶT
+        </button>
+    </footer>
 
     <script type="module" src="js/main.js"></script>
 </body>
