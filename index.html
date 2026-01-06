@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hành Trình Xuyên Việt: EduRobot Toán 5</title>
     <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Lexend:wght@400;700&display=swap" rel="stylesheet">
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
     <style>
         :root { 
             --primary: #FF9800; 
@@ -120,45 +124,29 @@
             pointer-events: none;
         }
 
-        /* FOOTER ĐỒNG BỘ THEO ẢNH MẪU */
+        /* FOOTER ĐỒNG BỘ */
         .game-footer {
-            background: #222; 
-            padding: 15px 20px;
-            display: flex; 
-            justify-content: center; 
-            gap: 20px;
+            background: #222; padding: 15px 20px;
+            display: flex; justify-content: center; gap: 20px;
             border-top: 3px solid var(--primary);
-            position: sticky; 
-            bottom: 0; 
-            z-index: 1000;
+            position: sticky; bottom: 0; z-index: 1000;
         }
 
         .btn-nav {
-            background: #333; 
-            border: 2px solid var(--primary);
-            color: var(--primary); 
-            padding: 10px 25px; 
-            border-radius: 50px; /* Bo tròn hoàn toàn (Capsule) */
-            font-family: 'Lexend', sans-serif;
-            font-weight: bold; 
-            font-size: 0.9rem;
-            cursor: pointer;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            background: #333; border: 2px solid var(--primary);
+            color: var(--primary); padding: 10px 25px; border-radius: 50px;
+            font-family: 'Lexend', sans-serif; font-weight: bold; font-size: 0.9rem;
+            cursor: pointer; text-decoration: none;
+            display: flex; align-items: center; gap: 10px;
             transition: all 0.3s ease;
             box-shadow: 0 4px 0px rgba(0,0,0,0.3);
         }
 
         .btn-nav:hover {
-            background: var(--primary);
-            color: white;
+            background: var(--primary); color: white;
             transform: translateY(-3px);
             box-shadow: 0 6px 15px rgba(255, 152, 0, 0.4);
         }
-
-        .btn-nav:active { transform: translateY(0); }
 
         /* RESPONSIVE */
         @media (max-width: 1024px) {
@@ -181,8 +169,7 @@
         #st-23 { top: 25%; left: 43%; }  #st-24 { top: 32%; left: 48%; }
         #st-26 { top: 48%; left: 58%; }  #st-27 { top: 56%; left: 60%; }
         #st-28 { top: 65%; left: 54%; }  #st-29 { top: 74%; left: 58%; }
-        #st-31 { top: 87%; left: 40%; }
-        #st-32 { top: 92%; left: 35%; }
+        #st-31 { top: 87%; left: 40%; }  #st-32 { top: 92%; left: 35%; }
     </style>
 </head>
 <body>
@@ -197,11 +184,11 @@
             <div style="width:35px; height:35px; border-radius:50%; background:var(--gold); border: 2px solid white;"></div>
             <div>
                 <h2 style="margin:0; font-size: 0.85rem; color: var(--gold);">NHÀ THÁM HIỂM</h2>
-                <span style="font-size: 0.7rem; color: #ccc;">💎 Cấp độ: <span id="student-name">Nhà thám hiểm</span></span>
+                <span style="font-size: 0.7rem; color: #ccc;">💎 Cấp độ: <span id="student-display-name">Khách</span></span>
             </div>
         </div>
         <div style="text-align: right;">
-            <p style="margin:0; font-size: 0.8rem; color: var(--primary); font-weight: bold;">⭐ ĐIỂM: <span id="total-score">0</span></p>
+            <p style="margin:0; font-size: 0.8rem; color: var(--primary); font-weight: bold;">⭐ ĐIỂM CAO NHẤT: <span id="top-score-val">0</span></p>
         </div>
     </header>
 
@@ -214,7 +201,7 @@
                 <div class="landmark-tag" id="tag-22">🏛️ Thủ đô Hà Nội</div>
                 <div class="landmark-tag" id="tag-25">🕌 Cố đô Huế</div>
                 <div class="landmark-tag" id="tag-30">🏢 TP. Hồ Chí Minh</div>
-                <div class="landmark-tag" id="tag-33"> Canoe Mũi Cà Mau</div>
+                <div class="landmark-tag" id="tag-33">🛶 Mũi Cà Mau</div>
 
                 <a href="tisophantram.html" class="station" id="st-19">19</a>
                 <a href="tilebandovaungdung.html" class="station" id="st-20">20</a>
@@ -235,7 +222,7 @@
         </div>
 
         <section class="leaderboard-sidebar">
-            <h3 class="leaderboard-title">🏆 BẢNG VÀNG</h3>
+            <h3 class="leaderboard-title">🏆 BẢNG VÀNG TOP 10</h3>
             <div class="table-container">
                 <table>
                     <thead>
@@ -246,7 +233,7 @@
                         </tr>
                     </thead>
                     <tbody id="leaderboard-body">
-                        <tr><td colspan="3">Đang cập nhật...</td></tr>
+                        <tr><td colspan="3">Đang kết nối...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -257,16 +244,72 @@
         <a href="bang-vang.html" class="btn-nav">
             <span>🏆</span> BẢNG VÀNG
         </a>
-
         <button class="btn-nav" onclick="alert('Tính năng Túi Đồ đang được Robot hoàn thiện!')">
             <span>🎒</span> TÚI ĐỒ
         </button>
-
         <button class="btn-nav" onclick="alert('Cài đặt hệ thống')">
             <span>⚙️</span> CÀI ĐẶT
         </button>
     </footer>
 
+    <script>
+        // Cấu hình Firebase đồng bộ với bang-vang.html
+        const firebaseConfig = {
+            apiKey: "AIzaSyC6zlWn8BKYU7P6A2-PYq6IIWOzaqJWFhc",
+            authDomain: "gamhoctap.firebaseapp.com",
+            databaseURL: "https://gamhoctap-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "gamhoctap"
+        };
+        
+        // Khởi tạo Firebase
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const db = firebase.database();
+
+        // Hàm cập nhật Bảng Vàng tự động
+        db.ref('scores').on('value', (snapshot) => {
+            const data = snapshot.val();
+            const tbody = document.getElementById('leaderboard-body');
+            
+            if (!data) {
+                tbody.innerHTML = '<tr><td colspan="3">Chưa có dữ liệu</td></tr>';
+                return;
+            }
+
+            let allStudents = [];
+            // Thu thập dữ liệu từ tất cả các bài tập
+            for (let gameId in data) {
+                for (let studentId in data[gameId]) {
+                    allStudents.push(data[gameId][studentId]);
+                }
+            }
+
+            // Sắp xếp: Điểm cao trước -> Thời gian ngắn sau
+            allStudents.sort((a, b) => {
+                if (b.score !== a.score) return b.score - a.score;
+                return (a.duration || 9999) - (b.duration || 9999);
+            });
+
+            // Lấy Top 10 duy nhất (lọc trùng tên nếu cần, ở đây lấy theo lượt nộp bài tốt nhất)
+            const top10 = allStudents.slice(0, 10);
+
+            // Cập nhật giao diện
+            tbody.innerHTML = top10.map((s, i) => `
+                <tr>
+                    <td>${i + 1}</td>
+                    <td>${s.fullName || "---"}</td>
+                    <td>${s.score}</td>
+                </tr>
+            `).join('');
+
+            // Cập nhật điểm cao nhất hệ thống lên header cho sinh động
+            if(top10.length > 0) {
+                document.getElementById('top-score-val').innerText = top10[0].score;
+            }
+        });
+    </script>
+    
     <script type="module" src="js/main.js"></script>
 </body>
 </html>
