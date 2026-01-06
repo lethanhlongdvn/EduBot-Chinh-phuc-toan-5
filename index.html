@@ -17,8 +17,9 @@
             margin: 0; padding: 0;
             font-family: 'Lexend', sans-serif;
             background-color: #1a1a1a;
-            height: 100vh; display: flex; flex-direction: column;
-            overflow: hidden;
+            min-height: 100vh; /* Sửa từ height: 100vh để có thể cuộn */
+            display: flex; flex-direction: column;
+            overflow-x: hidden; /* Chỉ khóa cuộn ngang */
         }
 
         /* BANNER CHÀO MỪNG */
@@ -31,142 +32,102 @@
 
         .welcome-text {
             font-family: 'Bungee', cursive;
-            font-size: 2.5rem; color: white;
-            text-shadow: 3px 3px 0px var(--primary), 6px 6px 0px rgba(0,0,0,0.5);
-            margin: 0; text-align: center; line-height: 1.2;
+            font-size: 2rem; color: white; /* Giảm nhẹ size chữ cho cân đối */
+            text-shadow: 3px 3px 0px var(--primary);
+            margin: 0; text-align: center;
         }
 
-        .robot-head-top {
-            width: 80px; height: auto;
-            filter: drop-shadow(0 0 10px var(--accent-blue));
-            animation: bounce 2s infinite ease-in-out;
-            object-fit: contain;
-        }
-
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0) scale(1); }
-            50% { transform: translateY(-10px) scale(1.05); }
-        }
+        .robot-head-top { width: 60px; height: auto; object-fit: contain; }
 
         /* HEADER DASHBOARD */
         .game-header {
-            background: #222; color: white; padding: 8px 20px;
+            background: #222; color: white; padding: 10px 20px;
             display: flex; justify-content: space-between; align-items: center;
-            z-index: 100;
+            border-bottom: 1px solid #333;
         }
 
-       /* --- PHẦN SỬA LẠI CHO BẢN ĐỒ VÀ BỐ CỤC --- */
+        /* BỐ CỤC CHÍNH */
+        .game-content-wrapper {
+            display: flex;
+            flex-direction: row; /* Máy tính: Bản đồ trái, Bảng vàng phải */
+            gap: 15px;
+            padding: 15px;
+            flex: 1;
+        }
 
-/* Khối bao quanh cả Bản đồ và Bảng vàng */
-.game-content-wrapper {
-    display: flex;
-    flex-direction: row; /* Nằm ngang trên máy tính */
-    gap: 15px;
-    padding: 15px;
-    flex: 1;
-    overflow-y: auto;
-    background: #1a1a1a;
-}
+        .map-container {
+            flex: 7; 
+            position: relative;
+            display: flex;
+            justify-content: center;
+            background: #2c2c2c;
+            border-radius: 15px;
+            padding: 10px;
+            height: fit-content;
+        }
 
-/* Phần bản đồ: chiếm 7 phần chiều rộng */
-.map-container {
-    flex: 7; 
-    position: relative;
-    display: flex;
-    justify-content: center;
-    background: #2c2c2c;
-    border-radius: 15px;
-    padding: 10px;
-    height: fit-content;
-}
+        .map-relative-box {
+            position: relative;
+            width: 100%;
+            max-width: 850px;
+            height: fit-content;
+        }
 
-.map-relative-box {
-    position: relative;
-    width: 100%;
-    max-width: 850px; /* Giữ nguyên để tọa độ trạm không bị lệch */
-    height: fit-content;
-}
+        .map-image { width: 100%; height: auto; display: block; border-radius: 15px; }
 
-.map-image { 
-    width: 100%; 
-    height: auto; 
-    display: block; 
-    border-radius: 15px; 
-}
+        /* BẢNG VÀNG SIDEBAR */
+        .leaderboard-sidebar {
+            flex: 3;
+            background: #222;
+            border: 2px solid var(--primary);
+            border-radius: 15px;
+            padding: 15px;
+            min-width: 280px;
+            height: fit-content;
+        }
 
-/* Phần bảng vàng: chiếm 3 phần chiều rộng */
-.leaderboard-sidebar {
-    flex: 3;
-    background: #222;
-    border: 2px solid var(--primary);
-    border-radius: 15px;
-    padding: 15px;
-    min-width: 280px;
-    height: fit-content;
-}
+        .leaderboard-title {
+            color: var(--gold);
+            text-align: center;
+            font-family: 'Bungee', cursive;
+            font-size: 1.1rem;
+            margin: 0 0 15px 0;
+        }
 
-/* --- KỸ THUẬT CHO ĐIỆN THOẠI --- */
-@media (max-width: 1024px) {
-    .game-content-wrapper {
-        flex-direction: column; /* Chuyển thành hàng dọc trên mobile */
-        align-items: center;
-    }
-    
-    .map-container, .leaderboard-sidebar {
-        width: 100%;
-        flex: none;
-    }
+        table { width: 100%; border-collapse: collapse; color: white; }
+        th { background: var(--primary); color: #000; padding: 8px; font-size: 0.85rem; }
+        td { padding: 8px; border-bottom: 1px solid #333; text-align: center; font-size: 0.85rem; }
+        td:nth-child(2) { text-align: left; }
+        td:nth-child(3) { color: var(--gold); font-weight: bold; }
 
-    .leaderboard-sidebar {
-        margin-top: 20px; /* Tạo khoảng cách khi bảng nằm dưới bản đồ */
-    }
-}
-
-        /* TRẠM DỪNG & TRẠNG THÁI */
+        /* TRẠM DỪNG */
         .station {
             position: absolute; width: 5.5%; aspect-ratio: 1/1;
             background: white; border: 3px solid var(--dark-green);
             border-radius: 50%; display: flex; justify-content: center; align-items: center;
             font-weight: bold; color: var(--dark-green); text-decoration: none;
-            font-size: 1.2vw; box-shadow: 0 0 15px rgba(255,255,255,0.3);
-            transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 10;
+            font-size: 1.1vw; z-index: 10;
         }
 
-        .station:hover { transform: scale(1.4); background: var(--gold); color: #000; z-index: 50; }
-
-        .station.completed {
-            background: var(--gold) !important; border-color: #fff !important;
-            color: #000 !important; box-shadow: 0 0 20px var(--gold);
-        }
-
-        .station.locked {
-            background: #444 !important; border-color: #666 !important;
-            color: #888 !important; cursor: not-allowed;
-            pointer-events: none; opacity: 0.7; filter: grayscale(1);
-        }
-
-        .station.locked::after {
-            content: "🔒"; position: absolute; font-size: 10px;
-            bottom: -8px; right: -2px; filter: none;
-        }
-
-        /* LANDMARK TAGS */
         .landmark-tag {
             position: absolute; background: rgba(0, 0, 0, 0.8);
-            color: var(--gold); padding: 4px 12px; border-radius: 20px;
-            font-size: 0.8vw; white-space: nowrap; pointer-events: none;
-            border: 1px solid var(--gold); font-weight: bold;
+            color: var(--gold); padding: 4px 10px; border-radius: 20px;
+            font-size: 0.75vw; border: 1px solid var(--gold); font-weight: bold;
         }
 
-        /* RESPONSIVE */
-        @media (max-width: 768px) {
-            .welcome-text { font-size: 1.5rem; }
-            .robot-head-top { width: 50px; }
+        /* RESPONSIVE CHO ĐIỆN THOẠI */
+        @media (max-width: 1024px) {
+            body { overflow-y: auto; }
+            .game-content-wrapper {
+                flex-direction: column; /* Đưa bảng vàng xuống dưới */
+                align-items: center;
+            }
+            .map-container, .leaderboard-sidebar { width: 100%; flex: none; }
             .station { width: 9%; font-size: 3.5vw; }
             .landmark-tag { font-size: 2vw; }
         }
 
-        /* TỌA ĐỘ */
+        /* TỌA ĐỘ TRẠM */
         #st-19 { top: 5%; left: 30%; }   #tag-19 { top: 3.5%; left: 22%; }
         #st-22 { top: 18%; left: 47%; }  #tag-22 { top: 16.5%; left: 54%; }
         #st-25 { top: 40%; left: 53%; }  #tag-25 { top: 38.5%; left: 60%; }
@@ -177,69 +138,21 @@
         #st-23 { top: 25%; left: 43%; }  #st-24 { top: 32%; left: 48%; }
         #st-26 { top: 48%; left: 58%; }  #st-27 { top: 56%; left: 60%; }
         #st-28 { top: 65%; left: 54%; }  #st-29 { top: 74%; left: 58%; }
-        #st-31 { top: 87%; left: 40%; }  #st-32 { top: 92%; left: 35%; }
+        #st-31 { top: 87%; left: 40%; }  #st-31 { top: 87%; left: 40%; }
+        #st-32 { top: 92%; left: 35%; }
 
         /* FOOTER */
         .game-footer {
-            background: #222; padding: 15px;
+            background: #222; padding: 12px;
             display: flex; justify-content: space-around;
-            border-top: 4px solid var(--primary);
+            border-top: 3px solid var(--primary);
+            position: sticky; bottom: 0;
         }
         .btn-nav {
             background: #333; border: 2px solid var(--primary);
-            color: var(--primary); padding: 10px 20px; border-radius: 25px;
-            font-family: 'Lexend'; font-weight: bold; cursor: pointer;
+            color: var(--primary); padding: 8px 15px; border-radius: 20px;
+            font-weight: bold; cursor: pointer; font-size: 0.8rem;
         }
-.leaderboard-section {
-    background: #222; 
-    margin: 20px auto; 
-    width: 95%; 
-    max-width: 850px; 
-    border-radius: 15px; 
-    border: 2px solid var(--primary);
-    padding: 15px;
-    box-sizing: border-box;
-}
-
-.leaderboard-title {
-    color: var(--gold);
-    text-align: center;
-    font-family: 'Bungee', cursive;
-    font-size: 1.2rem;
-    margin-bottom: 15px;
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-    color: white;
-}
-
-th {
-    background: var(--primary);
-    color: #000;
-    padding: 8px;
-    font-size: 0.9rem;
-}
-
-td {
-    padding: 10px;
-    border-bottom: 1px solid #333;
-    text-align: center;
-    font-size: 0.9rem;
-}
-
-/* Làm nổi bật tên học sinh */
-td:nth-child(2) {
-    text-align: left;
-    color: #fff;
-}
-
-/* Màu vàng cho cột điểm */
-td:nth-child(3) {
-    color: var(--gold);
-    font-weight: bold;
-}
     </style>
 </head>
 <body>
@@ -263,68 +176,53 @@ td:nth-child(3) {
     </header>
 
     <main class="game-content-wrapper">
-    <div class="map-container">
-        <div class="map-relative-box">
-            <img src="Bandogame.jpg" alt="Bản đồ Việt Nam" class="map-image">
-            
-            <div class="landmark-tag" id="tag-19">📍 Cột cờ Lũng Cú</div>
-            <div class="landmark-tag" id="tag-22">🏛️ Thủ đô Hà Nội</div>
-            <div class="landmark-tag" id="tag-25">🕌 Cố đô Huế</div>
-            <div class="landmark-tag" id="tag-30">🏢 TP. Hồ Chí Minh</div>
-            <div class="landmark-tag" id="tag-33">🛶 Mũi Cà Mau</div>
+        <div class="map-container">
+            <div class="map-relative-box">
+                <img src="Bandogame.jpg" alt="Bản đồ Việt Nam" class="map-image">
+                
+                <div class="landmark-tag" id="tag-19">📍 Cột cờ Lũng Cú</div>
+                <div class="landmark-tag" id="tag-22">🏛️ Thủ đô Hà Nội</div>
+                <div class="landmark-tag" id="tag-25">🕌 Cố đô Huế</div>
+                <div class="landmark-tag" id="tag-30">🏢 TP. Hồ Chí Minh</div>
+                <div class="landmark-tag" id="tag-33">🛶 Mũi Cà Mau</div>
 
-            <a href="tisophantram.html" class="station" id="st-19">19</a>
-            <a href="tilebandovaungdung.html" class="station" id="st-20">20</a>
-            <a href="tongtiso.html" class="station" id="st-21">21</a>
-            <a href="hieutiso.html" class="station" id="st-22">22</a>
-            <a href="bai23.html" class="station" id="st-23">23</a>
-            <a href="bai24.html" class="station" id="st-24">24</a>
-            <a href="bai25.html" class="station" id="st-25">25</a>
-            <a href="bai26.html" class="station" id="st-26">26</a>
-            <a href="bai27.html" class="station" id="st-27">27</a>
-            <a href="bai28.html" class="station" id="st-28">28</a>
-            <a href="bai29.html" class="station" id="st-29">29</a>
-            <a href="bai30.html" class="station" id="st-30">30</a>
-            <a href="bai31.html" class="station" id="st-31">31</a>
-            <a href="bai32.html" class="station" id="st-32">32</a>
-            <a href="bai33.html" class="station" id="st-33">33</a>
+                <a href="tisophantram.html" class="station" id="st-19">19</a>
+                <a href="tilebandovaungdung.html" class="station" id="st-20">20</a>
+                <a href="tongtiso.html" class="station" id="st-21">21</a>
+                <a href="hieutiso.html" class="station" id="st-22">22</a>
+                <a href="bai23.html" class="station" id="st-23">23</a>
+                <a href="bai24.html" class="station" id="st-24">24</a>
+                <a href="bai25.html" class="station" id="st-25">25</a>
+                <a href="bai26.html" class="station" id="st-26">26</a>
+                <a href="bai27.html" class="station" id="st-27">27</a>
+                <a href="bai28.html" class="station" id="st-28">28</a>
+                <a href="bai29.html" class="station" id="st-29">29</a>
+                <a href="bai30.html" class="station" id="st-30">30</a>
+                <a href="bai31.html" class="station" id="st-31">31</a>
+                <a href="bai32.html" class="station" id="st-32">32</a>
+                <a href="bai33.html" class="station" id="st-33">33</a>
+            </div>
         </div>
-    </div>
 
-    <section class="leaderboard-sidebar">
-        <h3 class="leaderboard-title">🏆 BẢNG VÀNG</h3>
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Hạng</th>
-                        <th>Tên</th>
-                        <th>Điểm</th>
-                    </tr>
-                </thead>
-                <tbody id="leaderboard-body">
-                    <tr><td colspan="3">Đang cập nhật...</td></tr>
-                </tbody>
-            </table>
-        </div>
-    </section>
-</main>
-<section class="leaderboard-section">
-    <h3 class="leaderboard-title">🏆 BẢNG VÀNG NHÀ THÁM HIỂM</h3>
-    <div class="table-container">
-        <table>
-            <thead>
-                <tr>
-                    <th width="20%">Hạng</th>
-                    <th width="50%">Tên thám hiểm</th>
-                    <th width="30%">Điểm</th>
-                </tr>
-            </thead>
-            <tbody id="leaderboard-body">
-                </tbody>
-        </table>
-    </div>
-</section>
+        <section class="leaderboard-sidebar">
+            <h3 class="leaderboard-title">🏆 BẢNG VÀNG</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th width="20%">Hạng</th>
+                            <th width="55%">Tên</th>
+                            <th width="25%">Điểm</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboard-body">
+                        <tr><td colspan="3">Đang cập nhật...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
     <footer class="game-footer">
         <button class="btn-nav">🏆 BẢNG VÀNG</button>
         <button class="btn-nav">🎒 TÚI ĐỒ</button>
