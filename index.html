@@ -15,7 +15,6 @@
             --dark-green: #2e7d32; 
             --gold: #ffd700; 
             --bg-dark: #1a1a1a;
-            --locked-gray: #555;
         }
 
         body {
@@ -27,7 +26,7 @@
             overflow-x: hidden;
         }
 
-        /* BANNER & HEADER giữ nguyên như cũ */
+        /* BANNER */
         .welcome-banner {
             background: linear-gradient(90deg, #1a1a1a, #333, #1a1a1a);
             padding: 15px 20px;
@@ -41,6 +40,8 @@
             margin: 0; text-align: center;
         }
         .robot-head-top { width: 50px; height: auto; }
+
+        /* HEADER */
         .game-header {
             background: #222; color: white; padding: 10px 20px;
             display: flex; justify-content: space-between; align-items: center;
@@ -64,23 +65,14 @@
             border-radius: 50%; display: flex; justify-content: center; align-items: center;
             font-weight: bold; color: var(--dark-green); text-decoration: none;
             font-size: 1.1vw; z-index: 10; transition: all 0.2s;
-            cursor: pointer;
         }
         
         /* TRẠNG THÁI KHÓA */
         .station.locked {
-            background: #333 !important;
-            border-color: #555 !important;
-            color: #777 !important;
-            cursor: not-allowed;
-            opacity: 0.7;
+            background: #333 !important; border-color: #555 !important;
+            color: #777 !important; cursor: not-allowed; opacity: 0.6;
         }
-        .station.locked::after {
-            content: '🔒';
-            position: absolute;
-            font-size: 0.6vw;
-            bottom: -5px;
-        }
+        .station.locked::after { content: '🔒'; position: absolute; font-size: 0.7vw; bottom: -8px; }
 
         .station:not(.locked):hover { transform: scale(1.2); box-shadow: 0 0 15px var(--gold); z-index: 20; }
 
@@ -90,7 +82,7 @@
             font-size: 0.7vw; border: 1px solid var(--gold); pointer-events: none;
         }
 
-        /* BẢNG VÀNG & FOOTER (Giữ nguyên CSS của thầy) */
+        /* BẢNG VÀNG SIDEBAR */
         .leaderboard-sidebar {
             flex: 3; background: #222; border: 2px solid var(--primary);
             border-radius: 15px; padding: 15px; min-width: 280px; height: fit-content;
@@ -99,21 +91,33 @@
         table { width: 100%; border-collapse: collapse; color: white; }
         th { background: var(--primary); color: #000; padding: 8px; font-size: 0.8rem; }
         td { padding: 8px; border-bottom: 1px solid #333; text-align: center; font-size: 0.85rem; }
-        
+
+        /* FOOTER CẢI TIẾN */
         .game-footer {
             background: #222; padding: 15px 10px; display: flex; 
-            flex-direction: column; align-items: center; gap: 12px;
+            flex-direction: column; align-items: center; gap: 10px;
             border-top: 3px solid var(--primary); position: sticky; bottom: 0; z-index: 1000;
         }
         .footer-buttons { display: flex; flex-direction: row; justify-content: center; gap: 8px; width: 100%; }
         .btn-nav {
             background: #333; border: 2px solid var(--primary); color: var(--primary); 
-            padding: 8px 12px; border-radius: 50px; font-size: 0.8rem;
-            white-space: nowrap; display: flex; align-items: center; gap: 5px; text-decoration: none; font-weight: bold;
+            padding: 8px 15px; border-radius: 50px; font-size: 0.85rem; font-weight: bold;
+            white-space: nowrap; display: flex; align-items: center; gap: 5px; text-decoration: none;
         }
         .footer-copyright { color: #888; font-size: 0.7rem; margin-top: 5px; }
 
-        /* TỌA ĐỘ (Giữ nguyên) */
+        /* RESPONSIVE MOBILE */
+        @media (max-width: 1024px) {
+            .welcome-text { font-size: 1.1rem; }
+            .game-content-wrapper { flex-direction: column; }
+            .map-container, .leaderboard-sidebar { width: 100%; flex: none; }
+            .station { width: 22px !important; height: 22px !important; font-size: 10px !important; }
+            .station.locked::after { font-size: 8px; }
+            .landmark-tag { font-size: 7px; padding: 2px 5px; }
+            .btn-nav { font-size: 0.75rem; padding: 6px 10px; }
+        }
+
+        /* TỌA ĐỘ TRẠM */
         #st-19 { top: 5%; left: 30%; }   #tag-19 { top: 3.5%; left: 22%; }
         #st-20 { top: 8%; left: 45%; }   #st-21 { top: 13%; left: 38%; }
         #st-22 { top: 18%; left: 47%; }  #tag-22 { top: 16.5%; left: 54%; }
@@ -124,11 +128,6 @@
         #st-30 { top: 82%; left: 48%; }  #tag-30 { top: 80.5%; left: 55%; }
         #st-31 { top: 87%; left: 40%; }  #st-32 { top: 92%; left: 35%; }
         #st-33 { top: 95%; left: 42%; }  #tag-33 { top: 94%; left: 30%; }
-
-        @media (max-width: 1024px) {
-            .station { width: 22px !important; height: 22px !important; font-size: 10px !important; }
-            .station.locked::after { font-size: 8px; }
-        }
     </style>
 </head>
 <body>
@@ -140,10 +139,10 @@
 
     <header class="game-header">
         <div style="display:flex; align-items:center; gap:10px;">
-            <div id="user-avatar" style="width:30px; height:30px; border-radius:50%; background:var(--gold); border:2px solid #fff; cursor:pointer;" onclick="setStudentName()"></div>
+            <div onclick="setStudentName()" style="width:30px; height:30px; border-radius:50%; background:var(--gold); border:2px solid #fff; cursor:pointer;"></div>
             <div>
                 <h2 style="margin:0; font-size:0.8rem; color:var(--gold);">NHÀ THÁM HIỂM</h2>
-                <span style="font-size:0.7rem; color:#ccc;">👤 Tên: <span id="user-lv">Bấm để nhập tên</span></span>
+                <span style="font-size:0.7rem; color:#ccc;">👤 <span id="user-lv">Đang tải...</span></span>
             </div>
         </div>
         <div style="text-align:right;">
@@ -153,7 +152,7 @@
 
     <main class="game-content-wrapper">
         <div class="map-container">
-            <div class="map-relative-box" id="map-stations">
+            <div class="map-relative-box">
                 <img src="Bandogame.jpg" alt="Bản đồ" class="map-image">
                 
                 <div class="landmark-tag" id="tag-19">📍 Lũng Cú</div>
@@ -182,7 +181,7 @@
 
         <section class="leaderboard-sidebar">
             <h3 class="leaderboard-title">🏆 BẢNG VÀNG TOP 10</h3>
-            <table id="leaderboard-table">
+            <table>
                 <thead>
                     <tr><th width="20%">Hạng</th><th width="55%">Tên</th><th width="25%">Điểm</th></tr>
                 </thead>
@@ -196,7 +195,7 @@
     <footer class="game-footer">
         <div class="footer-buttons">
             <a href="bang-vang.html" class="btn-nav"><span>🏆</span> BẢNG VÀNG</a>
-            <button class="btn-nav" onclick="alert('Hãy hoàn thành các vòng để nhận quà vào Túi Đồ!')"><span>🎒</span> TÚI ĐỒ</button>
+            <button class="btn-nav" onclick="alert('Hãy tích lũy điểm để nhận quà Robot!')"><span>🎒</span> TÚI ĐỒ</button>
             <button class="btn-nav" onclick="clearData()"><span>⚙️</span> ĐĂNG XUẤT</button>
         </div>
         <div class="footer-copyright">
@@ -214,56 +213,61 @@
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        let currentStudent = localStorage.getItem('studentName') || "";
+        let currentStudent = localStorage.getItem('studentName');
+
+        // 1. Tự động đòi tên khi vào trang
+        window.onload = function() {
+            if (!currentStudent) {
+                setTimeout(setStudentName, 1000);
+            } else {
+                document.getElementById('user-lv').innerText = currentStudent;
+                checkProgression();
+            }
+        };
 
         function setStudentName() {
-            const name = prompt("Nhập đầy đủ Họ và Tên để Robot mở khóa hành trình của bạn:", currentStudent);
-            if (name) {
-                localStorage.setItem('studentName', name);
+            const name = prompt("🤖 Chào bạn! Hãy nhập Họ và Tên để bắt đầu hành trình:");
+            if (name && name.trim().length > 3) {
+                localStorage.setItem('studentName', name.trim());
                 location.reload();
+            } else if (name !== null) {
+                alert("Tên quá ngắn, vui lòng nhập lại!");
+                setStudentName();
             }
         }
 
         function clearData() {
-            if(confirm("Bạn muốn đăng xuất để người khác chơi?")) {
+            if(confirm("Đăng xuất để người khác chơi?")) {
                 localStorage.removeItem('studentName');
                 location.reload();
             }
         }
 
-        if (currentStudent) {
-            document.getElementById('user-lv').innerText = currentStudent;
-            checkProgression();
-        }
-
-        // --- HÀM KIỂM TRA ĐIỀU KIỆN KHÓA VÒNG ---
+        // 2. Kiểm tra điểm mở khóa
         function checkProgression() {
             db.ref('scores').once('value', (snapshot) => {
                 const data = snapshot.val() || {};
                 const stations = document.querySelectorAll('.station');
                 
-                // Quy trình: Vòng n mở nếu Vòng (n-1) có điểm >= 85
                 stations.forEach(st => {
                     const stepNum = parseInt(st.getAttribute('data-step'));
-                    
-                    // Vòng 19 (vòng đầu) luôn mở
                     if (stepNum === 19) return;
 
-                    // Kiểm tra điểm vòng trước đó (stepNum - 1)
-                    let prevStepKey = "bai" + (stepNum - 1);
-                    if (stepNum === 20) prevStepKey = "tisophantram"; // Fix key cho bài đầu
-                    if (stepNum === 21) prevStepKey = "tilebandovaungdung";
-                    if (stepNum === 22) prevStepKey = "tongtiso";
-                    if (stepNum === 23) prevStepKey = "hieutiso";
+                    const gameKeys = {
+                        20: "tisophantram",
+                        21: "tilebandovaungdung",
+                        22: "tongtiso",
+                        23: "hieutiso"
+                    };
 
+                    let prevKey = gameKeys[stepNum] || "bai" + (stepNum - 1);
                     let passed = false;
-                    // Tìm trong database xem user này đã đạt điểm bài trước chưa
-                    for (let gameId in data) {
-                        if (gameId.includes(prevStepKey)) {
-                            for (let id in data[gameId]) {
-                                if (data[gameId][id].fullName === currentStudent && data[gameId][id].score >= 85) {
-                                    passed = true;
-                                    break;
+
+                    for (let gId in data) {
+                        if (gId.toLowerCase().includes(prevKey.toLowerCase())) {
+                            for (let id in data[gId]) {
+                                if (data[gId][id].fullName === currentStudent && data[gId][id].score >= 85) {
+                                    passed = true; break;
                                 }
                             }
                         }
@@ -273,28 +277,27 @@
                         st.classList.add('locked');
                         st.onclick = (e) => {
                             e.preventDefault();
-                            alert(`🤖 Robot: Bạn cần đạt ít nhất 85 điểm ở vòng ${stepNum - 1} để mở khóa vòng này!`);
+                            alert(`🤖 Robot: ${currentStudent} ơi, bạn cần đạt 85đ ở vòng ${stepNum - 1} để đi tiếp nhé!`);
                         };
                     }
                 });
             });
         }
 
-        // Cập nhật Bảng Vàng (như cũ)
+        // 3. Cập nhật Bảng Vàng
         db.ref('scores').on('value', (snapshot) => {
             const data = snapshot.val();
             const tbody = document.getElementById('leaderboard-body');
             if (!data) return;
-
             let list = [];
             for (let gId in data) {
                 for (let sId in data[gId]) { list.push(data[gId][sId]); }
             }
             list.sort((a, b) => b.score - a.score);
-            const top10 = list.slice(0, 10);
-            tbody.innerHTML = top10.map((s, i) => `
+            tbody.innerHTML = list.slice(0, 10).map((s, i) => `
                 <tr><td>${i+1}</td><td style="text-align:left">${s.fullName || "---"}</td><td>${s.score}</td></tr>
             `).join('');
+            if(list.length > 0) document.getElementById('high-score').innerText = list[0].score;
         });
     </script>
 </body>
