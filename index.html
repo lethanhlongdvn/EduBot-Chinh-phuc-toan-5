@@ -137,6 +137,56 @@
             color: var(--primary); padding: 10px 20px; border-radius: 25px;
             font-family: 'Lexend'; font-weight: bold; cursor: pointer;
         }
+.leaderboard-section {
+    background: #222; 
+    margin: 20px auto; 
+    width: 95%; 
+    max-width: 850px; 
+    border-radius: 15px; 
+    border: 2px solid var(--primary);
+    padding: 15px;
+    box-sizing: border-box;
+}
+
+.leaderboard-title {
+    color: var(--gold);
+    text-align: center;
+    font-family: 'Bungee', cursive;
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    color: white;
+}
+
+th {
+    background: var(--primary);
+    color: #000;
+    padding: 8px;
+    font-size: 0.9rem;
+}
+
+td {
+    padding: 10px;
+    border-bottom: 1px solid #333;
+    text-align: center;
+    font-size: 0.9rem;
+}
+
+/* Làm nổi bật tên học sinh */
+td:nth-child(2) {
+    text-align: left;
+    color: #fff;
+}
+
+/* Màu vàng cho cột điểm */
+td:nth-child(3) {
+    color: var(--gold);
+    font-weight: bold;
+}
     </style>
 </head>
 <body>
@@ -186,7 +236,22 @@
             <a href="bai33.html" class="station" id="st-33">33</a>
         </div>
     </main>
-
+<section class="leaderboard-section">
+    <h3 class="leaderboard-title">🏆 BẢNG VÀNG NHÀ THÁM HIỂM</h3>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th width="20%">Hạng</th>
+                    <th width="50%">Tên thám hiểm</th>
+                    <th width="30%">Điểm</th>
+                </tr>
+            </thead>
+            <tbody id="leaderboard-body">
+                </tbody>
+        </table>
+    </div>
+</section>
     <footer class="game-footer">
         <button class="btn-nav">🏆 BẢNG VÀNG</button>
         <button class="btn-nav">🎒 TÚI ĐỒ</button>
