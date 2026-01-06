@@ -92,18 +92,55 @@
         td { padding: 8px; border-bottom: 1px solid #333; text-align: center; font-size: 0.85rem; }
 
         /* FOOTER CAPSULE */
-        .game-footer {
-            background: #222; padding: 15px; display: flex; justify-content: center; 
-            gap: 15px; border-top: 3px solid var(--primary); position: sticky; bottom: 0; z-index: 1000;
-        }
+        /* FOOTER CẢI TIẾN */
+       /* Điều chỉnh tổng thể Footer */
+.game-footer {
+    background: #222; 
+    padding: 15px 10px 10px 10px;
+    display: flex; 
+    flex-direction: column; /* Xếp hàng nút trên, chữ dưới */
+    align-items: center;
+    gap: 12px;
+    border-top: 3px solid var(--primary);
+    position: sticky; 
+    bottom: 0; 
+    z-index: 1000;
+}
 
-        .btn-nav {
-            background: #333; border: 2px solid var(--primary); color: var(--primary);
-            padding: 10px 22px; border-radius: 50px; font-weight: bold; font-size: 0.9rem;
-            cursor: pointer; text-decoration: none; display: flex; align-items: center; gap: 8px;
-            transition: 0.3s; box-shadow: 0 4px 0 rgba(0,0,0,0.3);
+/* Ép 3 nút nằm chung 1 hàng */
+.footer-buttons {
+    display: flex;
+    flex-direction: row; 
+    justify-content: center;
+    gap: 8px; /* Khoảng cách giữa các nút */
+    width: 100%;
+}
+
+/* Chỉnh nút nhỏ lại một chút để vừa màn hình điện thoại */
+.btn-nav {
+    background: #333; 
+    border: 2px solid var(--primary);
+    color: var(--primary); 
+    padding: 8px 12px; 
+    border-radius: 50px;
+    font-size: 0.8rem; /* Giảm nhẹ cỡ chữ */
+    white-space: nowrap; /* Ngăn chữ bên trong nút bị nhảy dòng */
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.footer-copyright {
+    color: #888;
+    font-size: 0.7rem;
+    margin-top: 5px;
+}
+
+        /* Responsive cho Mobile để các nút không bị tràn */
+        @media (max-width: 1024px) {
+            .footer-buttons { gap: 8px; }
+            .footer-copyright { font-size: 0.6rem; }
         }
-        .btn-nav:hover { background: var(--primary); color: white; transform: translateY(-2px); }
 
         /* --- RESPONSIVE MOBILE (THU NHỎ TRẠM) --- */
         @media (max-width: 1024px) {
@@ -196,11 +233,17 @@
         </section>
     </main>
 
-    <footer class="game-footer">
+   <footer class="game-footer">
+    <div class="footer-buttons">
         <a href="bang-vang.html" class="btn-nav"><span>🏆</span> BẢNG VÀNG</a>
         <button class="btn-nav" onclick="alert('Tính năng Túi Đồ sắp ra mắt!')"><span>🎒</span> TÚI ĐỒ</button>
         <button class="btn-nav" onclick="alert('Cài đặt hệ thống')"><span>⚙️</span> CÀI ĐẶT</button>
-    </footer>
+    </div>
+
+    <div class="footer-copyright">
+        &copy; 2025 EduRobot - Phát triển bởi GV. Lê Thành Long
+    </div>
+</footer>
 
     <script>
         const firebaseConfig = {
