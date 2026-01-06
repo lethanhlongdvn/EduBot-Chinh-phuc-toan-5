@@ -3,37 +3,194 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EduRobot: Chinh phục Toán 5</title>
-    <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css">
+    <title>Hành Trình Xuyên Việt: EduRobot Toán 5</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Lexend:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --primary: #FF9800; 
+            --dark-green: #2e7d32; 
+            --gold: #ffd700; 
+            --accent-blue: #00d2ff; 
+        }
+
+        body {
+            margin: 0; padding: 0;
+            font-family: 'Lexend', sans-serif;
+            background-color: #1a1a1a;
+            height: 100vh; display: flex; flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* BANNER CHÀO MỪNG */
+        .welcome-banner {
+            background: linear-gradient(90deg, #1a1a1a, #333, #1a1a1a);
+            padding: 20px;
+            display: flex; justify-content: center; align-items: center;
+            gap: 20px; border-bottom: 2px solid var(--primary);
+        }
+
+        .welcome-text {
+            font-family: 'Bungee', cursive;
+            font-size: 2.5rem; color: white;
+            text-shadow: 3px 3px 0px var(--primary), 6px 6px 0px rgba(0,0,0,0.5);
+            margin: 0; text-align: center; line-height: 1.2;
+        }
+
+        .robot-head-top {
+            width: 80px; height: auto;
+            filter: drop-shadow(0 0 10px var(--accent-blue));
+            animation: bounce 2s infinite ease-in-out;
+            object-fit: contain;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-10px) scale(1.05); }
+        }
+
+        /* HEADER DASHBOARD */
+        .game-header {
+            background: #222; color: white; padding: 8px 20px;
+            display: flex; justify-content: space-between; align-items: center;
+            z-index: 100;
+        }
+
+        /* BẢN ĐỒ */
+        .map-container {
+            flex: 1; position: relative; overflow-y: auto;
+            display: flex; justify-content: center;
+            background: #2c2c2c; padding: 20px 0;
+            scroll-behavior: smooth;
+        }
+
+        .map-relative-box {
+            position: relative; width: 100%; max-width: 850px; height: fit-content;
+        }
+
+        .map-image { width: 100%; height: auto; display: block; border-radius: 15px; }
+
+        /* TRẠM DỪNG & TRẠNG THÁI */
+        .station {
+            position: absolute; width: 5.5%; aspect-ratio: 1/1;
+            background: white; border: 3px solid var(--dark-green);
+            border-radius: 50%; display: flex; justify-content: center; align-items: center;
+            font-weight: bold; color: var(--dark-green); text-decoration: none;
+            font-size: 1.2vw; box-shadow: 0 0 15px rgba(255,255,255,0.3);
+            transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 10;
+        }
+
+        .station:hover { transform: scale(1.4); background: var(--gold); color: #000; z-index: 50; }
+
+        .station.completed {
+            background: var(--gold) !important; border-color: #fff !important;
+            color: #000 !important; box-shadow: 0 0 20px var(--gold);
+        }
+
+        .station.locked {
+            background: #444 !important; border-color: #666 !important;
+            color: #888 !important; cursor: not-allowed;
+            pointer-events: none; opacity: 0.7; filter: grayscale(1);
+        }
+
+        .station.locked::after {
+            content: "🔒"; position: absolute; font-size: 10px;
+            bottom: -8px; right: -2px; filter: none;
+        }
+
+        /* LANDMARK TAGS */
+        .landmark-tag {
+            position: absolute; background: rgba(0, 0, 0, 0.8);
+            color: var(--gold); padding: 4px 12px; border-radius: 20px;
+            font-size: 0.8vw; white-space: nowrap; pointer-events: none;
+            border: 1px solid var(--gold); font-weight: bold;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .welcome-text { font-size: 1.5rem; }
+            .robot-head-top { width: 50px; }
+            .station { width: 9%; font-size: 3.5vw; }
+            .landmark-tag { font-size: 2vw; }
+        }
+
+        /* TỌA ĐỘ */
+        #st-19 { top: 5%; left: 30%; }   #tag-19 { top: 3.5%; left: 22%; }
+        #st-22 { top: 18%; left: 47%; }  #tag-22 { top: 16.5%; left: 54%; }
+        #st-25 { top: 40%; left: 53%; }  #tag-25 { top: 38.5%; left: 60%; }
+        #st-30 { top: 82%; left: 48%; }  #tag-30 { top: 80.5%; left: 55%; }
+        #st-33 { top: 95%; left: 42%; }  #tag-33 { top: 94%; left: 30%; }
+        
+        #st-20 { top: 8%; left: 45%; }   #st-21 { top: 13%; left: 38%; } 
+        #st-23 { top: 25%; left: 43%; }  #st-24 { top: 32%; left: 48%; }
+        #st-26 { top: 48%; left: 58%; }  #st-27 { top: 56%; left: 60%; }
+        #st-28 { top: 65%; left: 54%; }  #st-29 { top: 74%; left: 58%; }
+        #st-31 { top: 87%; left: 40%; }  #st-32 { top: 92%; left: 35%; }
+
+        /* FOOTER */
+        .game-footer {
+            background: #222; padding: 15px;
+            display: flex; justify-content: space-around;
+            border-top: 4px solid var(--primary);
+        }
+        .btn-nav {
+            background: #333; border: 2px solid var(--primary);
+            color: var(--primary); padding: 10px 20px; border-radius: 25px;
+            font-family: 'Lexend'; font-weight: bold; cursor: pointer;
+        }
+    </style>
 </head>
 <body>
 
+    <div class="welcome-banner">
+        <h1 class="welcome-text">THÁM HIỂM XUYÊN VIỆT CÙNG ROBOT</h1>
+        <img src="robot-head.png" alt="Robot Mascot" class="robot-head-top">
+    </div>
+
     <header class="game-header">
-        <div class="player-profile">
-            <img src="assets/robot-head.png" alt="Robot Avatar" class="avatar">
-            <div class="stats">
-                <h2 id="student-name">Đang tải...</h2>
-                <div class="score-bar">
-                    <span>⭐ Điểm tích lũy: <strong id="total-score">0</strong></span>
-                </div>
+        <div style="display:flex; align-items:center; gap:12px;">
+            <div style="width:35px; height:35px; border-radius:50%; background:var(--gold); border: 2px solid white;"></div>
+            <div>
+                <h2 style="margin:0; font-size: 0.85rem; color: var(--gold);">NHÀ THÁM HIỂM</h2>
+                <span style="font-size: 0.7rem; color: #ccc;">💎 Cấp độ: <span id="student-name">Đang tải...</span></span>
             </div>
         </div>
-        <div class="game-logo">
-            <h1>EDURobot</h1>
-            <p>Hành trình Toán học</p>
+        <div style="text-align: right;">
+            <p style="margin:0; font-size: 0.8rem; color: var(--primary); font-weight: bold;">⭐ ĐIỂM: <span id="total-score">0</span></p>
         </div>
     </header>
 
-    <main class="map-area">
-        <div class="map-path" id="map-path">
-            </div>
+    <main class="map-container">
+        <div class="map-relative-box">
+            <img src="Bandogame.jpg" alt="Bản đồ Việt Nam" class="map-image">
+            
+            <div class="landmark-tag" id="tag-19">📍 Cột cờ Lũng Cú</div>
+            <div class="landmark-tag" id="tag-22">🏛️ Thủ đô Hà Nội</div>
+            <div class="landmark-tag" id="tag-25">🕌 Cố đô Huế</div>
+            <div class="landmark-tag" id="tag-30">🏢 TP. Hồ Chí Minh</div>
+            <div class="landmark-tag" id="tag-33">🛶 Mũi Cà Mau</div>
+
+            <a href="bai19.html" class="station" id="st-19">19</a>
+            <a href="bai20.html" class="station" id="st-20">20</a>
+            <a href="bai21.html" class="station" id="st-21">21</a>
+            <a href="bai22.html" class="station" id="st-22">22</a>
+            <a href="bai23.html" class="station" id="st-23">23</a>
+            <a href="bai24.html" class="station" id="st-24">24</a>
+            <a href="bai25.html" class="station" id="st-25">25</a>
+            <a href="bai26.html" class="station" id="st-26">26</a>
+            <a href="bai27.html" class="station" id="st-27">27</a>
+            <a href="bai28.html" class="station" id="st-28">28</a>
+            <a href="bai29.html" class="station" id="st-29">29</a>
+            <a href="bai30.html" class="station" id="st-30">30</a>
+            <a href="bai31.html" class="station" id="st-31">31</a>
+            <a href="bai32.html" class="station" id="st-32">32</a>
+            <a href="bai33.html" class="station" id="st-33">33</a>
+        </div>
     </main>
 
     <footer class="game-footer">
-        <button class="btn-nav">🏆 Bảng vàng</button>
-        <button class="btn-nav">🛒 Cửa hàng</button>
-        <button class="btn-nav">⚙️ Cài đặt</button>
+        <button class="btn-nav">🏆 BẢNG VÀNG</button>
+        <button class="btn-nav">🎒 TÚI ĐỒ</button>
+        <button class="btn-nav">⚙️ CÀI ĐẶT</button>
     </footer>
 
     <script type="module" src="js/main.js"></script>
