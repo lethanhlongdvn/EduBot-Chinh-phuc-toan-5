@@ -37,7 +37,7 @@
 <div class="container">
     <div class="header-box">
         <h2>🗺️ BẢN ĐỒ KHO BÁU (TUẦN 19)</h2>
-        <p>Tỉ số, tỉ số phần trăm và ứng dụng tỉ lệ bản đồ</p>
+        <p>Tỉ số, tỉ số phần trăm và ứng dụng tỉ lệ bản đồ [cite: 1]</p>
     </div>
 
     <div class="level-map">
@@ -50,7 +50,7 @@
 
     <div id="game-content">
         <div style="display: flex; justify-content: space-between; font-weight: bold; color: #555; margin-bottom: 10px; font-size: 0.9rem;">
-            <span id="lvl-title">Khởi hành!</span>
+            <span id="lvl-title">Khám phá [cite: 3]</span>
             <span id="score-display">Tổng điểm: 0/100</span>
         </div>
         <div class="question-area">
@@ -62,23 +62,17 @@
         </div>
     </div>
 
-    <div id="status-screen" class="hidden" style="text-align: center; padding: 20px;">
-        <h2 id="status-title"></h2>
-        <p id="status-info" style="font-size: 1.2rem;"></p>
-        <button id="status-btn" class="action-btn" onclick="handleStatusAction()"></button>
-    </div>
-
     <div id="result-screen" class="hidden" style="text-align: center; padding: 30px 0;">
-        <h2>Hành trình hoàn tất! 🏆</h2>
+        <h2 id="final-title">Hành trình hoàn tất!</h2>
         <p id="result-msg" style="font-size: 2.5rem; color: var(--primary); font-weight: bold; margin: 15px 0;"></p>
         <p id="final-advice"></p>
         <div id="save-form" class="hidden">
             <input type="text" id="player-name" class="input-field" placeholder="Nhập Họ và Tên...">
             <input type="text" id="player-class" class="input-field" placeholder="Nhập Lớp...">
             <br>
-            <button class="action-btn" onclick="saveScoreOnline()">Ghi danh Bảng Vàng</button>
+            <button class="action-btn" onclick="saveScoreOnline()">Ghi danh Bảng Vàng [cite: 121]</button>
         </div>
-        <button id="retry-btn" class="action-btn hidden" onclick="location.reload()" style="background: var(--secondary);">Chơi lại từ đầu</button>
+        <button id="retry-btn" class="action-btn hidden" onclick="location.reload()" style="background: var(--secondary);">Thử lại vòng này ↺</button>
     </div>
 </div>
 
@@ -93,119 +87,108 @@
     const db = firebase.database();
 
     const allQuestionsData = [
-        [ // PHẦN 1: KHÁM PHÁ (Đã lọc bỏ ký hiệu rác)
-            { q: "Trên bản đồ có 7 vị trí hang đá và 10 vị trí rừng cây. Tỉ số của số hang đá và số rừng cây là:", a: ["10 : 7", "7 : 10", "7 : 17", "10 : 17"], c: 1, h: "Lấy số hang đá chia cho số rừng cây." },
-            { q: "Tỉ số của số a và số b (b khác 0) là a : b hay a/b. Tỉ số này cho biết điều gì?", a: ["Số a bằng a/b số b", "Số b bằng a/b số a", "Số a nhiều hơn b là a/b", "Số a kém b là a/b"], c: 0, h: "Định nghĩa tỉ số cơ bản." },
-            { q: "Trong một cuộc khảo sát 100 bạn thì có 43 bạn thích đi tìm kho báu. Tỉ số phần trăm số bạn thích tìm kho báu là:", a: ["4,3%", "0,43%", "43%", "430%"], c: 2, h: "Số lượng trên 100 chính là tỉ số phần trăm." },
-            { q: "Ký hiệu % trong tỉ số phần trăm được đọc là:", a: ["Phần mười", "Phần trăm", "Phần nghìn", "Đơn vị"], c: 1, h: "Cách đọc ký hiệu %." },
-            { q: "Tỉ số 1 : 10 000 ghi ở phía dưới một bản đồ được gọi là:", a: ["Tỉ số độ dài", "Tỉ lệ bản đồ", "Tỉ số phần trăm", "Tỉ số xích"], c: 1, h: "Đây là khái niệm về tỉ lệ bản đồ." },
-            { q: "Tỉ lệ bản đồ thường được viết dưới dạng một phân số có tử số là:", a: ["1", "10", "100", "1 000"], c: 0, h: "Tỉ lệ bản đồ ưu tiên tử số là 1." },
-            { q: "Tỉ lệ bản đồ 1 : 500 cho biết hình ảnh trên bản đồ đã được:", a: ["Phóng to 500 lần", "Giữ nguyên", "Thu nhỏ 500 lần", "Thu nhỏ 1 lần"], c: 2, h: "Số 500 ở mẫu số chỉ mức độ thu nhỏ." },
-            { q: "Để tính độ dài thật khi biết độ dài bản đồ và tỉ lệ, ta thực hiện:", a: ["Chia cho mẫu số tỉ lệ", "Nhân với mẫu số tỉ lệ", "Cộng với mẫu số tỉ lệ", "Lấy mẫu số chia độ dài bản đồ"], c: 1, h: "Phép tính tìm độ dài thực tế." }
+        [ // CHẶNG 1: KHÁM PHÁ [cite: 3]
+            { q: "Trên bản đồ có 7 vị trí hang đá và 10 vị trí rừng cây. Tỉ số của số hang đá và số rừng cây là: [cite: 5, 6]", a: ["10 : 7", "7 : 10", "7 : 17", "10 : 17"], c: 1, h: "Đáp án đúng là 7 : 10 [cite: 121]" },
+            { q: "Tỉ số của số a và số b (b khác 0) là a : b hay a/b. Tỉ số này cho biết điều gì? [cite: 11, 12]", a: ["Số a bằng a/b số b", "Số b bằng a/b số a", "Số a nhiều hơn số b là a/b đơn vị", "Số a kém số b là a/b đơn vị"], c: 0, h: "Số a bằng a/b số b [cite: 121]" },
+            { q: "Trong một cuộc khảo sát 100 bạn thì có 43 bạn thích đi tìm kho báu. Tỉ số phần trăm số bạn thích tìm kho báu là: [cite: 17, 18]", a: ["4,3%", "0,43%", "43%", "430%"], c: 2, h: "Đáp án là 43% [cite: 121]" },
+            { q: "Để tính độ dài thật ngoài thực tế dựa trên độ dài bản đồ và tỉ lệ bản đồ, ta thực hiện: [cite: 43]", a: ["Chia cho mẫu số tỉ lệ", "Nhân với mẫu số tỉ lệ", "Cộng với mẫu số tỉ lệ", "Lấy mẫu số chia độ dài bản đồ"], c: 1, h: "Nhân độ dài bản đồ với mẫu số tỉ lệ [cite: 45, 121]" }
         ],
-        [ // PHẦN 2: LUYỆN TẬP
-            { q: "Tỉ số của m = 13 và n = 17 được viết dưới dạng phân số là:", a: ["17/13", "13 : 17", "13/17", "13/30"], c: 2, h: "Viết số đứng trước làm tử số." },
-            { q: "Chuyển phân số 9/25 thành tỉ số phần trăm:", a: ["9%", "36%", "25%", "45%"], c: 1, h: "Nhân cả tử và mẫu với 4 để được mẫu 100." },
-            { q: "Một hòn đảo có 100 cây dừa, trong đó có 92 cây đã có quả. Tỉ số phần trăm số cây dừa CHƯA có quả là:", a: ["8%", "92%", "100%", "18%"], c: 0, h: "Lấy 100% trừ đi số cây đã có quả." },
-            { q: "Trên bản đồ tỉ lệ 1 : 1 000, khoảng cách từ cổng hang đến rương vàng đo được 6 cm. Độ dài thật là:", a: ["6 m", "60 m", "600 m", "6 000 m"], c: 1, h: "6 x 1000 = 6000cm = 60m." },
-            { q: "Quãng đường thực tế dài 160 km. Trên bản đồ tỉ lệ 1 : 1 000 000, quãng đường này dài:", a: ["160 cm", "16 cm", "1,6 cm", "16 mm"], c: 1, h: "Đổi 160km ra cm rồi chia cho 1.000.000." },
-            { q: "Kết quả của phép tính: 57% + 43,5% là:", a: ["100%", "10,05%", "100,5%", "90,5%"], c: 2, h: "Thực hiện phép cộng số thập phân." },
-            { q: "Một thợ săn đi được 35% con đường. Tỉ số phần trăm con đường thợ săn còn phải đi là:", a: ["35%", "135%", "65%", "75%"], c: 2, h: "Lấy 100% trừ đi số đã đi." },
-            { q: "Trên bản đồ tỉ lệ 1 : 2 000, khoảng cách giữa hai hòn đảo là 5 cm. Độ dài thật là:", a: ["10 m", "100 m", "1 000 m", "10 000 m"], c: 1, h: "5 x 2000 = 10000cm = 100m." }
+        [ // CHẶNG 2: LUYỆN TẬP [cite: 48]
+            { q: "Chuyển phân số 9/25 thành tỉ số phần trăm: [cite: 55]", a: ["9%", "36%", "25%", "45%"], c: 1, h: "9/25 = 36/100 = 36% [cite: 122]" },
+            { q: "Hòn đảo có 100 cây dừa, 92 cây đã có quả. Tỉ số phần trăm số cây CHƯA có quả là: [cite: 60, 61]", a: ["8%", "92%", "100%", "18%"], c: 0, h: "Số cây chưa quả: 100 - 92 = 8 cây (8%) [cite: 122]" },
+            { q: "Trên bản đồ tỉ lệ 1:1000, khoảng cách đo được 6 cm. Độ dài thật là: [cite: 66, 67]", a: ["6 m", "60 m", "600 m", "6 000 m"], c: 1, h: "6 cm x 1000 = 6000 cm = 60 m [cite: 122]" },
+            { q: "Kết quả của phép tính: 57% + 43,5% là: [cite: 77]", a: ["100%", "10,05%", "100,5%", "90,5%"], c: 2, h: "Đáp án là 100,5% [cite: 122]" }
         ],
-        [ // PHẦN 3: NÂNG CAO
-            { q: "Mảnh vườn HCN trên bản đồ tỉ lệ 1:3000 có dài 3cm, rộng 2cm. Diện tích thật là:", a: ["6 m²", "180 m²", "5 400 m²", "540 m²"], c: 2, h: "Tính dài thật, rộng thật rồi mới tính diện tích." },
-            { q: "Bản đồ (1) tỉ lệ 1:1000 có 10cm. Cùng quãng đường đó, bản đồ (2) tỉ lệ 1:2000 dài:", a: ["20 cm", "5 cm", "10 cm", "2 cm"], c: 1, h: "Tỉ lệ càng lớn thì hình vẽ càng nhỏ." },
-            { q: "Khu bảo tồn hình vuông có chu vi trên bản đồ 1:5000 là 16cm. Diện tích thật là:", a: ["40 000 m²", "4 ha", "16 ha", "400 m²"], c: 1, h: "Cạnh thật là 200m. 200x200 = 40000m2 = 4ha." },
-            { q: "Chặng 1 chiếm 30%. Chặng 2 dài hơn chặng 1 là 40m và chiếm 70%. Tổng quãng đường:", a: ["100 m", "140 m", "200 m", "400 m"], c: 0, h: "Chặng 2 hơn Chặng 1 là 40% tương ứng 40m." }
+        [ // CHẶNG 3: NÂNG CAO [cite: 94]
+            { q: "HCN trên bản đồ tỉ lệ 1:3000 có dài 3cm, rộng 2cm. Diện tích thật là: [cite: 96, 97]", a: ["6 m²", "180 m²", "5 400 m²", "540 m²"], c: 2, h: "Dài thật 90m, rộng thật 60m. DT = 5400 m² [cite: 123]" },
+            { q: "Chặng một chiếm 30%. Chặng hai dài hơn chặng một 40m và chiếm 70%. Tổng quãng đường: [cite: 113, 114, 115]", a: ["100 m", "140 m", "200 m", "400 m"], c: 0, h: "Tổng quãng đường là 100m [cite: 123]" }
         ]
     ];
 
-    let curLvl = 0, curQ = 0, totalScore = 0, correctInStage = 0;
+    let curLvl = 0, curQ = 0, totalScore = 0;
     let currentLvlQuestions = [];
-    const Q_COUNT = [4, 4, 2]; // Mỗi chặng lấy số lượng câu hỏi nhất định
 
-    function prepareQuestionsForLevel() {
-        let pool = [...allQuestionsData[curLvl]];
-        pool.sort(() => Math.random() - 0.5);
-        currentLvlQuestions = pool.slice(0, Q_COUNT[curLvl]);
-        curQ = 0; correctInStage = 0;
+    function prepareQuestions() {
+        currentLvlQuestions = allQuestionsData[curLvl];
+        showQuestion();
     }
 
     function showQuestion() {
         let q = currentLvlQuestions[curQ];
-        let totalAnswered = (curLvl === 0) ? curQ : (curLvl === 1 ? 4 + curQ : 8 + curQ);
+        let totalAnswered = 0;
+        if(curLvl === 1) totalAnswered = 4 + curQ;
+        else if(curLvl === 2) totalAnswered = 8 + curQ;
+        else totalAnswered = curQ;
+
         document.getElementById('q-text').innerHTML = `<b>Câu ${totalAnswered + 1}:</b> ${q.q}`;
         document.getElementById('progress').style.width = (totalAnswered / 10 * 100) + "%";
+        
         let html = q.a.map((opt, i) => `<button class="opt" onclick="checkAnswer(${i})">${opt}</button>`).join('');
         document.getElementById('options').innerHTML = html;
         document.getElementById('robot-hint').classList.add('hidden');
-        document.getElementById('lvl-title').innerText = "Chặng " + (curLvl + 1);
+        
+        // Cập nhật trạng thái nút chặng
+        document.querySelectorAll('.lvl-btn').forEach((btn, idx) => {
+            btn.classList.toggle('active', idx === curLvl);
+        });
+        const titles = ["Khám phá [cite: 3]", "Luyện tập [cite: 48]", "Nâng cao [cite: 94]"];
+        document.getElementById('lvl-title').innerText = titles[curLvl];
     }
 
     function checkAnswer(i) {
         let q = currentLvlQuestions[curQ];
         let btns = document.querySelectorAll('.opt');
         btns.forEach(b => b.disabled = true);
+        
         if(i === q.c) {
-            totalScore += 10; correctInStage++;
+            totalScore += 10;
             btns[i].style.background = "#C8E6C9";
-            showRobot("Chính xác! Tiếp tục nhé. ✨");
+            showRobot("Chính xác! +10 điểm.");
         } else {
             btns[i].style.background = "#FFCDD2";
             btns[q.c].style.background = "#C8E6C9";
-            showRobot("Gợi ý: " + q.h);
+            showRobot(q.h);
         }
+
         setTimeout(() => {
             curQ++;
-            if(curQ < Q_COUNT[curLvl]) { showQuestion(); updateScoreDisplay(); }
-            else { finishStage(); }
-        }, 1800);
+            if(curQ < currentLvlQuestions.length) {
+                showQuestion();
+                updateScoreDisplay();
+            } else {
+                if(curLvl < 2) {
+                    curLvl++; curQ = 0;
+                    prepareQuestions();
+                    updateScoreDisplay();
+                } else {
+                    showFinalResult();
+                }
+            }
+        }, 2000);
     }
 
-    function updateScoreDisplay() { document.getElementById('score-display').innerText = `Tổng điểm: ${totalScore}/100`; }
-    function showRobot(m) { document.getElementById('robot-hint').classList.remove('hidden'); document.getElementById('hint-text').innerText = m; }
-
-    function finishStage() {
-        document.getElementById('game-content').classList.add('hidden');
-        let passThreshold = Q_COUNT[curLvl] / 2; // Điều kiện 50%
-        if (correctInStage >= passThreshold) {
-            if (curLvl < 2) {
-                showStatusScreen("Vượt chặng thành công! 🎉", `Đúng ${correctInStage}/${Q_COUNT[curLvl]} câu. Bạn được đi tiếp.`, "Sang chặng tiếp theo ➔", "next");
-            } else { showFinalResult(); }
-        } else {
-            showStatusScreen("Chưa đủ điểm qua vòng! 😟", `Bạn đúng ${correctInStage}/${Q_COUNT[curLvl]} câu. Cần đúng 50% để qua chặng.`, "Thử lại chặng này ↺", "retry");
-        }
+    function updateScoreDisplay() {
+        document.getElementById('score-display').innerText = `Tổng điểm: ${totalScore}/100`;
     }
 
-    function showStatusScreen(title, info, btnText, type) {
-        let screen = document.getElementById('status-screen');
-        screen.classList.remove('hidden');
-        document.getElementById('status-title').innerText = title;
-        document.getElementById('status-info').innerText = info;
-        let btn = document.getElementById('status-btn');
-        btn.innerText = btnText; btn.setAttribute('data-type', type);
-        btn.style.background = (type === 'retry') ? "var(--danger)" : "var(--success)";
-    }
-
-    function handleStatusAction() {
-        let type = document.getElementById('status-btn').getAttribute('data-type');
-        document.getElementById('status-screen').classList.add('hidden');
-        if (type === 'next') { curLvl++; } else { totalScore -= (correctInStage * 10); }
-        prepareQuestionsForLevel();
-        document.querySelectorAll('.lvl-btn').forEach((b, i) => b.classList.toggle('active', i === curLvl));
-        document.getElementById('game-content').classList.remove('hidden');
-        showQuestion(); updateScoreDisplay();
+    function showRobot(m) {
+        document.getElementById('robot-hint').classList.remove('hidden');
+        document.getElementById('hint-text').innerText = m;
     }
 
     function showFinalResult() {
+        document.getElementById('game-content').classList.add('hidden');
         document.getElementById('result-screen').classList.remove('hidden');
         document.getElementById('result-msg').innerText = `${totalScore} ĐIỂM`;
+        document.getElementById('progress').style.width = "100%";
+
         if(totalScore >= 50) {
-            document.getElementById('final-advice').innerText = "Chúc mừng! Bạn đã chinh phục được kho báu.";
+            document.getElementById('final-title').innerText = "Chúc mừng! 🏆";
+            document.getElementById('final-advice').innerText = "Bạn đã hoàn thành vòng chơi xuất sắc.";
             document.getElementById('save-form').classList.remove('hidden');
         } else {
-            document.getElementById('final-advice').innerText = "Cố gắng đạt 50 điểm để được ghi danh nhé.";
+            document.getElementById('final-title').innerText = "Cần cố gắng hơn! 😟";
+            document.getElementById('final-advice').innerText = "Bạn cần ít nhất 50 điểm để ghi danh.";
             document.getElementById('retry-btn').classList.remove('hidden');
         }
     }
@@ -213,18 +196,19 @@
     function saveScoreOnline() {
         const name = document.getElementById('player-name').value.trim();
         const className = document.getElementById('player-class').value.trim();
-        if (!name || !className) { alert("Vui lòng nhập đầy đủ tên và lớp."); return; }
+        if (!name || !className) { alert("Nhập tên và lớp nhé!"); return; }
+        
         const userKey = (className + "_" + name).replace(/[\s\/.\#\$\[\]]/g, '_');
         db.ref('scores/Tuan_19_Ban_Do_Kho_Bau/' + userKey).set({
             fullName: name, className: "'" + className, score: totalScore,
             date: new Date().toLocaleString('vi-VN'), timestamp: firebase.database.ServerValue.TIMESTAMP
         }).then(() => {
-            alert("Ghi danh thành công!");
-            location.href = "index.html";
+            alert("Đã ghi danh Bảng Vàng!");
+            location.reload();
         });
     }
 
-    window.onload = () => { prepareQuestionsForLevel(); showQuestion(); };
+    window.onload = () => { prepareQuestions(); };
 </script>
 </body>
 </html>
