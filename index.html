@@ -64,16 +64,16 @@
             background: white; border: 2.5px solid var(--dark-green);
             border-radius: 50%; display: flex; justify-content: center; align-items: center;
             font-weight: bold; color: var(--dark-green); text-decoration: none;
-            font-size: 1.1vw; z-index: 10; transition: all 0.2s;
+            font-size: 1.1vw; z-index: 10; transition: all 0.2s; cursor: pointer;
         }
         
         .station.locked {
             background: #333 !important; border-color: #555 !important;
-            color: #777 !important; cursor: not-allowed; opacity: 0.6;
+            color: #777 !important; opacity: 0.6;
         }
         .station.locked::after { content: '🔒'; position: absolute; font-size: 0.7vw; bottom: -8px; }
 
-        .station:not(.locked):hover { transform: scale(1.2); box-shadow: 0 0 15px var(--gold); z-index: 20; }
+        .station:hover { transform: scale(1.2); box-shadow: 0 0 15px var(--gold); z-index: 20; }
 
         .landmark-tag {
             position: absolute; background: rgba(0, 0, 0, 0.7);
@@ -101,71 +101,43 @@
         .btn-nav {
             background: #333; border: 2px solid var(--primary); color: var(--primary); 
             padding: 8px 15px; border-radius: 50px; font-size: 0.85rem; font-weight: bold;
-            white-space: nowrap; display: flex; align-items: center; gap: 5px; text-decoration: none;
+            white-space: nowrap; display: flex; align-items: center; gap: 5px; text-decoration: none; cursor: pointer;
         }
-        .footer-copyright { color: #888; font-size: 0.7rem; margin-top: 5px; }
 
-        /* --- POPUP HƯỚNG DẪN --- */
-        .modal-overlay {
+        /* COUNTDOWN OVERLAY */
+        #countdown-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85); display: none; justify-content: center;
-            align-items: center; z-index: 9999;
-        }
-        .modal-content {
-            background: #2c2c2c; width: 90%; max-width: 500px; padding: 25px;
-            border-radius: 20px; border: 3px solid var(--primary); color: white;
-            text-align: left; position: relative; box-shadow: 0 0 30px var(--primary);
-        }
-        .modal-title { font-family: 'Bungee'; color: var(--gold); font-size: 1.3rem; margin-bottom: 15px; text-align: center; }
-        .modal-body p { margin: 10px 0; font-size: 0.9rem; line-height: 1.5; }
-        .modal-footer { margin-top: 20px; display: flex; flex-direction: column; align-items: center; gap: 15px; }
-        .btn-ok { 
-            background: var(--primary); border: none; padding: 10px 40px; 
-            border-radius: 50px; color: black; font-weight: bold; cursor: pointer; font-family: 'Lexend';
-        }
-        .no-repeat-box { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; color: #bbb; cursor: pointer; }
-
-        @media (max-width: 1024px) {
-            .welcome-text { font-size: 1.1rem; }
-            .game-content-wrapper { flex-direction: column; }
-            .station { width: 22px !important; height: 22px !important; font-size: 10px !important; }
-            .btn-nav { font-size: 0.75rem; padding: 6px 10px; }
+            background: rgba(0,0,0,0.9); display: none; justify-content: center;
+            align-items: center; z-index: 10000; flex-direction: column; color: white;
         }
 
         /* TỌA ĐỘ TRẠM */
-        #st-19 { top: 5%; left: 30%; }   #tag-19 { top: 3.5%; left: 22%; }
-        #st-20 { top: 8%; left: 45%; }   #st-21 { top: 13%; left: 38%; }
-        #st-22 { top: 18%; left: 47%; }  #tag-22 { top: 16.5%; left: 54%; }
-        #st-23 { top: 25%; left: 43%; }  #st-24 { top: 32%; left: 48%; }
-        #st-25 { top: 40%; left: 53%; }  #tag-25 { top: 38.5%; left: 60%; }
-        #st-26 { top: 48%; left: 58%; }  #st-27 { top: 56%; left: 60%; }
-        #st-28 { top: 65%; left: 54%; }  #st-29 { top: 74%; left: 58%; }
-        #st-30 { top: 82%; left: 48%; }  #tag-30 { top: 80.5%; left: 55%; }
-        #st-31 { top: 87%; left: 40%; }  #st-32 { top: 92%; left: 35%; }
-        #st-33 { top: 95%; left: 42%; }  #tag-33 { top: 94%; left: 30%; }
+        #st-19 { top: 3%; left: 35%; }   #tag-19 { top: 2%; left: 25%; }
+        #st-20 { top: 8%; left: 45%; }
+        #st-21 { top: 13%; left: 38%; }
+        #st-22 { top: 18%; left: 48%; }  #tag-22 { top: 17%; left: 55%; }
+        #st-23 { top: 24%; left: 42%; }
+        #st-24 { top: 30%; left: 47%; }
+        #st-25 { top: 38%; left: 52%; }  #tag-25 { top: 37%; left: 60%; }
+        #st-26 { top: 46%; left: 58%; }
+        #st-27 { top: 54%; left: 60%; }
+        #st-28 { top: 62%; left: 54%; }
+        #st-29 { top: 70%; left: 57%; }
+        #st-30 { top: 78%; left: 48%; }  #tag-30 { top: 77%; left: 55%; }
+        #st-31 { top: 85%; left: 42%; }
+        #st-32 { top: 88%; left: 35%; }
+        #st-33 { top: 92%; left: 40%; }  #tag-33 { top: 91%; left: 32%; }
+        #st-34 { top: 95%; left: 45%; }
+        #st-35 { top: 97%; left: 38%; }
     </style>
 </head>
 <body>
 
-    <div id="guideModal" class="modal-overlay">
-        <div class="modal-content">
-            <div class="modal-title">🤖 CẨM NANG THÁM HIỂM</div>
-            <div class="modal-body">
-                <p>1. 👤 <b>Nhập tên:</b> Bấm vào nút "Nhập tên" (nút giữa, cuối trang) để Robot ghi nhận điểm.</p>
-                <p>2. 🔒 <b>Khóa vòng:</b> Bạn phải đạt ít nhất <b>85% số điểm</b> ở vòng trước để mở vòng tiếp theo.</p>
-                <p>3. 🏆 <b>Bảng vàng:</b> Cố gắng làm bài thật nhanh và chính xác để lên Top 10 nhé!</p>
-                
-                <p style="font-family: 'Bungee'; color: var(--gold); text-align: center; margin-top: 20px; font-size: 1.1rem; text-shadow: 1px 1px 2px rgba(0,0,0,0.5);">
-                    CHÚC BẠN NHẬN ĐƯỢC CÚP VÀNG
-                </p>
-            </div>
-            <div class="modal-footer">
-                <label class="no-repeat-box">
-                    <input type="checkbox" id="dontShowAgain"> Không nhắc lại ở lần sau.
-                </label>
-                <button class="btn-ok" onclick="closeGuide()">OK!</button>
-            </div>
-        </div>
+    <div id="countdown-overlay">
+        <h2 id="cd-title" style="font-family:'Bungee'; color:var(--gold);">VÒNG THI CHƯA MỞ</h2>
+        <p>Các em hãy hoàn thành kiến thức trên lớp tuần này trước nhé!</p>
+        <div id="cd-timer" style="font-size: 3rem; font-weight: bold; margin: 20px 0; color: #00E676;">00:00:00:00</div>
+        <button class="btn-nav" onclick="document.getElementById('countdown-overlay').style.display='none'">ĐÃ HIỂU</button>
     </div>
 
     <div class="welcome-banner">
@@ -178,11 +150,11 @@
             <div onclick="setStudentName()" style="width:30px; height:30px; border-radius:50%; background:var(--gold); border:2px solid #fff; cursor:pointer;"></div>
             <div>
                 <h2 style="margin:0; font-size:0.8rem; color:var(--gold);">NHÀ THÁM HIỂM</h2>
-                <span style="font-size:0.7rem; color:#ccc;">👤 <span id="user-lv">Khách (Chưa nhập tên)</span></span>
+                <span style="font-size:0.7rem; color:#ccc;">👤 <span id="user-lv">Khách</span></span>
             </div>
         </div>
-        <div style="text-align:right;">
-            <p style="margin:0; font-size:0.8rem; color:var(--primary); font-weight:bold;">⭐ TOP ĐIỂM: <span id="high-score">0</span></p>
+        <div>
+            <p style="margin:0; font-size:0.8rem; color:var(--primary); font-weight:bold;">⭐ KỶ LỤC LỚP: <span id="high-score">0</span></p>
         </div>
     </header>
 
@@ -196,21 +168,23 @@
                 <div class="landmark-tag" id="tag-30">🏢 TP.HCM</div>
                 <div class="landmark-tag" id="tag-33">🛶 Cà Mau</div>
 
-                <a href="19.html" class="station" id="st-19" data-step="19">19</a>
-                <a href="20.html" class="station" id="st-20" data-step="20">20</a>
-                <a href="tongtiso.html" class="station" id="st-21" data-step="21">21</a>
-                <a href="hieutiso.html" class="station" id="st-22" data-step="22">22</a>
-                <a href="bai23.html" class="station" id="st-23" data-step="23">23</a>
-                <a href="bai24.html" class="station" id="st-24" data-step="24">24</a>
-                <a href="bai25.html" class="station" id="st-25" data-step="25">25</a>
-                <a href="bai26.html" class="station" id="st-26" data-step="26">26</a>
-                <a href="bai27.html" class="station" id="st-27" data-step="27">27</a>
-                <a href="bai28.html" class="station" id="st-28" data-step="28">28</a>
-                <a href="bai29.html" class="station" id="st-29" data-step="29">29</a>
-                <a href="bai30.html" class="station" id="st-30" data-step="30">30</a>
-                <a href="bai31.html" class="station" id="st-31" data-step="31">31</a>
-                <a href="bai32.html" class="station" id="st-32" data-step="32">32</a>
-                <a href="bai33.html" class="station" id="st-33" data-step="33">33</a>
+                <div class="station" id="st-19" onclick="handleStageClick(19)">19</div>
+                <div class="station" id="st-20" onclick="handleStageClick(20)">20</div>
+                <div class="station" id="st-21" onclick="handleStageClick(21)">21</div>
+                <div class="station" id="st-22" onclick="handleStageClick(22)">22</div>
+                <div class="station" id="st-23" onclick="handleStageClick(23)">23</div>
+                <div class="station" id="st-24" onclick="handleStageClick(24)">24</div>
+                <div class="station" id="st-25" onclick="handleStageClick(25)">25</div>
+                <div class="station" id="st-26" onclick="handleStageClick(26)">26</div>
+                <div class="station" id="st-27" onclick="handleStageClick(27)">27</div>
+                <div class="station" id="st-28" onclick="handleStageClick(28)">28</div>
+                <div class="station" id="st-29" onclick="handleStageClick(29)">29</div>
+                <div class="station" id="st-30" onclick="handleStageClick(30)">30</div>
+                <div class="station" id="st-31" onclick="handleStageClick(31)">31</div>
+                <div class="station" id="st-32" onclick="handleStageClick(32)">32</div>
+                <div class="station" id="st-33" onclick="handleStageClick(33)">33</div>
+                <div class="station" id="st-34" onclick="handleStageClick(34)">34</div>
+                <div class="station" id="st-35" onclick="handleStageClick(35)">35</div>
             </div>
         </div>
 
@@ -229,16 +203,17 @@
 
     <footer class="game-footer">
         <div class="footer-buttons">
-            <a href="bang-vang.html" class="btn-nav"><span>🏆</span> BẢNG VÀNG</a>
+            <a href="tuido.html" class="btn-nav"><span>🎒</span> TÚI ĐỒ</a>
             <button class="btn-nav" onclick="setStudentName()"><span>👤</span> NHẬP TÊN</button>
             <button class="btn-nav" onclick="clearData()"><span>⚙️</span> ĐĂNG XUẤT</button>
         </div>
         <div class="footer-copyright">
-            &copy; 2025 EduRobot - Phát triển bởi GV. Lê Thành Long
+            &copy; 2025 EduRobot - GV. Lê Thành Long
         </div>
     </footer>
 
     <script>
+        // CONFIG FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyC6zlWn8BKYU7P6A2-PYq6IIWOzaqJWFhc",
             authDomain: "gamhoctap.firebaseapp.com",
@@ -248,30 +223,33 @@
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        let currentStudent = localStorage.getItem('studentName');
-
-        window.onload = function() {
-            // Kiểm tra xem người dùng có chọn "Không nhắc lại" không
-            if (localStorage.getItem('hideGuide') !== 'true') {
-                document.getElementById('guideModal').style.display = 'flex';
-            } else if (!currentStudent) {
-                // Nếu đã ẩn hướng dẫn mà chưa có tên thì hiện bảng nhập tên
-                setTimeout(setStudentName, 500);
-            }
-
-            if (currentStudent) {
-                document.getElementById('user-lv').innerText = currentStudent;
-            }
-            checkProgression();
+        // LỊCH MỞ VÒNG (Đầu tuần kế tiếp)
+        const GAME_SCHEDULE = {
+            19: "2026-01-19", 20: "2026-01-26", 21: "2026-02-02", 
+            22: "2026-02-23", 23: "2026-03-02", 24: "2026-03-09", 
+            25: "2026-03-16", 26: "2026-03-23", 27: "2026-03-30", 
+            28: "2026-04-06", 29: "2026-04-13", 30: "2026-04-20", 
+            31: "2026-04-27", 32: "2026-05-04", 33: "2026-05-11", 
+            34: "2026-05-18", 35: "2026-05-25"
         };
 
-        function closeGuide() {
-            if (document.getElementById('dontShowAgain').checked) {
-                localStorage.setItem('hideGuide', 'true');
-            }
-            document.getElementById('guideModal').style.display = 'none';
-            if (!currentStudent) setStudentName();
-        }
+        const pageLinks = {
+            19: "tisophantram.html", 20: "cancancongly.html", 21: "sieucapcasio.html",
+            22: "daihoitoanhoc.html", 23: "donvisieudang.html", 24: "kientrucsunhi.html",
+            25: "xuongdonghop.html", 26: "thosanthoigian.html", 27: "donghokydieu.html",
+            28: "duongduaf1.html", 29: "chuyensebuytkythu.html", 30: "nhaphantichnhi.html",
+            31: "matmasohoc.html", 32: "dautruongsothapphan.html", 33: "tamgiacvang.html",
+            34: "chinhphucdinhcao.html", 35: "vongquaymayman.html"
+        };
+
+        let currentStudent = localStorage.getItem('studentName');
+        let cdInterval;
+
+        window.onload = function() {
+            if (currentStudent) document.getElementById('user-lv').innerText = currentStudent;
+            else setTimeout(setStudentName, 1000);
+            updateStationStyles();
+        };
 
         function setStudentName() {
             const name = prompt("🤖 Nhập Họ và Tên để thám hiểm Việt Nam:");
@@ -282,70 +260,80 @@
         }
 
         function clearData() {
-            if(confirm("Đăng xuất để người khác chơi?")) {
+            if(confirm("Đăng xuất tài khoản hiện tại?")) {
                 localStorage.removeItem('studentName');
-                localStorage.removeItem('hideGuide'); // Reset cả hướng dẫn
                 location.reload();
             }
         }
 
-        function checkProgression() {
-            db.ref('scores').once('value', (snapshot) => {
-                const data = snapshot.val() || {};
-                const stations = document.querySelectorAll('.station');
-                
-                stations.forEach(st => {
-                    const stepNum = parseInt(st.getAttribute('data-step'));
-                    if (stepNum === 19) return;
+        function handleStageClick(weekNo) {
+            if (!currentStudent) {
+                setStudentName();
+                return;
+            }
 
-                    if (!currentStudent) {
-                        lockStation(st, "🤖 Hãy NHẬP TÊN để Robot mở khóa hành trình!");
-                        return;
-                    }
+            const now = new Date();
+            const openDate = new Date(GAME_SCHEDULE[weekNo] + "T00:00:00");
 
-                    const gameKeys = { 20: "tisophantram", 21: "tilebandovaungdung", 22: "tongtiso", 23: "hieutiso" };
-                    let prevKey = gameKeys[stepNum] || "bai" + (stepNum - 1);
-                    let passed = false;
+            if (now >= openDate) {
+                window.location.href = pageLinks[weekNo];
+            } else {
+                showCountdown(openDate, weekNo);
+            }
+        }
 
-                    for (let gId in data) {
-                        if (gId.toLowerCase().includes(prevKey.toLowerCase())) {
-                            for (let id in data[gId]) {
-                                if (data[gId][id].fullName === currentStudent && data[gId][id].score >= 85) {
-                                    passed = true; break;
-                                }
-                            }
-                        }
-                    }
+        function showCountdown(endTime, weekNo) {
+            const overlay = document.getElementById('countdown-overlay');
+            const timer = document.getElementById('cd-timer');
+            overlay.style.display = 'flex';
+            
+            if(cdInterval) clearInterval(cdInterval);
+            
+            cdInterval = setInterval(() => {
+                const distance = endTime - new Date().getTime();
+                if (distance < 0) {
+                    clearInterval(cdInterval);
+                    location.reload();
+                    return;
+                }
+                const d = Math.floor(distance / (1000 * 60 * 60 * 24));
+                const h = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const s = Math.floor((distance % (1000 * 60)) / 1000);
+                timer.innerHTML = `${d}d ${h}h ${m}m ${s}s`;
+            }, 1000);
+        }
 
-                    if (!passed) {
-                        lockStation(st, `🤖 ${currentStudent} ơi! Bạn cần 85đ ở vòng ${stepNum - 1} để đi tiếp.`);
-                    }
-                });
+        function updateStationStyles() {
+            const now = new Date();
+            Object.keys(GAME_SCHEDULE).forEach(week => {
+                const openDate = new Date(GAME_SCHEDULE[week] + "T00:00:00");
+                const el = document.getElementById(`st-${week}`);
+                if (now < openDate) el.classList.add('locked');
+                else el.classList.remove('locked');
             });
         }
 
-        function lockStation(element, message) {
-            element.classList.add('locked');
-            element.onclick = (e) => {
-                e.preventDefault();
-                alert(message);
-                if(!currentStudent) setStudentName();
-            };
-        }
-
+        // BẢNG VÀNG
         db.ref('scores').on('value', (snapshot) => {
             const data = snapshot.val();
             const tbody = document.getElementById('leaderboard-body-list');
             if (!data) return;
             let list = [];
-            for (let gId in data) {
-                for (let sId in data[gId]) { list.push(data[gId][sId]); }
-            }
+            for (let g in data) for (let s in data[g]) list.push(data[g][s]);
             list.sort((a, b) => b.score - a.score);
-            tbody.innerHTML = list.slice(0, 10).map((s, i) => `
-                <tr><td>${i+1}</td><td style="text-align:left">${s.fullName || "---"}</td><td>${s.score}</td></tr>
+            const unique = [];
+            const seen = new Set();
+            for (const item of list) {
+                if (!seen.has(item.fullName)) {
+                    unique.push(item);
+                    seen.add(item.fullName);
+                }
+            }
+            tbody.innerHTML = unique.slice(0, 10).map((s, i) => `
+                <tr><td>${i+1}</td><td style="text-align:left">${s.fullName}</td><td>${s.score}</td></tr>
             `).join('');
-            if(list.length > 0) document.getElementById('high-score').innerText = list[0].score;
+            if(unique.length > 0) document.getElementById('high-score').innerText = unique[0].score;
         });
     </script>
 </body>
