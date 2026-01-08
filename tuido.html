@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Túi Đồ Nhà Thám Hiểm - EduRobot</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Lexend:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+    <style>
+        :root {
+            --primary: #FF9800;
+            --gold: #FFD700;
+            --silver: #C0C0C0;
+            --bronze: #CD7F32;
+            --bg-dark: #1a1a1a;
+        }
+
+        body {
+            margin: 0; padding: 0;
+            font-family: 'Lexend', sans-serif;
+            background-color: var(--bg-dark);
+            color: white;
+            min-height: 100vh;
+        }
+
+        .container { padding: 20px; max-width: 800px; margin: auto; }
+
+        .header {
+            text-align: center; margin-bottom: 30px;
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 10px;
+        }
+
+        .header h1 { font-family: 'Bungee'; color: var(--gold); margin: 0; }
+
+        /* BẢNG HUY CHƯƠNG */
+        .medal-section {
+            display: flex; justify-content: space-around;
+            background: rgba(255,255,255,0.05);
+            padding: 20px; border-radius: 20px;
+            margin-bottom: 30px; border: 1px solid #333;
+        }
+
+        .medal-item { text-align: center; }
+        .medal-icon { font-size: 3rem; display: block; filter: drop-shadow(0 0 10px rgba(0,0,0,0.5)); }
+        .medal-name { font-size: 0.8rem; font-weight: bold; margin-top: 5px; color: #aaa; }
+        .medal-count { font-size: 1.5rem; font-weight: bold; color: var(--gold); }
+
+        /* DANH SÁCH VẬT PHẨM */
+        .item-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 15px;
+        }
+
+        .item-card {
+            background: #2c2c2c; border-radius: 15px; padding: 15px;
+            text-align: center; border: 2px solid #333;
+            transition: 0.3s; opacity: 0.3; /* Mặc định là chưa có thì mờ đi */
+        }
+
+        .item-card.unlocked { opacity: 1; border-color: var(--primary); background: #3d3d3d; }
+        .item-card .icon { font-size: 2.5rem; margin-bottom: 10px; display: block; }
+        .item-card .name { font-size: 0.75rem; font-weight: bold; }
+        .item-card .week { font-size: 0.6rem; color: var(--primary); }
+
+        .btn-back {
+            display: inline-block; margin-top: 30px;
+            background: var(--primary); color: black;
+            text-decoration: none; padding: 10px 25px;
+            border-radius: 50px; font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>TÚI ĐỒ CỦA EM</h1>
+        <p>👤 Nhà thám hiểm: <span id="student-name" style="color:var(--gold)">...</span></p>
+    </div>
+
+    <div class="medal-section">
+        <div class="medal-item">
+            <span class="medal-icon">🥇</span>
+            <div class="medal-name">VÀNG</div>
+            <div id="gold-count" class="medal-count">0</div>
+        </div>
+        <div class="medal-item">
+            <span class="medal-icon">🥈</span>
+            <div class="medal-name">BẠC</div>
+            <div id="silver-count" class="medal-count">0</div>
+        </div>
+        <div class="medal-item">
+            <span class="medal-icon">🥉</span>
+            <div class="medal-name">ĐỒNG</div>
+            <div id="bronze-count" class="medal-count">0</div>
+        </div>
+    </div>
+
+    <h3 style="color:var(--primary)">🎒 VẬT PHẨM THU THẬP</h3>
+    <div class="item-grid" id="item-list">
+        </div>
+
+    <center><a href="index.html" class="btn-back">QUAY LẠI BẢN ĐỒ</a></center>
+</div>
+
+<script>
+    // 1. Cấu hình Firebase
+    const firebaseConfig = {
+        apiKey: "AIzaSyC6zlWn8BKYU7P6A2-PYq6IIWOzaqJWFhc",
+        authDomain: "gamhoctap.firebaseapp.com",
+        databaseURL: "https://gamhoctap-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "gamhoctap"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // 2. Dữ liệu vật phẩm theo tuần
+    const ITEMS_DATA = {
+        19: { name: "La bàn thạch anh", icon: "🧭", table: "tisophantram" },
+        20: { name: "Cán cân công lý", icon: "⚖️", table: "cancancongly" },
+        21: { name: "Máy tính Casio thần kỳ", icon: "📟", table: "sieucapcasio" },
+        22: { name: "Cúp thủ khoa Toán", icon: "🏆", table: "daihoitoanhoc" },
+        26: { name: "Mô tô Rô-bốt", icon: "🏍️", table: "thosanthoigian" }
+    };
+
+    // 3. Lịch chốt huy chương (24h Thứ Bảy của tuần mở vòng)
+    const MEDAL_DEADLINES = {
+        19: "2026-01-24", 20: "2026-01-31", 21: "2026-02-07",
+        22: "2026-02-28", 23: "2026-03-07" // Tiếp tục cập nhật theo GAME_SCHEDULE
+    };
+
+    const currentStudent = localStorage.getItem('studentName');
+
+    async function loadInventory() {
+        if (!currentStudent) {
+            alert("Vui lòng nhập tên tại bản đồ trước!");
+            window.location.href = "index.html";
+            return;
+        }
+        document.getElementById('student-name').innerText = currentStudent;
+
+        let medals = { gold: 0, silver: 0, bronze: 0 };
+        const itemContainer = document.getElementById('item-list');
+
+        // Duyệt qua từng tuần để kiểm tra điểm
+        for (let week in ITEMS_DATA) {
+            const item = ITEMS_DATA[week];
+            const snapshot = await db.ref(`scores/${item.table}`).once('value');
+            const scores = snapshot.val();
+
+            let unlocked = false;
+            let gotMedal = "";
+
+            if (scores) {
+                // Tìm bài làm của học sinh này
+                let studentResults = Object.values(scores)
+                    .filter(s => s.fullName === currentStudent)
+                    .sort((a, b) => b.score - a.score); // Lấy điểm cao nhất
+
+                if (studentResults.length > 0) {
+                    const topResult = studentResults[0];
+                    if (topResult.score >= 50) unlocked = true;
+
+                    // KIỂM TRA HUY CHƯƠNG
+                    const submitTime = new Date(topResult.timestamp || Date.now());
+                    const deadline = new Date(MEDAL_DEADLINES[week] + "T23:59:59");
+
+                    if (submitTime <= deadline) {
+                        if (topResult.score === 100) {
+                             medals.gold++;
+                             gotMedal = "🥇";
+                        } else if (topResult.score >= 80) {
+                             medals.silver++;
+                             gotMedal = "🥈";
+                        } else {
+                             medals.bronze++;
+                             gotMedal = "🥉";
+                        }
+                    }
+                }
+            }
+
+            // Hiển thị vật phẩm lên màn hình
+            const card = document.createElement('div');
+            card.className = `item-card ${unlocked ? 'unlocked' : ''}`;
+            card.innerHTML = `
+                <span class="icon">${unlocked ? item.icon : '❓'}</span>
+                <div class="name">${unlocked ? item.name : 'Chưa mở khóa'}</div>
+                <div class="week">Tuần ${week} ${unlocked ? gotMedal : ''}</div>
+            `;
+            itemContainer.appendChild(card);
+        }
+
+        // Cập nhật số lượng huy chương
+        document.getElementById('gold-count').innerText = medals.gold;
+        document.getElementById('silver-count').innerText = medals.silver;
+        document.getElementById('bronze-count').innerText = medals.bronze;
+    }
+
+    loadInventory();
+</script>
+
+</body>
+</html>
