@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hành Trình Xuyên Việt: EduRobot Toán 5</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Lexend:wght@400;700&display=swap" rel="stylesheet">
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+    <style>
+        :root { 
+            --primary: #FF9800; 
+            --dark-green: #2e7d32; 
+            --gold: #ffd700; 
+            --bg-dark: #1a1a1a;
+        }
+
+        body {
+            margin: 0; padding: 0;
+            font-family: 'Lexend', sans-serif;
+            background-color: var(--bg-dark);
+            min-height: 100vh;
+            display: flex; flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* BANNER */
+        .welcome-banner {
+            background: linear-gradient(90deg, #1a1a1a, #333, #1a1a1a);
+            padding: 15px 20px;
+            display: flex; justify-content: center; align-items: center;
+            gap: 20px; border-bottom: 2px solid var(--primary);
+        }
+        .welcome-text {
+            font-family: 'Bungee', cursive;
+            font-size: 1.8rem; color: white;
+            text-shadow: 3px 3px 0px var(--primary);
+            margin: 0; text-align: center;
+        }
+        .robot-head-top { width: 50px; height: auto; }
+
+        /* HEADER */
+        .game-header {
+            background: #222; color: white; padding: 10px 20px;
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid #333;
+        }
+
+        /* MAIN CONTENT */
+        .game-content-wrapper { display: flex; gap: 15px; padding: 15px; flex: 1; }
+        .map-container {
+            flex: 7; position: relative; display: flex; justify-content: center;
+            background: #2c2c2c; border-radius: 15px; padding: 10px;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+        }
+        .map-relative-box { position: relative; width: 100%; max-width: 850px; }
+        .map-image { width: 100%; height: auto; display: block; border-radius: 10px; }
+
+        /* TRẠM DỪNG */
+        .station {
+            position: absolute; width: 5%; aspect-ratio: 1/1;
+            background: white; border: 2.5px solid var(--dark-green);
+            border-radius: 50%; display: flex; justify-content: center; align-items: center;
+            font-weight: bold; color: var(--dark-green); text-decoration: none;
+            font-size: 1.1vw; z-index: 10; transition: all 0.2s;
+        }
+        
+        .station.locked {
+            background: #333 !important; border-color: #555 !important;
+            color: #777 !important; cursor: not-allowed; opacity: 0.6;
+        }
+        .station.locked::after { content: '🔒'; position: absolute; font-size: 0.7vw; bottom: -8px; }
+
+        .station:not(.locked):hover { transform: scale(1.2); box-shadow: 0 0 15px var(--gold); z-index: 20; }
+
+        .landmark-tag {
+            position: absolute; background: rgba(0, 0, 0, 0.7);
+            color: var(--gold); padding: 3px 8px; border-radius: 20px;
+            font-size: 0.7vw; border: 1px solid var(--gold); pointer-events: none;
+        }
+
+        /* SIDEBAR */
+        .leaderboard-sidebar {
+            flex: 3; background: #222; border: 2px solid var(--primary);
+            border-radius: 15px; padding: 15px; min-width: 280px; height: fit-content;
+        }
+        .leaderboard-title { color: var(--gold); text-align: center; font-family: 'Bungee'; font-size: 1.1rem; margin-bottom: 15px; }
+        table { width: 100%; border-collapse: collapse; color: white; }
+        th { background: var(--primary); color: #000; padding: 8px; font-size: 0.8rem; }
+        td { padding: 8px; border-bottom: 1px solid #333; text-align: center; font-size: 0.85rem; }
+
+        /* FOOTER */
+        .game-footer {
+            background: #222; padding: 15px 10px; display: flex; 
+            flex-direction: column; align-items: center; gap: 10px;
+            border-top: 3px solid var(--primary); position: sticky; bottom: 0; z-index: 1000;
+        }
+        .footer-buttons { display: flex; flex-direction: row; justify-content: center; gap: 8px; width: 100%; }
+        .btn-nav {
+            background: #333; border: 2px solid var(--primary); color: var(--primary); 
+            padding: 8px 15px; border-radius: 50px; font-size: 0.85rem; font-weight: bold;
+            white-space: nowrap; display: flex; align-items: center; gap: 5px; text-decoration: none;
+        }
+        .footer-copyright { color: #888; font-size: 0.7rem; margin-top: 5px; }
+
+        /* --- POPUP HƯỚNG DẪN --- */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); display: none; justify-content: center;
+            align-items: center; z-index: 9999;
+        }
+        .modal-content {
+            background: #2c2c2c; width: 90%; max-width: 500px; padding: 25px;
+            border-radius: 20px; border: 3px solid var(--primary); color: white;
+            text-align: left; position: relative; box-shadow: 0 0 30px var(--primary);
+        }
+        .modal-title { font-family: 'Bungee'; color: var(--gold); font-size: 1.3rem; margin-bottom: 15px; text-align: center; }
+        .modal-body p { margin: 10px 0; font-size: 0.9rem; line-height: 1.5; }
+        .modal-footer { margin-top: 20px; display: flex; flex-direction: column; align-items: center; gap: 15px; }
+        .btn-ok { 
+            background: var(--primary); border: none; padding: 10px 40px; 
+            border-radius: 50px; color: black; font-weight: bold; cursor: pointer; font-family: 'Lexend';
+        }
+        .no-repeat-box { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; color: #bbb; cursor: pointer; }
+
+        @media (max-width: 1024px) {
+            .welcome-text { font-size: 1.1rem; }
+            .game-content-wrapper { flex-direction: column; }
+            .station { width: 22px !important; height: 22px !important; font-size: 10px !important; }
+            .btn-nav { font-size: 0.75rem; padding: 6px 10px; }
+        }
+
+        /* TỌA ĐỘ TRẠM */
+        #st-19 { top: 5%; left: 30%; }   #tag-19 { top: 3.5%; left: 22%; }
+        #st-20 { top: 8%; left: 45%; }   #st-21 { top: 13%; left: 38%; }
+        #st-22 { top: 18%; left: 47%; }  #tag-22 { top: 16.5%; left: 54%; }
+        #st-23 { top: 25%; left: 43%; }  #st-24 { top: 32%; left: 48%; }
+        #st-25 { top: 40%; left: 53%; }  #tag-25 { top: 38.5%; left: 60%; }
+        #st-26 { top: 48%; left: 58%; }  #st-27 { top: 56%; left: 60%; }
+        #st-28 { top: 65%; left: 54%; }  #st-29 { top: 74%; left: 58%; }
+        #st-30 { top: 82%; left: 48%; }  #tag-30 { top: 80.5%; left: 55%; }
+        #st-31 { top: 87%; left: 40%; }  #st-32 { top: 92%; left: 35%; }
+        #st-33 { top: 95%; left: 42%; }  #tag-33 { top: 94%; left: 30%; }
+    </style>
+</head>
+<body>
+
+    <div id="guideModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-title">🤖 CẨM NANG THÁM HIỂM</div>
+            <div class="modal-body">
+                <p>1. 👤 <b>Nhập tên:</b> Bấm vào nút "Nhập tên" (nút giữa, cuối trang) để Robot ghi nhận điểm.</p>
+                <p>2. 🔒 <b>Khóa vòng:</b> Bạn phải đạt ít nhất <b>85% số điểm</b> ở vòng trước để mở vòng tiếp theo.</p>
+                <p>3. 🏆 <b>Bảng vàng:</b> Cố gắng làm bài thật nhanh và chính xác để lên Top 10 nhé!</p>
+                
+                <p style="font-family: 'Bungee'; color: var(--gold); text-align: center; margin-top: 20px; font-size: 1.1rem; text-shadow: 1px 1px 2px rgba(0,0,0,0.5);">
+                    CHÚC BẠN NHẬN ĐƯỢC CÚP VÀNG
+                </p>
+            </div>
+            <div class="modal-footer">
+                <label class="no-repeat-box">
+                    <input type="checkbox" id="dontShowAgain"> Không nhắc lại ở lần sau.
+                </label>
+                <button class="btn-ok" onclick="closeGuide()">OK!</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="welcome-banner">
+        <h1 class="welcome-text">THÁM HIỂM XUYÊN VIỆT CÙNG ROBOT</h1>
+        <img src="robot-head.png" alt="Robot" class="robot-head-top">
+    </div>
+
+    <header class="game-header">
+        <div style="display:flex; align-items:center; gap:10px;">
+            <div onclick="setStudentName()" style="width:30px; height:30px; border-radius:50%; background:var(--gold); border:2px solid #fff; cursor:pointer;"></div>
+            <div>
+                <h2 style="margin:0; font-size:0.8rem; color:var(--gold);">NHÀ THÁM HIỂM</h2>
+                <span style="font-size:0.7rem; color:#ccc;">👤 <span id="user-lv">Khách (Chưa nhập tên)</span></span>
+            </div>
+        </div>
+        <div style="text-align:right;">
+            <p style="margin:0; font-size:0.8rem; color:var(--primary); font-weight:bold;">⭐ TOP ĐIỂM: <span id="high-score">0</span></p>
+        </div>
+    </header>
+
+    <main class="game-content-wrapper">
+        <div class="map-container">
+            <div class="map-relative-box">
+                <img src="Bandogame.jpg" alt="Bản đồ" class="map-image">
+                <div class="landmark-tag" id="tag-19">📍 Lũng Cú</div>
+                <div class="landmark-tag" id="tag-22">🏛️ Hà Nội</div>
+                <div class="landmark-tag" id="tag-25">🕌 Huế</div>
+                <div class="landmark-tag" id="tag-30">🏢 TP.HCM</div>
+                <div class="landmark-tag" id="tag-33">🛶 Cà Mau</div>
+
+                <a href="19.html" class="station" id="st-19" data-step="19">19</a>
+                <a href="20.html" class="station" id="st-20" data-step="20">20</a>
+                <a href="tongtiso.html" class="station" id="st-21" data-step="21">21</a>
+                <a href="hieutiso.html" class="station" id="st-22" data-step="22">22</a>
+                <a href="bai23.html" class="station" id="st-23" data-step="23">23</a>
+                <a href="bai24.html" class="station" id="st-24" data-step="24">24</a>
+                <a href="bai25.html" class="station" id="st-25" data-step="25">25</a>
+                <a href="bai26.html" class="station" id="st-26" data-step="26">26</a>
+                <a href="bai27.html" class="station" id="st-27" data-step="27">27</a>
+                <a href="bai28.html" class="station" id="st-28" data-step="28">28</a>
+                <a href="bai29.html" class="station" id="st-29" data-step="29">29</a>
+                <a href="bai30.html" class="station" id="st-30" data-step="30">30</a>
+                <a href="bai31.html" class="station" id="st-31" data-step="31">31</a>
+                <a href="bai32.html" class="station" id="st-32" data-step="32">32</a>
+                <a href="bai33.html" class="station" id="st-33" data-step="33">33</a>
+            </div>
+        </div>
+
+        <section class="leaderboard-sidebar">
+            <h3 class="leaderboard-title">🏆 BẢNG VÀNG TOP 10</h3>
+            <table>
+                <thead>
+                    <tr><th width="20%">Hạng</th><th width="55%">Tên</th><th width="25%">Điểm</th></tr>
+                </thead>
+                <tbody id="leaderboard-body-list">
+                    <tr><td colspan="3">Đang cập nhật...</td></tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+
+    <footer class="game-footer">
+        <div class="footer-buttons">
+            <a href="bang-vang.html" class="btn-nav"><span>🏆</span> BẢNG VÀNG</a>
+            <button class="btn-nav" onclick="setStudentName()"><span>👤</span> NHẬP TÊN</button>
+            <button class="btn-nav" onclick="clearData()"><span>⚙️</span> ĐĂNG XUẤT</button>
+        </div>
+        <div class="footer-copyright">
+            &copy; 2025 EduRobot - Phát triển bởi GV. Lê Thành Long
+        </div>
+    </footer>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyC6zlWn8BKYU7P6A2-PYq6IIWOzaqJWFhc",
+            authDomain: "gamhoctap.firebaseapp.com",
+            databaseURL: "https://gamhoctap-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "gamhoctap"
+        };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        let currentStudent = localStorage.getItem('studentName');
+
+        window.onload = function() {
+            // Kiểm tra xem người dùng có chọn "Không nhắc lại" không
+            if (localStorage.getItem('hideGuide') !== 'true') {
+                document.getElementById('guideModal').style.display = 'flex';
+            } else if (!currentStudent) {
+                // Nếu đã ẩn hướng dẫn mà chưa có tên thì hiện bảng nhập tên
+                setTimeout(setStudentName, 500);
+            }
+
+            if (currentStudent) {
+                document.getElementById('user-lv').innerText = currentStudent;
+            }
+            checkProgression();
+        };
+
+        function closeGuide() {
+            if (document.getElementById('dontShowAgain').checked) {
+                localStorage.setItem('hideGuide', 'true');
+            }
+            document.getElementById('guideModal').style.display = 'none';
+            if (!currentStudent) setStudentName();
+        }
+
+        function setStudentName() {
+            const name = prompt("🤖 Nhập Họ và Tên để thám hiểm Việt Nam:");
+            if (name && name.trim().length > 3) {
+                localStorage.setItem('studentName', name.trim());
+                location.reload();
+            }
+        }
+
+        function clearData() {
+            if(confirm("Đăng xuất để người khác chơi?")) {
+                localStorage.removeItem('studentName');
+                localStorage.removeItem('hideGuide'); // Reset cả hướng dẫn
+                location.reload();
+            }
+        }
+
+        function checkProgression() {
+            db.ref('scores').once('value', (snapshot) => {
+                const data = snapshot.val() || {};
+                const stations = document.querySelectorAll('.station');
+                
+                stations.forEach(st => {
+                    const stepNum = parseInt(st.getAttribute('data-step'));
+                    if (stepNum === 19) return;
+
+                    if (!currentStudent) {
+                        lockStation(st, "🤖 Hãy NHẬP TÊN để Robot mở khóa hành trình!");
+                        return;
+                    }
+
+                    const gameKeys = { 20: "tisophantram", 21: "tilebandovaungdung", 22: "tongtiso", 23: "hieutiso" };
+                    let prevKey = gameKeys[stepNum] || "bai" + (stepNum - 1);
+                    let passed = false;
+
+                    for (let gId in data) {
+                        if (gId.toLowerCase().includes(prevKey.toLowerCase())) {
+                            for (let id in data[gId]) {
+                                if (data[gId][id].fullName === currentStudent && data[gId][id].score >= 85) {
+                                    passed = true; break;
+                                }
+                            }
+                        }
+                    }
+
+                    if (!passed) {
+                        lockStation(st, `🤖 ${currentStudent} ơi! Bạn cần 85đ ở vòng ${stepNum - 1} để đi tiếp.`);
+                    }
+                });
+            });
+        }
+
+        function lockStation(element, message) {
+            element.classList.add('locked');
+            element.onclick = (e) => {
+                e.preventDefault();
+                alert(message);
+                if(!currentStudent) setStudentName();
+            };
+        }
+
+        db.ref('scores').on('value', (snapshot) => {
+            const data = snapshot.val();
+            const tbody = document.getElementById('leaderboard-body-list');
+            if (!data) return;
+            let list = [];
+            for (let gId in data) {
+                for (let sId in data[gId]) { list.push(data[gId][sId]); }
+            }
+            list.sort((a, b) => b.score - a.score);
+            tbody.innerHTML = list.slice(0, 10).map((s, i) => `
+                <tr><td>${i+1}</td><td style="text-align:left">${s.fullName || "---"}</td><td>${s.score}</td></tr>
+            `).join('');
+            if(list.length > 0) document.getElementById('high-score').innerText = list[0].score;
+        });
+    </script>
+</body>
+</html>
