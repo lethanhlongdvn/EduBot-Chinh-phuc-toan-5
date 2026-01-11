@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vòng Quay May Mắn - Tuần 35</title>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+    <style>
+        :root { --main-color: #ff4757; --sec-color: #2f3542; --gold: #ffa502; --win: #2ed573; }
+        body { font-family: 'Lexend', sans-serif; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; background: var(--sec-color); color: #fff; user-select: none; }
+        .game-box { max-width: 750px; width: 100%; background: #57606f; padding: 30px; border-radius: 25px; border: 4px solid var(--gold); box-shadow: 0 15px 40px rgba(0,0,0,0.4); }
+        .header { display: flex; justify-content: space-between; font-weight: bold; color: var(--gold); margin-bottom: 20px; border-bottom: 2px solid #747d8c; padding-bottom: 10px; }
+        .screen { background: #2f3542; border-radius: 15px; padding: 25px; margin-bottom: 25px; min-height: 160px; display: flex; flex-direction: column; justify-content: center; text-align: center; }
+        .q-tag { font-size: 0.8rem; text-transform: uppercase; color: var(--gold); margin-bottom: 10px; letter-spacing: 2px; }
+        .q-text { font-size: 1.3rem; line-height: 1.6; }
+        .input-zone { display: flex; flex-direction: column; gap: 15px; }
+        .ans-input { padding: 20px; border-radius: 15px; border: 3px solid var(--gold); background: #fff; color: #2f3542; font-size: 1.8rem; text-align: center; font-family: 'Lexend'; font-weight: bold; outline: none; }
+        .btn-submit { background: var(--main-color); color: white; padding: 18px; border: none; border-radius: 15px; font-weight: bold; cursor: pointer; font-size: 1.2rem; box-shadow: 0 6px 0 #b33939; transition: 0.2s; }
+        .btn-submit:active { transform: translateY(3px); box-shadow: 0 2px 0 #b33939; }
+        #toast { position: fixed; top: 30px; padding: 15px 40px; border-radius: 50px; font-weight: bold; z-index: 1000; opacity: 0; transition: 0.3s; pointer-events: none; border: 2px solid #fff; }
+        .show-toast { opacity: 1 !important; top: 50px !important; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+<div id="toast"></div>
+
+<div class="header" style="width: 100%; max-width: 750px;">
+    <span id="vong-thi">VÒNG QUAY MAY MẮN</span>
+    <span id="diem-so">ĐIỂM: 0</span>
+</div>
+
+<div class="game-box">
+    <div id="play-area">
+        <div class="screen">
+            <span class="q-tag" id="q-label">Câu hỏi 1</span>
+            <div id="q-content" class="q-text">Đang chuẩn bị đề thi...</div>
+        </div>
+        <div class="input-zone">
+            <input type="text" id="user-ans" class="ans-input" placeholder="Nhập kết quả..." autocomplete="off">
+            <button class="btn-submit" onclick="checkAnswer()">GỬI KẾT QUẢ</button>
+        </div>
+    </div>
+
+    <div id="result-screen" class="hidden" style="text-align: center;">
+        <h2 style="color: var(--gold);">KHO BÁU TRI THỨC</h2>
+        <h1 id="final-score" style="font-size: 5rem; margin: 20px 0;">0</h1>
+        <div id="save-form">
+            <input type="text" id="p-name" style="width:80%; padding:15px; margin:5px; border-radius:10px;" placeholder="Tên học sinh...">
+            <input type="text" id="p-class" style="width:80%; padding:15px; margin:5px; border-radius:10px;" placeholder="Lớp...">
+            <button class="btn-submit" style="width:85%; margin-top:15px;" onclick="saveData()">LƯU BẢNG VÀNG</button>
+        </div>
+        <button class="btn-submit" style="background:#747d8c; box-shadow:0 6px 0 #2f3542; margin-top:20px;" onclick="location.reload()">CHƠI LẠI</button>
+    </div>
+</div>
+
+<script>
+    let score = 0;
+    let currentIdx = 0;
+    let gameData = [];
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyC6zlWn8BKYU7P6A2-PYq6IIWOzaqJWFhc",
+        authDomain: "gamhoctap.firebaseapp.com",
+        databaseURL: "https://gamhoctap-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "gamhoctap"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // 30 BÀI CƠ BẢN
+    const POOL_CO_BAN = [
+        {q: "Số 121 783 907, chữ số 7 thuộc hàng nào? (Điền: hàng trăm nghìn/hàng chục nghìn/...)", a: "hàng trăm nghìn"},
+        {q: "Làm tròn số 105 362 480 đến hàng nghìn:", a: "105362000"},
+        {q: "Viết phân số 317/100 dưới dạng số thập phân:", a: "3.17"},
+        {q: "Rút gọn phân số 15/21 về phân số tối giản:", a: "5/7"},
+        {q: "Rút gọn phân số 72/120 về phân số tối giản:", a: "3/5"},
+        {q: "Tính: 536,817 + 82,579 =", a: "619.396"},
+        {q: "Tính: 64,38 + 93,46 =", a: "157.84"},
+        {q: "Tính nhanh: 275 + (725 + 486) =", a: "1486"},
+        {q: "Tìm x biết: a + x = a. x là số mấy?", a: "0"},
+        {q: "Tính: 32,6 x 0,58 =", a: "18.908"},
+        {q: "Tính: 98,28 : 3,6 =", a: "27.3"},
+        {q: "Tính nhẩm: 27,6 x 10 =", a: "276"},
+        {q: "Tính nhẩm: 432 x 0,1 =", a: "43.2"},
+        {q: "Đổi đơn vị: 1,5 km = ... m", a: "1500"},
+        {q: "Đổi đơn vị: 3 tấn 66 kg = ... tấn", a: "3.066"},
+        {q: "Đổi đơn vị: 1,6 ha = ... m²", a: "16000"},
+        {q: "Đổi đơn vị: 5 m³ 68 dm³ = ... m³", a: "5.068"},
+        {q: "Chu vi hình vuông có cạnh 60m là (m):", a: "240"},
+        {q: "Diện tích tam giác có đáy 5cm, cao 4cm (cm²):", a: "10"},
+        {q: "Diện tích hình thang có đáy lớn 50m, đáy bé 30m, cao 25m (m²):", a: "1000"},
+        {q: "Chu vi đĩa sứ hình tròn đường kính 24cm (cm):", a: "75.36"},
+        {q: "Thể tích hình hộp chữ nhật: dài 8cm, rộng 5cm, cao 6cm (cm³):", a: "240"},
+        {q: "Diện tích toàn phần hình lập phương cạnh 1,5m (m²):", a: "13.5"},
+        {q: "Tìm tỉ số phần trăm của 49 và 70 (%):", a: "70"},
+        {q: "Tính 10% của 60 lít (l):", a: "6"},
+        {q: "Lớp có 32 HS, 12 bạn xuất sắc. Tỉ số phần trăm HS xuất sắc là (%):", a: "37.5"},
+        {q: "Vận tốc ô tô đi 180km trong 2 giờ (km/h):", a: "90"},
+        {q: "Quãng đường tàu đi trong 2,5 giờ với vận tốc 32km/h (km):", a: "80"},
+        {q: "Thời gian chạy 400m với vận tốc 5m/s (giây):", a: "80"},
+        {q: "Biểu đồ có 45% HS thích lớp 3 trong tổng 100 em. Số em lớp 3 là:", a: "45"}
+    ];
+
+    // 10 BÀI NÂNG CAO
+    const POOL_NANG_CAO = [
+        {q: "Tàu dài 200m, v=20m/s qua hầm dài 600m. Sau bao lâu đuôi tàu ra khỏi hầm (giây)?", a: "40"},
+        {q: "Khối gỗ HHCN bị cắt đi một hình lập phương cạnh 2dm. Thể tích giảm đi bao nhiêu dm³?", a: "8"},
+        {q: "Bể cao 50cm, nước đang cao 3/4 bể. Chiều cao nước hiện tại là bao nhiêu cm?", a: "37.5"},
+        {q: "Giảm 10% của 350.000đ rồi giảm tiếp 5% trên giá mới. Giá cuối là (đồng):", a: "299250"},
+        {q: "Cô Hoa gửi 50tr lãi 8%/năm. Sau 1 năm cả gốc lẫn lãi là (triệu đồng):", a: "54"},
+        {q: "Hai xe cách 115km. Xe A đi 22km/h, xe B đi 24km/h ngược chiều. Sau mấy giờ gặp nhau?", a: "2.5"},
+        {q: "Hình thang tăng đáy lớn 10m thì diện tích tăng 50m². Chiều cao hình thang là (m):", a: "10"},
+        {q: "Khán đài C có 3600 người (chiếm 18%). Tổng số khán giả toàn sân là:", a: "20000"},
+        {q: "Gieo xúc xắc 9 lần, mặt chẵn xuất hiện 4 lần. Tỉ số khả năng mặt lẻ xuất hiện là (phân số):", a: "5/9"},
+        {q: "Diện tích 10.000km², mật độ 80 người/km². Muốn tăng mật độ lên 90 thì dân số tăng thêm bao nhiêu?", a: "100000"}
+    ];
+
+    function initGame() {
+        const shuffleCB = POOL_CO_BAN.sort(() => 0.5 - Math.random()).slice(0, 8);
+        const shuffleNC = POOL_NANG_CAO.sort(() => 0.5 - Math.random()).slice(0, 2);
+        gameData = [...shuffleCB, ...shuffleNC];
+        showQ();
+    }
+
+    function showQ() {
+        const item = gameData[currentIdx];
+        document.getElementById('q-label').innerText = `Thử thách ${currentIdx + 1}/10 ${currentIdx >= 8 ? "- NÂNG CAO" : ""}`;
+        document.getElementById('q-content').innerText = item.q;
+        document.getElementById('user-ans').value = "";
+        document.getElementById('user-ans').focus();
+    }
+
+    function checkAnswer() {
+        const userVal = document.getElementById('user-ans').value.trim().toLowerCase().replace(',', '.');
+        const correctVal = gameData[currentIdx].a.toLowerCase();
+
+        if (userVal === correctVal) {
+            score += (currentIdx >= 8 ? 20 : 10);
+            toast("CHÍNH XÁC! 🌟", "#2ed573");
+        } else {
+            toast("CHƯA ĐÚNG! ❌", "#ff4757");
+        }
+        
+        document.getElementById('diem-so').innerText = "ĐIỂM: " + score;
+        setTimeout(next, 1000);
+    }
+
+    function next() {
+        currentIdx++;
+        if (currentIdx < gameData.length) showQ();
+        else finish();
+    }
+
+    function toast(m, c) {
+        const t = document.getElementById('toast');
+        t.innerText = m; t.style.background = c;
+        t.classList.add('show-toast');
+        setTimeout(() => t.classList.remove('show-toast'), 800);
+    }
+
+    function finish() {
+        document.getElementById('play-area').classList.add('hidden');
+        document.getElementById('result-screen').classList.remove('hidden');
+        document.getElementById('final-score').innerText = score;
+    }
+
+    function saveData() {
+        const n = document.getElementById('p-name').value;
+        const c = document.getElementById('p-class').value;
+        if(!n || !c) return;
+        db.ref('ketqua/tuan35/' + Date.now()).set({ ten: n, lop: c, diem: score, ngay: new Date().toLocaleDateString() })
+        .then(() => { alert("Đã lưu kết quả vinh quang!"); location.reload(); });
+    }
+
+    // Cho phép nhấn Enter để gửi
+    document.getElementById('user-ans').addEventListener('keypress', (e) => {
+        if(e.key === 'Enter') checkAnswer();
+    });
+
+    window.onload = initGame;
+</script>
+</body>
+</html>
