@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mật mã số học - Tuần 31</title>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+    <style>
+        :root { --nen-toi: #0a192f; --chu-xanh: #00ff41; --canh-bao: #ff4d4d; --khung-game: #112240; }
+        body { font-family: 'Lexend', sans-serif; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; background: var(--nen-toi); color: #fff; user-select: none; }
+        .khung-chinh { max-width: 750px; width: 100%; background: var(--khung-game); padding: 30px; border-radius: 15px; box-shadow: 0 0 20px rgba(0,255,65,0.2); border: 2px solid var(--chu-xanh); }
+        #thông-bao { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); padding: 15px 40px; border-radius: 8px; font-weight: bold; font-size: 1.2rem; z-index: 1000; transition: 0.3s; opacity: 0; pointer-events: none; border: 2px solid var(--chu-xanh); }
+        .hien-thông-bao { opacity: 1 !important; top: 50px !important; }
+        .man-hinh { background: #020c1b; border-radius: 8px; padding: 25px; margin-bottom: 25px; border: 1px solid #233554; min-height: 160px; position: relative; box-shadow: inset 0 0 15px rgba(0,255,65,0.1); }
+        .tieu-de-man-hinh { display: flex; justify-content: space-between; font-size: 0.9rem; color: var(--chu-xanh); border-bottom: 1px solid #233554; padding-bottom: 10px; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px; }
+        .noi-dung-cau-hoi { font-size: 1.2rem; line-height: 1.7; color: #e6f1ff; }
+        .thanh-trang-thai { display: flex; justify-content: space-between; margin-bottom: 15px; color: var(--chu-xanh); font-weight: bold; width: 100%; max-width: 750px; }
+        .luoi-lua-chon { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .nut-lua-chon { background: #1d2d50; border: 1px solid var(--chu-xanh); padding: 18px; border-radius: 8px; font-family: 'Lexend'; cursor: pointer; transition: 0.3s; color: var(--chu-xanh); font-size: 1.05rem; text-align: left; }
+        .nut-lua-chon:hover { background: var(--chu-xanh); color: #0a192f; font-weight: bold; box-shadow: 0 0 15px var(--chu-xanh); }
+        .vung-nhap-lieu { display: flex; flex-direction: column; gap: 15px; }
+        .o-nhap { padding: 18px; border-radius: 8px; border: 1px solid var(--chu-xanh); background: #020c1b; color: var(--chu-xanh); font-size: 1.4rem; font-family: 'Lexend'; text-align: center; outline: none; }
+        .nut-hanh-dong { background: transparent; color: var(--chu-xanh); padding: 15px 30px; border: 2px solid var(--chu-xanh); border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1.1rem; text-transform: uppercase; transition: 0.3s; }
+        .nut-hanh-dong:hover { background: rgba(0, 255, 65, 0.1); box-shadow: inset 0 0 10px var(--chu-xanh); }
+        .an { display: none; }
+    </style>
+</head>
+<body>
+
+<div id="thông-bao"></div>
+
+<div class="thanh-trang-thai">
+    <span id="ten-nhiem-vu">NHIỆM VỤ 1: THU THẬP SỐ LIỆU</span>
+    <span id="hien-thi-diem">MẬT MÃ GIẢI ĐƯỢC: 0%</span>
+</div>
+
+<div class="khung-chinh">
+    <div class="man-hinh">
+        <div class="tieu-de-man-hinh">
+            <span>HỆ THỐNG GIẢI MÃ TOÁN HỌC - TUẦN 31</span>
+            <span id="so-luot-choi">LƯỢT THỬ: 3/3</span>
+        </div>
+        <div id="vung-cau-hoi" class="noi-dung-cau-hoi">Đang kết nối dữ liệu...</div>
+    </div>
+
+    <div id="vung-tuong-tac"></div>
+
+    <div id="man-hinh-ket-qua" class="an" style="text-align: center;">
+        <h2 style="color: var(--chu-xanh);">GIẢI MÃ THÀNH CÔNG</h2>
+        <h1 id="diem-cuoi" style="font-size: 4rem; color: #fff; margin: 15px 0;">0%</h1>
+        <div id="bieu-mau-luu" class="an">
+            <input type="text" id="ten-hs" style="width:80%; padding:15px; margin:10px; border-radius:8px; border:1px solid var(--chu-xanh); background: #020c1b; color: white;" placeholder="Họ và tên...">
+            <input type="text" id="lop-hs" style="width:80%; padding:15px; margin:10px; border-radius:8px; border:1px solid var(--chu-xanh); background: #020c1b; color: white;" placeholder="Lớp...">
+            <button class="nut-hanh-dong" style="width:85%; margin-top:10px;" onclick="luuDuLieu()">LƯU KẾT QUẢ</button>
+        </div>
+        <button class="nut-hanh-dong" style="color:#8892b0; border-color:#233554; margin-top:20px;" onclick="location.reload()">GIẢI MÃ LẠI</button>
+    </div>
+</div>
+
+<script>
+    let hoanThanh = false;
+    let diem = 0;
+    let vong = 1;
+    let cauHienTai = 0;
+    let luotConLai = 3;
+
+    window.addEventListener('beforeunload', (e) => {
+        if (!hoanThanh) { e.preventDefault(); e.returnValue = ''; }
+    });
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyC6zlWn8BKYU7P6A2-PYq6IIWOzaqJWFhc",
+        authDomain: "gamhoctap.firebaseapp.com",
+        databaseURL: "https://gamhoctap-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "gamhoctap"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    function tronMang(array) { return array.sort(() => Math.random() - 0.5); }
+
+    const KHO_1 = [
+        {q: "Để chuyển hóa thông tin rời rạc thành bảng dữ liệu dễ nhận xét, ta cần làm gì?", opts: ["Thu thập và phân loại", "Vẽ hình trang trí", "Viết lại vào vở bài tập", "Không cần làm gì"], c: 0},
+        {q: "Việc sắp xếp số liệu thống kê giúp chúng ta:", opts: ["Hiểu rõ ý nghĩa dữ liệu", "Làm bài toán khó hơn", "Mất nhiều thời gian hơn", "Tìm ra đáp án sai"], c: 0},
+        {q: "Có 5 bạn nặng: 30kg, 32kg, 30kg, 35kg, 32kg. Có bao nhiêu giá trị cân nặng khác nhau?", opts: ["2 giá trị", "3 giá trị", "4 giá trị", "5 giá trị"], c: 1},
+        {q: "Trong bảng thống kê, số lần lặp lại của một thông tin được gọi là:", opts: ["Tần số", "Tổng số", "Dữ liệu", "Kết quả"], c: 0},
+        {q: "Dữ liệu 'Các môn thể thao yêu thích' là loại dữ liệu nào?", opts: ["Số liệu", "Thông tin bằng chữ", "Hình vẽ", "Phép tính"], c: 1},
+        {q: "Khi khảo sát 15 bạn về số anh chị em, tổng số liệu thu được là:", opts: ["15 số liệu", "30 số liệu", "5 số liệu", "Không xác định"], c: 0},
+        {q: "Sắp xếp số liệu 4,5; 3,9; 4,1 theo thứ tự giảm dần là:", opts: ["4,5; 4,1; 3,9", "3,9; 4,1; 4,5", "4,1; 4,5; 3,9", "4,5; 3,9; 4,1"], c: 0},
+        {q: "Biểu đồ nào thường dùng để biểu diễn sự thay đổi của số liệu theo thời gian?", opts: ["Biểu đồ cột", "Biểu đồ đoạn thẳng", "Biểu đồ tranh", "Hình tròn"], c: 1}
+    ];
+
+    const KHO_2 = [
+        {q: "Phân số 2/5 viết dưới dạng số thập phân là:", opts: ["0,2", "0,4", "0,5", "2,5"], c: 1},
+        {q: "Số thập phân 0,25 tương ứng với phân số tối giản nào?", opts: ["1/4", "1/2", "2/5", "25/10"], c: 0},
+        {q: "Hỗn số 3 và 1/4 viết dưới dạng số thập phân là:", opts: ["3,14", "3,25", "3,4", "1,34"], c: 1},
+        {q: "So sánh 0,6 và 3/5:", opts: ["0,6 > 3/5", "0,6 < 3/5", "0,6 = 3/5", "Không so sánh được"], c: 2},
+        {q: "Trong số 123,456 chữ số 5 thuộc hàng nào?", opts: ["Hàng phần mười", "Hàng phần trăm", "Hàng phần nghìn", "Hàng chục"], c: 1},
+        {q: "Giá trị của biểu thức 0,5 + 1/2 là:", opts: ["0,6", "1", "1,5", "0,75"], c: 1},
+        {q: "Viết phân số 9/20 dưới dạng số thập phân:", opts: ["0,9", "0,45", "0,2", "4,5"], c: 1},
+        {q: "Số 0,008 đọc là:", opts: ["Tám phần mười", "Tám phần trăm", "Tám phần nghìn", "Tám đơn vị"], c: 2}
+    ];
+
+    const KHO_3 = [
+        {q: "Lớp có 25 học sinh, 15 bạn là nữ. Tỉ số phần trăm của số bạn nữ là (nhập số):", a: "60"},
+        {q: "Tính nhanh: 0,5 x 10 + 2,5 bằng bao nhiêu?", a: "7,5"},
+        {q: "Chuyển hỗn số 2 và 3/5 thành số thập phân (ví dụ: 2,6):", a: "2,6"},
+        {q: "Tìm X biết: X x 5 = 1. Giá trị của X là:", a: "0,2"}
+    ];
+
+    let deVong1 = tronMang([...KHO_1]).slice(0, 4);
+    let deVong2 = tronMang([...KHO_2]).slice(0, 4);
+    let deVong3 = tronMang([...KHO_3]).slice(0, 2);
+
+    function batDauVong(v) {
+        vong = v; cauHienTai = 0;
+        document.getElementById('ten-nhiem-vu').innerText = v === 1 ? "NHIỆM VỤ 1: THU THẬP SỐ LIỆU" : (v === 2 ? "NHIỆM VỤ 2: PHÂN SỐ & THẬP PHÂN" : "NHIỆM VỤ 3: GIẢI MÃ TỔNG HỢP");
+        if(v > 1) document.getElementById('so-luot-choi').classList.add('an');
+        hienThiCauHoi();
+    }
+
+    function hienThiCauHoi() {
+        let duLieu = vong === 1 ? deVong1 : (vong === 2 ? deVong2 : deVong3);
+        let cau = duLieu[cauHienTai];
+        document.getElementById('vung-cau-hoi').innerHTML = `<b>Mật mã ${cauHienTai+1}:</b> ${cau.q}`;
+        let html = '';
+        if(vong < 3) {
+            html = '<div class="luoi-lua-chon">';
+            cau.opts.forEach((o, i) => html += `<button class="nut-lua-chon" onclick="kiemTra(${i})">${o}</button>`);
+            html += '</div>';
+        } else {
+            html = `<div class="vung-nhap-lieu"><input type="text" id="nhap-an" class="o-nhap" placeholder="Nhập đáp án..."><button class="nut-hanh-dong" onclick="kiemTraTuLuan()">XÁC NHẬN MẬT MÃ</button></div>`;
+        }
+        document.getElementById('vung-tuong-tac').innerHTML = html;
+    }
+
+    function kiemTra(idx) {
+        let cau = (vong === 1) ? deVong1[cauHienTai] : deVong2[cauHienTai];
+        if(idx === cau.c) { diem += 10; hienThongBao(true); } 
+        else {
+            hienThongBao(false);
+            if(vong === 1) { 
+                luotConLai--; document.getElementById('so-luot-choi').innerText = "LƯỢT THỬ: "+luotConLai+"/3";
+                if(luotConLai <= 0) { setTimeout(() => batDauVong(2), 1200); return; }
+            }
+        }
+        capNhatDiem();
+        setTimeout(tiepTheo, 1200);
+    }
+
+    function kiemTraTuLuan() {
+        let traLoi = document.getElementById('nhap-an').value.trim().replace(',', '.');
+        let dapAn = deVong3[cauHienTai].a.replace(',', '.');
+        if(traLoi === dapAn || traLoi.includes(dapAn)) { diem += 10; hienThongBao(true); }
+        else { hienThongBao(false); }
+        capNhatDiem();
+        setTimeout(tiepTheo, 1200);
+    }
+
+    function tiepTheo() {
+        cauHienTai++;
+        let duLieu = (vong === 1) ? deVong1 : (vong === 2 ? deVong2 : deVong3);
+        if(cauHienTai < duLieu.length) hienThiCauHoi();
+        else if(vong < 3) batDauVong(vong + 1);
+        else ketThuc();
+    }
+
+    function capNhatDiem() { document.getElementById('hien-thi-diem').innerText = "MẬT MÃ GIẢI ĐƯỢC: " + diem + "%"; }
+
+    function hienThongBao(dung) {
+        const tb = document.getElementById('thông-bao');
+        tb.innerText = dung ? "CHÍNH XÁC! ✅" : "SAI RỒI! ❌";
+        tb.style.background = dung ? "rgba(0, 255, 65, 0.2)" : "rgba(255, 77, 77, 0.2)";
+        tb.style.color = dung ? "var(--chu-xanh)" : "var(--canh-bao)";
+        tb.classList.add('hien-thông-bao');
+        setTimeout(() => { tb.classList.remove('hien-thông-bao'); }, 1000);
+    }
+
+    function ketThuc() {
+        hoanThanh = true;
+        document.getElementById('vung-tuong-tac').innerHTML = '';
+        document.getElementById('vung-cau-hoi').innerText = "Hệ thống đã được giải mã hoàn toàn. Chúc mừng nhà toán học!";
+        document.getElementById('man-hinh-ket-qua').classList.remove('an');
+        document.getElementById('diem-cuoi').innerText = diem + "%";
+        if(diem >= 50) document.getElementById('bieu-mau-luu').classList.remove('an');
+    }
+
+    function luuDuLieu() {
+        const ten = document.getElementById('ten-hs').value;
+        const lop = document.getElementById('lop-hs').value;
+        if(!ten || !lop) return;
+        db.ref('ketqua/tuan31/' + Date.now()).set({ hoTen: ten, lop: lop, diemSo: diem, thoiGian: Date.now() })
+        .then(() => { alert("Đã lưu kết quả thành công!"); location.reload(); });
+    }
+
+    window.onload = () => { batDauVong(1); };
+</script>
+</body>
+</html>
