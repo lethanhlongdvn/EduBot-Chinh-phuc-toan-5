@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Siêu cấp Casio - Tuần 21</title>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;600;700&family=Montserrat:wght@700&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+    <style>
+        :root { 
+            --primary: #34495e; --casio-body: #2c3e50; --screen-bg: #a3cb38; 
+            --btn-gray: #ecf0f1; --btn-dark: #7f8c8d; --btn-orange: #f39c12; --danger: #e74c3c; 
+        }
+
+        body { 
+            font-family: 'Lexend', sans-serif; margin: 0; padding: 20px;
+            display: flex; flex-direction: column; align-items: center;
+            background: #1a252f; color: white; min-height: 100vh;
+        }
+
+        /* Thân máy Casio */
+        .casio-case {
+            max-width: 650px; width: 100%; background: var(--casio-body);
+            padding: 30px; border-radius: 20px 20px 60px 60px;
+            box-shadow: 0 25px 0 #141a21, 0 40px 60px rgba(0,0,0,0.6);
+            border: 5px solid #141a21; margin-bottom: 20px;
+        }
+
+        /* Màn hình hiển thị */
+        .screen {
+            background: var(--screen-bg); border-radius: 12px; padding: 20px;
+            margin-bottom: 30px; border: 8px solid #57606f;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.3);
+            min-height: 150px; color: #1e272e;
+        }
+
+        .screen-header { 
+            display: flex; justify-content: space-between; 
+            font-family: 'Montserrat', sans-serif; font-size: 0.75rem;
+            border-bottom: 1px solid rgba(0,0,0,0.1); padding-bottom: 5px; margin-bottom: 10px;
+        }
+
+        .screen-content { font-size: 1.15rem; font-weight: 600; line-height: 1.5; }
+
+        .score-info { display: flex; justify-content: space-between; margin-bottom: 15px; font-weight: bold; color: #bdc3c7; width: 100%; max-width: 650px;}
+
+        /* Lưới ghép đôi */
+        .match-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .match-column { display: flex; flex-direction: column; gap: 10px; }
+        .match-item {
+            background: var(--btn-gray); color: #2d3436; padding: 15px;
+            border-radius: 10px; cursor: pointer; text-align: center;
+            font-weight: 600; font-size: 0.95rem; border-bottom: 5px solid #bdc3c7;
+            transition: all 0.2s; min-height: 60px; display: flex; align-items: center; justify-content: center;
+        }
+        .match-item:hover { background: #fff; transform: translateY(-2px); }
+        .match-item.active { background: var(--btn-orange); color: white; border-bottom-color: #d35400; }
+        .match-item.matched { opacity: 0; pointer-events: none; visibility: hidden; }
+
+        /* Nút trắc nghiệm */
+        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .btn-opt {
+            background: var(--btn-gray); color: #2d3436; border: none; padding: 20px;
+            border-radius: 12px; font-family: 'Lexend'; font-weight: bold; font-size: 1.05rem;
+            cursor: pointer; border-bottom: 5px solid #bdc3c7; transition: 0.2s;
+        }
+        .btn-opt:hover { background: white; }
+
+        .hidden { display: none; }
+        .footer-edu { text-align: center; width: 100%; padding: 20px 0; color: #7f8c8d; font-size: 0.9rem; letter-spacing: 1px; }
+        .btn-action { background: var(--btn-orange); color: white; padding: 15px 30px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 1.1rem; }
+    </style>
+</head>
+<body>
+
+<div class="score-info">
+    <span id="stage-title">VÒNG 1: KHÁM PHÁ</span>
+    <span id="score-text">ĐIỂM: 0/100</span>
+</div>
+
+<div class="casio-case">
+    <div class="screen">
+        <div class="screen-header">
+            <span>CASIO fx-580VN X</span>
+            <span id="hearts-count">❤️ MẠNG: 3/3</span>
+        </div>
+        <div class="screen-content" id="main-display">
+            Chào mừng các em! Hãy vượt qua 10 thử thách để trở thành Siêu cấp Casio.
+        </div>
+    </div>
+
+    <div id="play-area"></div>
+
+    <div id="result-screen" class="hidden">
+        <div style="text-align: center;">
+            <h2 id="status-msg">KẾT QUẢ BÀI THI</h2>
+            <div style="font-size: 4rem; color: var(--btn-orange); margin: 10px 0;" id="score-val">0/100</div>
+            <p id="sub-msg" style="color: #bdc3c7;"></p>
+            
+            <div id="save-form" class="hidden">
+                <input type="text" id="p-name" style="width: 85%; padding: 15px; border-radius: 10px; margin-bottom: 10px;" placeholder="Họ và Tên...">
+                <input type="text" id="p-class" style="width: 85%; padding: 15px; border-radius: 10px; margin-bottom: 20px;" placeholder="Lớp...">
+                <button class="btn-action" onclick="saveData()">GHI DANH BẢNG VÀNG</button>
+            </div>
+            <button id="retry-btn" class="btn-action" style="background:#7f8c8d; margin-top:10px;" onclick="location.reload()">THỬ LẠI</button>
+        </div>
+    </div>
+</div>
+
+<div class="footer-edu">
+    © 2026 EduRobot - Lê Thành Long
+</div>
+
+<script>
+    // Cấu hình Firebase
+    const firebaseConfig = {
+        apiKey: "AIzaSyC6zlWn8BKYU7P6A2-PYq6IIWOzaqJWFhc",
+        authDomain: "gamhoctap.firebaseapp.com",
+        databaseURL: "https://gamhoctap-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "gamhoctap"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    const Q_POOL1 = [
+        {q: "Muốn tìm 60% của 300, em tính?", a: "300 × 60 ÷ 100"},
+        {q: "Để bắt đầu sử dụng máy tính, nhấn?", a: "Phím ON/C"},
+        {q: "Muốn xóa số vừa nhập để nhập lại?", a: "Phím CE"},
+        {q: "Phím biểu diễn ký hiệu phần trăm là?", a: "Phím %"},
+        {q: "5% của 780.000 có kết quả là?", a: "39.000"},
+        {q: "10% của số 60 có giá trị là?", a: "Số 6"},
+        {q: "Tỉ số phần trăm của 3 và 40 là?", a: "7,5"},
+        {q: "Máy tính giúp tính toán thế nào?", a: "Nhanh và Chính xác"}
+    ];
+
+    const Q_POOL2 = [
+        {q: "70% của 120 m² là:", opts: ["84 m²", "70 m²", "94 m²", "80 m²"], c: 0, h: "120 × 70 ÷ 100"},
+        {q: "24,5% của 2 kg là:", opts: ["0,5 kg", "0,49 kg", "4,9 kg", "0,24 kg"], c: 1, h: "2 × 24,5 ÷ 100"},
+        {q: "Ba lô 250.000đ giảm giá 15%. Số tiền giảm là:", opts: ["25.000đ", "30.000đ", "37.500đ", "40.000đ"], c: 2, h: "250.000 × 15 ÷ 100"},
+        {q: "May 850 bộ đồ, đã xong 70%. Số bộ đã xong:", opts: ["595 bộ", "600 bộ", "500 bộ", "700 bộ"], c: 0, h: "850 × 70 ÷ 100"},
+        {q: "Thịt bò có 18% đạm. 250g thịt có bao nhiêu đạm?", opts: ["45 g", "18 g", "50 g", "35 g"], c: 0, h: "250 × 18 ÷ 100"},
+        {q: "Đội 300 người, 40% mặc áo đỏ. Số người áo đỏ:", opts: ["100", "120", "150", "200"], c: 1, h: "300 × 40 ÷ 100"},
+        {q: "Gửi 250 triệu lãi suất 8%/năm. Tiền lãi 1 năm:", opts: ["15 triệu", "20 triệu", "25 triệu", "10 triệu"], c: 1, h: "250tr × 8 ÷ 100"},
+        {q: "Kết quả biểu thức: 1,975 + 2,025 là:", opts: ["3,9", "4,0", "4,1", "4,2"], c: 1, h: "1,975 + 2,025 = 4"}
+    ];
+
+    const Q_POOL3 = [
+        {q: "Hoàn tiền 10% cho đơn 1.004.000đ. Số tiền hoàn:", opts: ["100.000đ", "100.400đ", "10.040đ", "1.004đ"], c: 1, h: "1.004.000 × 10 ÷ 100"},
+        {q: "Thùng 33,2 m³. Hàng chiếm 80%, thể tích trống là:", opts: ["26,56 m³", "6,64 m³", "7,2 m³", "10 m³"], c: 1, h: "Trống 20%: 33,2 × 20 ÷ 100"},
+        {q: "Gửi 35 triệu lãi 7,4%/năm. Tổng gốc + lãi 1 năm:", opts: ["37.590.000đ", "35.740.000đ", "38.000.000đ", "2.590.000đ"], c: 0, h: "Lãi 2.590.000 + Gốc 35.000.000"},
+        {q: "Bán 7 vòng giá 25k/cái. Ban GK góp 20% số tiền đó:", opts: ["25.000đ", "35.000đ", "40.000đ", "15.000đ"], c: 1, h: "Tổng 175.000 × 20 ÷ 100"}
+    ];
+
+    let game1, game2, game3;
+    let score = 0, currentStage = 1, qIdx = 0, lives = 3;
+    let selQ = null, selA = null;
+
+    function shuffle(arr) { return arr.sort(() => 0.5 - Math.random()); }
+
+    function initStage1() {
+        game1 = shuffle([...Q_POOL1]).slice(0, 4);
+        game2 = shuffle([...Q_POOL2]).slice(0, 4);
+        game3 = shuffle([...Q_POOL3]).slice(0, 2);
+
+        document.getElementById('main-display').innerText = "VÒNG 1: Ghép 4 cặp câu hỏi và đáp án đúng. Chú ý: Sai 3 lần sẽ bị khóa bàn phím!";
+        
+        let qs = game1.map((item, idx) => ({txt: item.q, id: idx}));
+        let as = game1.map((item, idx) => ({txt: item.a, id: idx}));
+        
+        qs = shuffle(qs); as = shuffle(as);
+
+        let html = `<div class="match-grid"><div class="match-column">`;
+        qs.forEach(item => html += `<div class="match-item" id="q-${item.id}" onclick="match('q', ${item.id})">${item.txt}</div>`);
+        html += `</div><div class="match-column">`;
+        as.forEach(item => html += `<div class="match-item" id="a-${item.id}" onclick="match('a', ${item.id})">${item.txt}</div>`);
+        html += `</div></div>`;
+        
+        document.getElementById('play-area').innerHTML = html;
+    }
+
+    function match(type, id) {
+        if(type === 'q') {
+            if(selQ !== null) document.getElementById(`q-${selQ}`).classList.remove('active');
+            selQ = id; document.getElementById(`q-${id}`).classList.add('active');
+        } else {
+            if(selA !== null) document.getElementById(`a-${selA}`).classList.remove('active');
+            selA = id; document.getElementById(`a-${id}`).classList.add('active');
+        }
+
+        if(selQ !== null && selA !== null) {
+            if(selQ === selA) {
+                score += 10; updateScore();
+                document.getElementById(`q-${selQ}`).classList.add('matched');
+                document.getElementById(`a-${selA}`).classList.add('matched');
+                if(document.querySelectorAll('.match-item:not(.matched)').length === 0) setTimeout(startStage2, 800);
+            } else {
+                lives--; document.getElementById('hearts-count').innerText = "❤️ MẠNG: " + lives + "/3";
+                if(lives <= 0) startStage2();
+                else { 
+                    document.getElementById(`q-${selQ}`).classList.remove('active'); 
+                    document.getElementById(`a-${selA}`).classList.remove('active'); 
+                }
+            }
+            selQ = null; selA = null;
+        }
+    }
+
+    function startStage2() {
+        currentStage = 2; qIdx = 0;
+        document.getElementById('stage-title').innerText = "VÒNG 2: LUYỆN TẬP";
+        document.getElementById('hearts-count').classList.add('hidden');
+        renderQ();
+    }
+
+    function renderQ() {
+        let data = (currentStage === 2) ? game2 : game3;
+        let item = data[qIdx];
+        document.getElementById('main-display').innerHTML = `<div style="opacity:0.6; font-size:0.8rem">Câu hỏi ${qIdx+1}:</div>${item.q}`;
+        let html = `<div class="options-grid">`;
+        item.opts.forEach((opt, i) => html += `<button class="btn-opt" onclick="check(${i})">${opt}</button>`);
+        document.getElementById('play-area').innerHTML = html + `</div>`;
+    }
+
+    function check(idx) {
+        let data = (currentStage === 2) ? game2 : game3;
+        if(idx === data[qIdx].c) score += 10;
+        else alert("Gợi ý: " + data[qIdx].h);
+        
+        updateScore();
+        qIdx++;
+        if(qIdx < data.length) renderQ();
+        else if(currentStage === 2) { 
+            currentStage = 3; qIdx = 0; 
+            document.getElementById('stage-title').innerText = "VÒNG 3: NÂNG CAO"; 
+            renderQ(); 
+        } else finish();
+    }
+
+    function updateScore() { document.getElementById('score-text').innerText = "ĐIỂM: " + score + "/100"; }
+
+    function finish() {
+        document.getElementById('play-area').classList.add('hidden');
+        document.getElementById('result-screen').classList.remove('hidden');
+        document.getElementById('score-val').innerText = score + "/100";
+        if(score >= 50) {
+            document.getElementById('status-msg').innerText = "🎉 CHÚC MỪNG SIÊU CẤP CASIO!";
+            document.getElementById('save-form').classList.remove('hidden');
+            document.getElementById('retry-btn').classList.add('hidden');
+        } else {
+            document.getElementById('status-msg').innerText = "❌ CẦN CỐ GẮNG HƠN";
+            document.getElementById('sub-msg').innerText = "Hãy luyện tập thêm để đạt ít nhất 50 điểm nhé!";
+        }
+    }
+
+    function saveData() {
+        const name = document.getElementById('p-name').value;
+        const cls = document.getElementById('p-class').value;
+        if(!name || !cls) return alert("Điền đủ thông tin em nhé!");
+        db.ref('scores/tuan21/' + Date.now()).set({ name, class: cls, score, year: 2026 })
+        .then(() => { alert("Đã ghi danh Bảng Vàng!"); location.reload(); });
+    }
+
+    window.onload = initStage1;
+</script>
+</body>
+</html>
