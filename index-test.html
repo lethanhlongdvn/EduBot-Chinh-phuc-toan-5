@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KIỂM TRA HỆ THỐNG - EduRobot</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Lexend:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root { 
+            --primary: #FF9800; 
+            --dark-green: #2e7d32; 
+            --gold: #ffd700; 
+            --bg-dark: #1a1a1a;
+            --test-mode: #2980b9; /* Đổi màu xanh dương cho dễ phân biệt bản test */
+        }
+
+        body {
+            margin: 0; padding: 0;
+            font-family: 'Lexend', sans-serif;
+            background-color: var(--bg-dark);
+            min-height: 100vh;
+            display: flex; flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        .welcome-banner {
+            background: linear-gradient(90deg, #2c3e50, #2980b9, #2c3e50);
+            padding: 10px 20px;
+            display: flex; justify-content: center; align-items: center;
+            border-bottom: 3px solid white;
+        }
+        .welcome-text {
+            font-family: 'Bungee', cursive;
+            font-size: 1.5rem; color: white;
+            margin: 0; text-align: center;
+        }
+
+        .game-content-wrapper { display: flex; gap: 15px; padding: 15px; flex: 1; }
+        .map-container {
+            flex: 7; position: relative; display: flex; justify-content: center;
+            background: #2c2c2c; border-radius: 15px; padding: 10px;
+        }
+        .map-relative-box { position: relative; width: 100%; max-width: 850px; }
+        .map-image { width: 100%; height: auto; display: block; border-radius: 10px; opacity: 0.8; }
+
+        .station {
+            position: absolute; width: 5%; aspect-ratio: 1/1;
+            background: white; border: 2.5px solid var(--dark-green);
+            border-radius: 50%; display: flex; justify-content: center; align-items: center;
+            font-weight: bold; color: var(--dark-green); text-decoration: none;
+            font-size: 1.1vw; z-index: 10; transition: 0.2s; cursor: pointer;
+        }
+        .station:hover { transform: scale(1.3); background: var(--gold); border-color: #000; z-index: 20; }
+
+        .landmark-tag {
+            position: absolute; background: rgba(0, 0, 0, 0.7);
+            color: var(--gold); padding: 3px 8px; border-radius: 20px;
+            font-size: 0.7vw; border: 1px solid var(--gold); pointer-events: none;
+        }
+
+        .sidebar {
+            flex: 3; background: #222; border: 2px solid var(--test-mode);
+            border-radius: 15px; padding: 15px; min-width: 250px; color: white;
+        }
+
+        .game-footer {
+            background: #222; padding: 15px; display: flex; 
+            flex-direction: column; align-items: center;
+            border-top: 3px solid var(--test-mode);
+        }
+        .btn-nav {
+            background: #333; border: 2px solid white; color: white; 
+            padding: 10px 20px; border-radius: 50px; font-weight: bold;
+            text-decoration: none; cursor: pointer;
+        }
+
+        /* TỌA ĐỘ GIỮ NGUYÊN */
+        #st-19 { top: 3%; left: 35%; }    #tag-19 { top: 2%; left: 25%; }
+        #st-20 { top: 8%; left: 45%; }
+        #st-21 { top: 13%; left: 38%; }
+        #st-22 { top: 18%; left: 48%; }  #tag-22 { top: 17%; left: 55%; }
+        #st-23 { top: 24%; left: 42%; }
+        #st-24 { top: 30%; left: 47%; }
+        #st-25 { top: 38%; left: 52%; }  #tag-25 { top: 37%; left: 60%; }
+        #st-26 { top: 46%; left: 58%; }
+        #st-27 { top: 54%; left: 60%; }
+        #st-28 { top: 62%; left: 54%; }
+        #st-29 { top: 70%; left: 57%; }
+        #st-30 { top: 78%; left: 48%; }  #tag-30 { top: 77%; left: 55%; }
+        #st-31 { top: 85%; left: 42%; }
+        #st-32 { top: 88%; left: 35%; }
+        #st-33 { top: 92%; left: 40%; }  #tag-33 { top: 91%; left: 32%; }
+        #st-34 { top: 95%; left: 45%; }
+        #st-35 { top: 97%; left: 38%; }
+    </style>
+</head>
+<body>
+
+    <div class="welcome-banner">
+        <h1 class="welcome-text">BẢN KIỂM TRA ĐƯỜNG DẪN (19.HTML -> 35.HTML)</h1>
+    </div>
+
+    <main class="game-content-wrapper">
+        <div class="map-container">
+            <div class="map-relative-box">
+                <img src="Bandogame.jpg" alt="Bản đồ" class="map-image">
+                <div class="landmark-tag" id="tag-19">📍 Lũng Cú</div>
+                <div class="landmark-tag" id="tag-22">🏛️ Hà Nội</div>
+                <div class="landmark-tag" id="tag-25">🕌 Huế</div>
+                <div class="landmark-tag" id="tag-30">🏢 TP.HCM</div>
+                <div class="landmark-tag" id="tag-33">🛶 Cà Mau</div>
+
+                <div class="station" id="st-19" onclick="goTo(19)">19</div>
+                <div class="station" id="st-20" onclick="goTo(20)">20</div>
+                <div class="station" id="st-21" onclick="goTo(21)">21</div>
+                <div class="station" id="st-22" onclick="goTo(22)">22</div>
+                <div class="station" id="st-23" onclick="goTo(23)">23</div>
+                <div class="station" id="st-24" onclick="goTo(24)">24</div>
+                <div class="station" id="st-25" onclick="goTo(25)">25</div>
+                <div class="station" id="st-26" onclick="goTo(26)">26</div>
+                <div class="station" id="st-27" onclick="goTo(27)">27</div>
+                <div class="station" id="st-28" onclick="goTo(28)">28</div>
+                <div class="station" id="st-29" onclick="goTo(29)">29</div>
+                <div class="station" id="st-30" onclick="goTo(30)">30</div>
+                <div class="station" id="st-31" onclick="goTo(31)">31</div>
+                <div class="station" id="st-32" onclick="goTo(32)">32</div>
+                <div class="station" id="st-33" onclick="goTo(33)">33</div>
+                <div class="station" id="st-34" onclick="goTo(34)">34</div>
+                <div class="station" id="st-35" onclick="goTo(35)">35</div>
+            </div>
+        </div>
+
+        <aside class="sidebar">
+            <h3 style="font-family:'Bungee'; color:var(--gold);">HƯỚNG DẪN</h3>
+            <ul style="padding-left: 20px; font-size: 0.9rem; line-height: 1.8;">
+                <li>Nhấn vào số để mở file tương ứng.</li>
+                <li>Ví dụ: Nhấn <b>22</b> sẽ mở <b>22.html</b></li>
+                <li>Đảm bảo các file này nằm cùng thư mục với trang index này.</li>
+            </ul>
+        </aside>
+    </main>
+
+    <footer class="game-footer">
+        <a href="index.html" class="btn-nav">QUAY LẠI TRANG CHỦ</a>
+    </footer>
+
+    <script>
+        function goTo(num) {
+            // Đường dẫn mới theo yêu cầu của thầy: số.html
+            const fileName = num + ".html";
+            console.log("Đang mở file:", fileName);
+            window.location.href = fileName;
+        }
+    </script>
+</body>
+</html>
