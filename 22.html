@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đại hội Toán học - Tuần 22</title>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+    <style>
+        :root { --primary: #2c3e50; --screen-bg: #f8f9fa; --btn-gray: #ecf0f1; --btn-orange: #f39c12; --danger: #e74c3c; --success: #2ecc71; }
+        body { font-family: 'Lexend', sans-serif; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; background: #34495e; color: white; user-select: none; overflow-x: hidden; min-height: 100vh; }
+        
+        /* Container chính */
+        .game-container { max-width: 700px; width: 100%; background: var(--primary); padding: 30px; border-radius: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); border: 4px solid #1a252f; position: relative; margin-bottom: 20px; }
+        
+        /* Toast thông báo */
+        #toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); padding: 15px 40px; border-radius: 50px; font-weight: bold; font-size: 1.2rem; z-index: 1000; transition: opacity 0.3s, top 0.3s; opacity: 0; pointer-events: none; }
+        .toast-true { background: var(--success); color: white; opacity: 1 !important; top: 50px !important; }
+        .toast-false { background: var(--danger); color: white; opacity: 1 !important; top: 50px !important; }
+
+        .screen { background: var(--screen-bg); border-radius: 12px; padding: 20px; margin-bottom: 25px; color: #1e272e; border: 5px solid #bdc3c7; min-height: 120px; }
+        .screen-header { display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: bold; border-bottom: 1px solid #ccc; padding-bottom: 5px; margin-bottom: 10px; color: #7f8c8d; }
+        .q-text { font-size: 1.1rem; font-weight: 600; line-height: 1.5; }
+        .status-bar { display: flex; justify-content: space-between; margin-bottom: 15px; font-weight: bold; font-size: 0.9rem; color: #ecf0f1; width: 100%; max-width: 700px; }
+        
+        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .opt-btn { background: var(--btn-gray); border: none; padding: 15px; border-radius: 10px; font-family: 'Lexend'; font-weight: bold; cursor: pointer; border-bottom: 4px solid #bdc3c7; transition: 0.2s; font-size: 0.95rem; color: #2c3e50; }
+        .opt-btn:hover { background: white; transform: translateY(-2px); }
+        
+        .input-area { display: flex; flex-direction: column; gap: 15px; }
+        .ans-input { padding: 15px; border-radius: 10px; border: none; font-size: 1.1rem; font-family: 'Lexend'; text-align: center; color: #2c3e50; }
+        .hidden { display: none; }
+        .action-btn { background: var(--btn-orange); color: white; padding: 15px 30px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 1.1rem; }
+        
+        /* Chân trang yêu cầu */
+        .footer-edu { text-align: center; width: 100%; padding: 20px 0; color: #bdc3c7; font-size: 0.9rem; letter-spacing: 1px; margin-top: auto; }
+    </style>
+</head>
+<body>
+
+<div id="toast"></div>
+
+<div class="status-bar">
+    <span id="stage-name">VÒNG 1: KHÁM PHÁ</span>
+    <span id="score-display">ĐIỂM: 0</span>
+</div>
+
+<div class="game-container">
+    <div class="screen">
+        <div class="screen-header">
+            <span>ĐẠI HỘI TOÁN HỌC</span>
+            <span id="lives-count">❤️ MẠNG: 3/3</span>
+        </div>
+        <div id="q-content" class="q-text">Đang chuẩn bị bài thi...</div>
+    </div>
+
+    <div id="play-area"></div>
+
+    <div id="result-screen" class="hidden" style="text-align: center;">
+        <h2>KẾT QUẢ CHUNG CUỘC</h2>
+        <h1 id="final-score" style="font-size: 4rem; color: var(--btn-orange); margin: 10px 0;">0 ĐIỂM</h1>
+        <div id="save-form" class="hidden">
+            <input type="text" id="p-name" style="width: 85%; padding: 15px; margin-bottom: 10px; border-radius: 10px;" placeholder="Họ và tên...">
+            <input type="text" id="p-class" style="width: 85%; padding: 15px; margin-bottom: 20px; border-radius: 10px;" placeholder="Lớp...">
+            <button class="action-btn" style="width:90%;" onclick="saveData()">GHI DANH BẢNG VÀNG</button>
+        </div>
+        <button id="retry-btn" class="action-btn" style="background:#7f8c8d; margin-top:20px;" onclick="location.reload()">THỬ LẠI</button>
+    </div>
+</div>
+
+<div class="footer-edu">
+    © 2026 EduRobot - Lê Thành Long
+</div>
+
+<script>
+    // Firebase Config
+    const firebaseConfig = {
+        apiKey: "AIzaSyC6zlWn8BKYU7P6A2-PYq6IIWOzaqJWFhc",
+        authDomain: "gamhoctap.firebaseapp.com",
+        databaseURL: "https://gamhoctap-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "gamhoctap"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // Dữ liệu câu hỏi
+    const POOL1 = [
+        {q: "Tỉ số của số a và số b (b khác 0) cho biết điều gì?", opts: ["Số b bằng mấy phần số a", "Hiệu giữa số a và b", "Số a bằng mấy phần số b", "Tổng của số a và b"], c: 2},
+        {q: "Tỉ số phần trăm 43/100 được viết dưới dạng ký hiệu là:", opts: ["0,43%", "4,3%", "43%", "430%"], c: 2},
+        {q: "Bản đồ tỉ lệ 1 : 10.000 cho biết điều gì?", opts: ["Hình thật thu nhỏ 10.000 lần", "Độ thật bằng 1/10.000 bản đồ", "Bản đồ phóng to 10.000 lần", "1 cm bản đồ là 10.000 m thật"], c: 0},
+        {q: "Để tính độ dài thật, ta làm như sau:", opts: ["Lấy bản đồ chia tỉ lệ", "Trừ mẫu số tỉ lệ", "Nhân bản đồ với mẫu số tỉ lệ", "Chia mẫu số tỉ lệ cho bản đồ"], c: 2},
+        {q: "Khi hình lập phương nằm trong hình hộp chữ nhật thì:", opts: ["Thể tích lập phương lớn hơn", "Thể tích hai hình bằng nhau", "Thể tích lập phương bé hơn", "Không so sánh được"], c: 2},
+        {q: "Nếu hình P tách thành hai hình M và N, thể tích P là:", opts: ["Tích thể tích M và N", "Hiệu thể tích M và N", "Tổng thể tích M và N", "Trung bình cộng M và N"], c: 2},
+        {q: "Một hình hộp chữ nhật tiêu chuẩn có bao nhiêu kích thước?", opts: ["Một", "Hai", "Ba", "Sáu"], c: 2},
+        {q: "So sánh thể tích hai hình ghép bởi các khối nhỏ bằng cách:", opts: ["Đếm số lượng khối nhỏ", "Đo chiều dài", "Cân khối lượng", "Quan sát mắt"], c: 0}
+    ];
+
+    const POOL2 = [
+        {q: "Chuyển phân số 3/4 thành tỉ số phần trăm:", opts: ["34%", "0,75%", "75%", "3,4%"], c: 2},
+        {q: "Bản đồ tỉ lệ 1 : 2.000, độ dài 2 cm ứng với độ dài thật là:", opts: ["4 m", "40 m", "400 m", "4.000 m"], c: 1},
+        {q: "Tổng hai số là 60, tỉ số là 7/8. Số lớn là:", opts: ["28", "32", "35", "40"], c: 1},
+        {q: "Ti vi giá 15.000.000 đồng, giảm giá 8%. Số tiền giảm là:", opts: ["120.000 đồng", "1.200.000 đồng", "1.500.000 đồng", "800.000 đồng"], c: 1},
+        {q: "Hình C có 12 khối lập phương, hình D có 10 khối. Phát biểu đúng:", opts: ["Thể tích C > D", "Thể tích D > C", "Bằng nhau", "D nhiều khối hơn C"], c: 0},
+        {q: "Tính 2% của số 250:", opts: ["50", "25", "5", "0,5"], c: 2}
+    ];
+
+    const POOL3 = [
+        {q: "Thửa đất tỉ lệ 1:3000 có dài 3cm, rộng 2cm. Tính diện tích thật (m²):", a: "5400"},
+        {q: "Tỉ số kẹo Mi/Mai là 5/2. Mi hơn Mai 6 cái. Tổng kẹo hai bạn là:", a: "14"},
+        {q: "Thùng xe 33,2 m³. Hàng chiếm 80%. Thể tích phần trống (m³) là:", a: "6.64"}
+    ];
+
+    let score = 0, stage = 1, qIdx = 0, lives = 3;
+    let game1, game2, game3;
+
+    function shuffle(arr) { return arr.sort(() => 0.5 - Math.random()); }
+
+    function showToast(isCorrect) {
+        const toast = document.getElementById('toast');
+        toast.innerText = isCorrect ? "CHÍNH XÁC! 🎉" : "CHƯA ĐÚNG RỒI! ❌";
+        toast.className = isCorrect ? "toast-true" : "toast-false";
+        setTimeout(() => { toast.className = ""; }, 1000);
+    }
+
+    function initGame() {
+        game1 = shuffle([...POOL1]).slice(0, 4);
+        game2 = shuffle([...POOL2]).slice(0, 4);
+        game3 = shuffle([...POOL3]).slice(0, 2);
+        renderStage();
+    }
+
+    function renderStage() {
+        qIdx = 0;
+        document.getElementById('stage-name').innerText = stage === 1 ? "VÒNG 1: KHÁM PHÁ" : (stage === 2 ? "VÒNG 2: LUYỆN TẬP" : "VÒNG 3: NÂNG CAO");
+        if(stage > 1) document.getElementById('lives-count').classList.add('hidden');
+        renderQ();
+    }
+
+    function renderQ() {
+        let data = stage === 1 ? game1 : (stage === 2 ? game2 : game3);
+        let item = data[qIdx];
+        document.getElementById('q-content').innerHTML = `<b>Câu ${qIdx+1}:</b> ${item.q}`;
+        let html = '';
+        if(stage < 3) {
+            html = '<div class="options-grid">';
+            item.opts.forEach((o, i) => html += `<button class="opt-btn" onclick="check(${i})">${o}</button>`);
+            html += '</div>';
+        } else {
+            html = `<div class="input-area"><input type="text" id="ans" class="ans-input" placeholder="Nhập số..."><button class="action-btn" onclick="checkTuluan()">GỬI ĐÁP ÁN</button></div>`;
+        }
+        document.getElementById('play-area').innerHTML = html;
+    }
+
+    function check(idx) {
+        let item = (stage === 1) ? game1[qIdx] : game2[qIdx];
+        if(idx === item.c) { score += 10; showToast(true); }
+        else {
+            showToast(false);
+            if(stage === 1) { lives--; document.getElementById('lives-count').innerText = `❤️ MẠNG: ${lives}/3`; }
+        }
+        document.getElementById('score-display').innerText = "ĐIỂM: " + score;
+        setTimeout(next, 1100);
+    }
+
+    function checkTuluan() {
+        let userAns = document.getElementById('ans').value.trim().replace(',', '.');
+        if(userAns == game3[qIdx].a) { score += 30; showToast(true); }
+        else { showToast(false); }
+        document.getElementById('score-display').innerText = "ĐIỂM: " + score;
+        setTimeout(next, 1100);
+    }
+
+    function next() {
+        qIdx++;
+        let data = stage === 1 ? game1 : (stage === 2 ? game2 : game3);
+        if(qIdx < data.length) renderQ();
+        else if(stage < 3 && lives > 0) { stage++; renderStage(); }
+        else finish();
+    }
+
+    function finish() {
+        document.getElementById('play-area').classList.add('hidden');
+        document.getElementById('result-screen').classList.remove('hidden');
+        document.getElementById('final-score').innerText = score + " ĐIỂM";
+        if(score >= 50) document.getElementById('save-form').classList.remove('hidden');
+    }
+
+    function saveData() {
+        const name = document.getElementById('p-name').value;
+        const cls = document.getElementById('p-class').value;
+        if(!name || !cls) return alert("Nhập đủ thông tin em nhé!");
+        db.ref('scores/tuan22/' + Date.now()).set({ name, class: cls, score, year: 2026 })
+        .then(() => { alert("Đã ghi danh!"); location.reload(); });
+    }
+
+    window.onload = initGame;
+</script>
+</body>
+</html>
