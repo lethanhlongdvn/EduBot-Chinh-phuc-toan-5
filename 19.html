@@ -10,7 +10,7 @@
 
     <style>
         :root { --parchment: #f4e4bc; --ink: #2c3e50; --gold: #c6930a; --ocean: #2980b9; --red: #e74c3c; }
-        body { font-family: 'Lexend', sans-serif; margin: 0; padding: 20px; background: #1a1a2e; color: var(--ink); display: flex; flex-direction: column; align-items: center; min-height: 100vh; position: relative; padding-bottom: 100px; overflow-x: hidden; }
+        body { font-family: 'Lexend', sans-serif; margin: 0; padding: 20px; background: #1a1a2e; color: var(--ink); display: flex; flex-direction: column; align-items: center; min-height: 100vh; position: relative; padding-bottom: 100px; }
         .stage-banner { background: var(--gold); color: white; padding: 12px 35px; border-radius: 50px; font-weight: 700; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); border: 2px solid #fff; text-transform: uppercase; letter-spacing: 1px; font-size: 1.2rem; }
         .map-frame { max-width: 750px; width: 100%; background: var(--parchment); padding: 30px; border-radius: 15px; border: 10px solid #8e735b; box-shadow: 0 0 40px rgba(0,0,0,0.6); position: relative; background-image: url('https://www.transparenttextures.com/patterns/parchment.png'); }
         .status-header { display: flex; justify-content: space-between; margin-bottom: 20px; font-weight: 700; color: #5e412f; border-bottom: 2px dashed #8e735b; padding-bottom: 10px; }
@@ -25,24 +25,23 @@
         .show-toast { opacity: 1 !important; top: 50px !important; }
         .hidden { display: none !important; }
         .btn-final { background: var(--ocean); color: white; padding: 15px 30px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 1.1rem; }
-        .footer-copyright { position: absolute; bottom: 20px; text-align: center; width: 100%; color: #bdc3c7; font-size: 0.9rem; letter-spacing: 0.5px; }
         #start-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1a1a2e; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; }
     </style>
 </head>
 <body>
 
 <div id="start-screen">
-    <h1 style="color: #c6930a; font-size: 2.5rem; text-align: center; margin-bottom: 30px;">TOÁN 5 - TUẦN 19<br><span style="font-size: 1.2rem; color: #fff;">BẢN ĐỒ KHO BÁU</span></h1>
-    <button class="btn-final" onclick="startGame()" style="padding: 25px 80px; font-size: 1.8rem; box-shadow: 0 0 20px var(--gold);">VÀO THỬ THÁCH</button>
+    <h1 style="color: #c6930a; font-size: 2rem; text-align: center; margin-bottom: 30px;">TOÁN 5 - TUẦN 19</h1>
+    <button class="btn-final" onclick="startGame()" style="padding: 20px 60px; font-size: 1.5rem;">BẮT ĐẦU</button>
 </div>
 
 <audio id="sound-correct" src="https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3" preload="auto"></audio>
 <audio id="sound-wrong" src="https://assets.mixkit.co/active_storage/sfx/2003/2003-preview.mp3" preload="auto"></audio>
 
-<div id="vong-banner" class="stage-banner">TUẦN 19: VÒNG 1 - KHÁM PHÁ</div>
+<div id="vong-banner" class="stage-banner">VÒNG 1: KHÁM PHÁ</div>
 
 <div class="status-header" style="width: 100%; max-width: 750px; color: #f1c40f; font-size: 1.2rem;">
-    <span>ĐIỂM: <span id="diem-nhan">0</span> / 100</span>
+    <span>ĐIỂM: <span id="diem-nhan">0</span></span>
     <span id="mang-song">GIÁP: ❤️❤️❤️</span>
 </div>
 
@@ -50,92 +49,77 @@
     <div id="ui-choi">
         <div class="status-header">
             <span id="cau-so">CÂU 1/4</span>
-            <span style="color: #8e735b;">MATH 5</span>
+            <span id="vong-label">VÒNG 1</span>
         </div>
-        <div class="question-box" id="noi-dung-cau-hoi">Đang chuẩn bị bản đồ...</div>
+        <div class="question-box" id="noi-dung-cau-hoi">...</div>
         <div id="khu-vuc-dap-an"></div>
     </div>
 
     <div id="ui-ket-thuc" class="hidden" style="text-align: center;">
-        <h2 id="title-finish" style="color: #5e412f;">KẾT THÚC HÀNH TRÌNH!</h2>
-        <h1 id="diem-cuoi" style="font-size: 4rem; margin: 15px 0; color: var(--gold);">0</h1>
-        <p id="msg-finish" style="font-weight: bold;"></p>
+        <h2 id="title-finish">KẾT THÚC!</h2>
+        <h1 id="diem-cuoi" style="font-size: 3rem; color: var(--gold);">0</h1>
         <div id="form-dang-ky">
-            <input type="text" id="ten-hs" style="width:80%; padding:15px; margin:5px; border-radius:8px; border:1px solid #ccc;" placeholder="Họ và tên...">
-            <input type="text" id="lop-hs" style="width:80%; padding:15px; margin:5px; border-radius:8px; border:1px solid #ccc;" placeholder="Lớp...">
+            <input type="text" id="ten-hs" style="width:80%; padding:15px; margin:5px;" placeholder="Họ tên...">
+            <input type="text" id="lop-hs" style="width:80%; padding:15px; margin:5px;" placeholder="Lớp...">
             <button class="btn-final" style="width:85%; margin-top:15px;" onclick="saveResult()">LƯU KẾT QUẢ</button>
         </div>
-        <button class="btn-final" style="background:#7f8c8d; margin-top:15px;" onclick="location.reload()">THỬ THÁCH LẠI</button>
     </div>
 </div>
 
 <div id="toast"></div>
-<div class="footer-copyright">@ 2026 EduRobot - Lê Thành Long</div>
 
 <script>
-    const FULL_DATA = {
+    const DATA = {
         V1: [
-            {q: "Trên bản đồ có 7 vị trí hang đá và 10 vị trí rừng cây. Tỉ số của số hang đá và số rừng cây là:", opts: ["10 : 7", "7 : 10", "7 : 17", "10 : 17"], c: 1},
-            {q: "Tỉ số của số a và số b (b khác 0) là a : b hay a/b. Tỉ số này cho biết điều gì?", opts: ["Số a bằng a/b số b", "Số b bằng a/b số a", "Số a nhiều hơn số b là a/b đơn vị", "Số a kém số b là a/b đơn vị"], c: 0},
-            {q: "Trong một cuộc khảo sát 100 bạn thì có 43 bạn thích đi tìm kho báu. Tỉ số phần trăm số bạn thích tìm kho báu là:", opts: ["4,3%", "0,43%", "43%", "430%"], c: 2},
-            {q: "Ký hiệu % trong tỉ số phần trăm được đọc là:", opts: ["Phần mười", "Phần trăm", "Phần nghìn", "Đơn vị"], c: 1},
-            {q: "Tỉ số 1 : 10 000 ghi ở phía dưới một bản đồ được gọi là:", opts: ["Tỉ số độ dài", "Tỉ lệ bản đồ", "Tỉ số phần trăm", "Tỉ số xích"], c: 1},
-            {q: "Tỉ lệ bản đồ thường được viết dưới dạng một phân số có tử số là:", opts: ["1", "10", "100", "1 000"], c: 0},
-            {q: "Tỉ lệ bản đồ 1 : 500 cho biết hình ảnh trên bản đồ đã được:", opts: ["Phóng to 500 lần", "Giữ nguyên kích thước", "Thu nhỏ 500 lần", "Thu nhỏ 1 lần"], c: 2},
-            {q: "Để tính độ dài thật dựa trên độ dài bản đồ và tỉ lệ bản đồ, ta thực hiện:", opts: ["Chia cho mẫu số tỉ lệ", "Nhân với mẫu số tỉ lệ", "Cộng với mẫu số tỉ lệ", "Lấy mẫu số chia độ dài bản đồ"], c: 1}
+            {q: "Tỉ số của 7 hang đá và 10 rừng cây là:", opts: ["10:7", "7:10", "7:17", "10:17"], c: 1},
+            {q: "Tỉ số a:b (b khác 0) cho biết điều gì?", opts: ["a bằng a/b lần b", "b bằng a/b lần a", "a hơn b a/b đơn vị", "a kém b a/b đơn vị"], c: 0},
+            {q: "Có 43 bạn thích kho báu trong 100 bạn. Tỉ số phần trăm là:", opts: ["4,3%", "0,43%", "43%", "430%"], c: 2},
+            {q: "Ký hiệu % đọc là:", opts: ["Phần mười", "Phần trăm", "Phần nghìn", "Đơn vị"], c: 1},
+            {q: "Tỉ số 1:10 000 dưới bản đồ gọi là:", opts: ["Tỉ số độ dài", "Tỉ lệ bản đồ", "Tỉ số phần trăm", "Tỉ số xích"], c: 1},
+            {q: "Tỉ lệ bản đồ thường có tử số là:", opts: ["1", "10", "100", "1000"], c: 0},
+            {q: "Tỉ lệ 1:500 cho biết hình ảnh đã được:", opts: ["Phóng 500 lần", "Giữ nguyên", "Thu nhỏ 500 lần", "Thu nhỏ 1 lần"], c: 2},
+            {q: "Tính độ dài thật ta lấy độ dài bản đồ:", opts: ["Chia mẫu số", "Nhân mẫu số", "Cộng mẫu số", "Trừ mẫu số"], c: 1}
         ],
         V2: [
-            {q: "Tỉ số của m = 13 và n = 17 được viết dưới dạng phân số là:", opts: ["17/13", "13 : 17", "13/17", "13/30"], c: 2},
-            {q: "Chuyển phân số 9/25 thành tỉ số phần trăm:", opts: ["9%", "36%", "25%", "45%"], c: 1},
-            {q: "Một hòn đảo có 100 cây dừa, 92 cây đã có quả. Tỉ số phần trăm cây CHƯA có quả là:", opts: ["8%", "92%", "100%", "18%"], c: 0},
-            {q: "Trên bản đồ tỉ lệ 1:1000, khoảng cách đo được 6cm. Độ dài thật là:", opts: ["6 m", "60 m", "600 m", "6 000 m"], c: 1},
-            {q: "Thực tế dài 160km. Trên bản đồ tỉ lệ 1:1.000.000, quãng đường này dài:", opts: ["160 cm", "16 cm", "1,6 cm", "16 mm"], c: 1},
-            {q: "Kết quả của phép tính: 57% + 43,5% là:", opts: ["100%", "10,05%", "100,5%", "90,5%"], c: 2},
-            {q: "Thợ săn đi được 35% con đường. Tỉ số phần trăm con đường CÒN PHẢI ĐI là:", opts: ["35%", "135%", "65%", "75%"], c: 2},
-            {q: "Trên bản đồ tỉ lệ 1:2000, khoảng cách giữa hai hòn đảo là 5cm. Độ dài thật là:", opts: ["10 m", "100 m", "1 000 m", "10 000 m"], c: 1}
+            {q: "Tỉ số của m=13 và n=17 là:", opts: ["17/13", "13:17", "13/17", "13/30"], c: 2},
+            {q: "9/25 viết dưới dạng tỉ số phần trăm là:", opts: ["9%", "36%", "25%", "45%"], c: 1},
+            {q: "100 cây dừa, 92 cây có quả. Tỉ số phần trăm cây CHƯA quả là:", opts: ["8%", "92%", "100%", "18%"], c: 0},
+            {q: "Tỉ lệ 1:1000, bản đồ 6cm. Độ dài thật là:", opts: ["6m", "60m", "600m", "6000m"], c: 1},
+            {q: "Thực tế 160km, tỉ lệ 1:1.000.000. Bản đồ dài:", opts: ["160cm", "16cm", "1,6cm", "16mm"], c: 1},
+            {q: "57% + 43,5% = ?", opts: ["100%", "10,05%", "100,5%", "90,5%"], c: 2},
+            {q: "Đi được 35%, tỉ số phần trăm CÒN PHẢI ĐI là:", opts: ["35%", "135%", "65%", "75%"], c: 2},
+            {q: "Tỉ lệ 1:2000, bản đồ 5cm. Độ dài thật là:", opts: ["10m", "100m", "1000m", "10km"], c: 1}
         ],
         V3: [
-            {q: "Mảnh vườn hình chữ nhật (tỉ lệ 1:3000) có dài 3cm, rộng 2cm. Diện tích thật là bao nhiêu m2?", ans: "5400"},
-            {q: "Bản đồ thứ nhất (1:1000), bản đồ thứ hai (1:2000). Nếu bản đồ thứ nhất dài 10cm thì bản đồ thứ hai dài bao nhiêu cm?", ans: "5"},
-            {q: "Khu bảo tồn hình vuông có chu vi trên bản đồ (1:5000) là 16cm. Diện tích thật là bao nhiêu ha?", ans: "4"},
-            {q: "Chặng một (30%), chặng hai dài hơn chặng một 40m và chiếm 70% tổng đường. Tổng quãng đường là bao nhiêu m?", ans: "100"}
+            {q: "Tỉ lệ 1:3000, dài 3cm, rộng 2cm. Diện tích thật (m2)?", ans: "5400"},
+            {q: "Bản đồ 1 (1:1000) dài 10cm. Bản đồ 2 (1:2000) dài bao nhiêu cm?", ans: "5"},
+            {q: "Hình vuông chu vi bản đồ (1:5000) là 16cm. Diện tích thật (ha)?", ans: "4"},
+            {q: "Chặng 1 (30%), chặng 2 chiếm 70% và hơn chặng 1 là 40m. Tổng đường (m)?", ans: "100"}
         ]
     };
 
-    let currentScore = 0, lives = 3, stage = 1, qIdx = 0, currentPool = [];
+    let score = 0, lives = 3, stage = 1, qIdx = 0, pool = [];
 
     function startGame() {
         document.getElementById('start-screen').classList.add('hidden');
         initStage(1);
     }
 
-    function playSound(isCorrect) {
-        const s = document.getElementById(isCorrect ? 'sound-correct' : 'sound-wrong');
-        s.currentTime = 0;
-        s.play().catch(e => console.log("Audio Error"));
+    function initStage(s) {
+        stage = s; qIdx = 0;
+        const b = document.getElementById('vong-banner');
+        const l = document.getElementById('vong-label');
+        if(s === 1) { b.innerText = "VÒNG 1: KHÁM PHÁ"; l.innerText = "VÒNG 1"; pool = shuffle([...DATA.V1]).slice(0, 4); }
+        else if(s === 2) { b.innerText = "VÒNG 2: LUYỆN TẬP"; l.innerText = "VÒNG 2"; pool = shuffle([...DATA.V2]).slice(0, 4); }
+        else { b.innerText = "VÒNG 3: NÂNG CAO"; l.innerText = "VÒNG 3"; pool = shuffle([...DATA.V3]).slice(0, 2); }
+        showQ();
     }
 
     function shuffle(a) { return a.sort(() => Math.random() - 0.5); }
 
-    function initStage(s) {
-        stage = s; qIdx = 0;
-        const banner = document.getElementById('vong-banner');
-        if(s === 1) { 
-            banner.innerText = "TUẦN 19: VÒNG 1 - KHÁM PHÁ"; 
-            currentPool = shuffle([...FULL_DATA.V1]).slice(0, 4); 
-        } else if(s === 2) { 
-            banner.innerText = "TUẦN 19: VÒNG 2 - LUYỆN TẬP"; 
-            currentPool = shuffle([...FULL_DATA.V2]).slice(0, 4); 
-        } else { 
-            banner.innerText = "TUẦN 19: VÒNG 3 - NÂNG CAO"; 
-            currentPool = shuffle([...FULL_DATA.V3]).slice(0, 2); 
-        }
-        showQ();
-    }
-
     function showQ() {
-        let item = currentPool[qIdx];
-        document.getElementById('cau-so').innerText = `CÂU ${qIdx + 1}/${currentPool.length}`;
+        let item = pool[qIdx];
+        document.getElementById('cau-so').innerText = `CÂU ${qIdx+1}/${pool.length}`;
         document.getElementById('noi-dung-cau-hoi').innerText = item.q;
         const c = document.getElementById('khu-vuc-dap-an');
         c.innerHTML = '';
@@ -144,29 +128,42 @@
             item.opts.forEach((o, i) => {
                 let btn = document.createElement('button');
                 btn.className = "btn-opt"; btn.innerText = o;
-                btn.onclick = () => { if(i === item.c) win(); else lose(); };
+                btn.onclick = () => check(i === item.c);
                 c.appendChild(btn);
             });
         } else {
             c.className = "input-area";
-            c.innerHTML = `<input type="number" id="ans-input" class="input-ans" placeholder="Nhập số..."><button class="btn-submit" onclick="checkTL()">GỬI ĐÁP ÁN</button>`;
-            setTimeout(() => document.getElementById('ans-input').focus(), 300);
+            c.innerHTML = `<input type="number" id="ans-input" class="input-ans"><button class="btn-submit" onclick="checkTL()">GỬI</button>`;
         }
     }
 
-    function checkTL() { if(document.getElementById('ans-input').value.trim() === currentPool[qIdx].ans) win(); else lose(); }
+    function checkTL() { check(document.getElementById('ans-input').value.trim() === pool[qIdx].ans); }
 
-    function win() { 
-        currentScore += 10; playSound(true); 
-        showToast("XUẤT SẮC! +10đ", "#27ae60"); next(); 
-    }
-
-    function lose() {
-        lives--; playSound(false); updateHearts();
-        if(lives <= 0) {
-            showToast(stage === 1 ? "HẾT GIÁP! SANG VÒNG 2" : "HẾT GIÁP!", "#e67e22");
-            setTimeout(() => { if(stage < 3) initStage(stage + 1); else end(); }, 1200);
-        } else { showToast("SAI RỒI! ❌", "#e74c3c"); next(); }
+    function check(isCorrect) {
+        const sCorrect = document.getElementById('sound-correct');
+        const sWrong = document.getElementById('sound-wrong');
+        
+        if(isCorrect) {
+            score += 10;
+            sCorrect.currentTime = 0; sCorrect.play();
+            showToast("ĐÚNG RỒI! +10đ", "#27ae60");
+            next();
+        } else {
+            sWrong.currentTime = 0; sWrong.play();
+            showToast("SAI RỒI! ❌", "#e74c3c");
+            
+            if(stage === 1) {
+                lives--;
+                updateHearts();
+                if(lives <= 0) {
+                    showToast("HẾT GIÁP! CHUYỂN VÒNG 2", "#e67e22");
+                    setTimeout(() => initStage(2), 1000);
+                    return;
+                }
+            }
+            // Vòng 2 và 3 sai cũng chuyển bài luôn
+            next();
+        }
     }
 
     function updateHearts() {
@@ -175,10 +172,10 @@
     }
 
     function next() {
-        document.getElementById('diem-nhan').innerText = currentScore;
+        document.getElementById('diem-nhan').innerText = score;
         setTimeout(() => {
             qIdx++;
-            if(qIdx < currentPool.length) showQ();
+            if(qIdx < pool.length) showQ();
             else if(stage < 3) initStage(stage + 1);
             else end();
         }, 800);
@@ -187,10 +184,7 @@
     function end() {
         document.getElementById('ui-choi').classList.add('hidden');
         document.getElementById('ui-ket-thuc').classList.remove('hidden');
-        document.getElementById('diem-cuoi').innerText = currentScore;
-        const m = document.getElementById('msg-finish');
-        m.innerText = currentScore >= 50 ? "BẠN ĐÃ QUA VÒNG! 🎉" : "CỐ GẮNG LẦN SAU NHÉ! 💪";
-        m.style.color = currentScore >= 50 ? "green" : "red";
+        document.getElementById('diem-cuoi').innerText = score;
     }
 
     function showToast(m, c) {
@@ -200,9 +194,9 @@
 
     function saveResult() {
         const t = document.getElementById('ten-hs').value, l = document.getElementById('lop-hs').value;
-        if(!t || !l) return alert("Nhập tên và lớp nhé!");
-        firebase.database().ref('ketqua/tuan19/' + Date.now()).set({ hoTen: t, lop: l, diem: currentScore })
-        .then(() => { alert("Đã lưu điểm!"); location.reload(); });
+        if(!t || !l) return alert("Nhập đủ thông tin!");
+        firebase.database().ref('ketqua/tuan19/' + Date.now()).set({ hoTen: t, lop: l, diem: score })
+        .then(() => { alert("Đã lưu!"); location.reload(); });
     }
 
     window.onload = () => {
