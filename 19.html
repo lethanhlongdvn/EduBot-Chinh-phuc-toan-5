@@ -31,7 +31,7 @@
 <body>
 
 <div id="start-screen">
-    <h1 style="color: #c6930a; font-size: 2rem; text-align: center; margin-bottom: 30px;">TOÁN 5 - TUẦN 19</h1>
+    <h1 style="color: #c6930a; font-size: 2rem; text-align: center; margin-bottom: 30px;">TOÁN 5 - TUẦN 19: BẢN ĐỒ KHO BÁU</h1>
     <button class="btn-final" onclick="startGame()" style="padding: 20px 60px; font-size: 1.5rem;">BẮT ĐẦU</button>
 </div>
 
@@ -42,7 +42,7 @@
 
 <div class="status-header" style="width: 100%; max-width: 750px; color: #f1c40f; font-size: 1.2rem;">
     <span>ĐIỂM: <span id="diem-nhan">0</span></span>
-    <span id="mang-song">GIÁP: ❤️❤️❤️</span>
+    <span id="mang-song">SỐ LẦN SAI CÒN LẠI CỦA BẠN: ❤️❤️❤️</span>
 </div>
 
 <div class="map-frame">
@@ -57,12 +57,16 @@
 
     <div id="ui-ket-thuc" class="hidden" style="text-align: center;">
         <h2 id="title-finish">KẾT THÚC!</h2>
-        <h1 id="diem-cuoi" style="font-size: 3rem; color: var(--gold);">0</h1>
-        <div id="form-dang-ky">
-            <input type="text" id="ten-hs" style="width:80%; padding:15px; margin:5px;" placeholder="Họ tên...">
-            <input type="text" id="lop-hs" style="width:80%; padding:15px; margin:5px;" placeholder="Lớp...">
-            <button class="btn-final" style="width:85%; margin-top:15px;" onclick="saveResult()">LƯU KẾT QUẢ</button>
+        <h1 id="diem-cuoi" style="font-size: 4rem; color: var(--gold); margin: 10px 0;">0</h1>
+        <p id="msg-finish" style="font-weight: bold; margin-bottom: 20px;"></p>
+        
+        <div id="form-dang-ky" class="hidden">
+            <input type="text" id="ten-hs" style="width:80%; padding:15px; margin:5px; border-radius:8px; border:1px solid #ccc;" placeholder="Họ và tên...">
+            <input type="text" id="lop-hs" style="width:80%; padding:15px; margin:5px; border-radius:8px; border:1px solid #ccc;" placeholder="Lớp...">
+            <button class="btn-final" style="width:85%; margin-top:10px;" onclick="saveResult()">LƯU KẾT QUẢ VÀ QUA VÒNG</button>
         </div>
+        
+        <button id="btn-retry" class="btn-final" style="background:#7f8c8d; margin-top:10px;" onclick="location.reload()">THỬ THÁCH LẠI</button>
     </div>
 </div>
 
@@ -111,7 +115,7 @@
         const l = document.getElementById('vong-label');
         if(s === 1) { b.innerText = "VÒNG 1: KHÁM PHÁ"; l.innerText = "VÒNG 1"; pool = shuffle([...DATA.V1]).slice(0, 4); }
         else if(s === 2) { b.innerText = "VÒNG 2: LUYỆN TẬP"; l.innerText = "VÒNG 2"; pool = shuffle([...DATA.V2]).slice(0, 4); }
-        else { b.innerText = "VÒNG 3: NÂNG CAO"; l.innerText = "VÒNG 3"; pool = shuffle([...DATA.V3]).slice(0, 2); }
+        else { b.innerText = "VÒNG 3: LUYỆN TẬP NÂNG CAO"; l.innerText = "VÒNG 3"; pool = shuffle([...DATA.V3]).slice(0, 2); }
         showQ();
     }
 
@@ -133,7 +137,7 @@
             });
         } else {
             c.className = "input-area";
-            c.innerHTML = `<input type="number" id="ans-input" class="input-ans"><button class="btn-submit" onclick="checkTL()">GỬI</button>`;
+            c.innerHTML = `<input type="number" id="ans-input" class="input-ans" placeholder="Nhập kết quả..."><button class="btn-submit" onclick="checkTL()">GỬI ĐÁP ÁN</button>`;
         }
     }
 
@@ -156,12 +160,12 @@
                 lives--;
                 updateHearts();
                 if(lives <= 0) {
-                    showToast("HẾT GIÁP! CHUYỂN VÒNG 2", "#e67e22");
+                    showToast("HẾT SỐ LẦN SAI! SANG VÒNG 2", "#e67e22");
                     setTimeout(() => initStage(2), 1000);
                     return;
                 }
             }
-            // Vòng 2 và 3 sai cũng chuyển bài luôn
+            // Vòng 2 và 3 sai cũng tự chuyển
             next();
         }
     }
@@ -185,6 +189,19 @@
         document.getElementById('ui-choi').classList.add('hidden');
         document.getElementById('ui-ket-thuc').classList.remove('hidden');
         document.getElementById('diem-cuoi').innerText = score;
+        
+        const msg = document.getElementById('msg-finish');
+        const form = document.getElementById('form-dang-ky');
+        
+        if(score >= 50) {
+            msg.innerText = "CHÚC MỪNG! EM ĐÃ HOÀN THÀNH VÒNG THI TUẦN 19.";
+            msg.style.color = "green";
+            form.classList.remove('hidden');
+        } else {
+            msg.innerText = "ĐIỂM CỦA EM CHƯA ĐẠT (DƯỚI 50 ĐIỂM). HÃY THỬ LẠI NHÉ!";
+            msg.style.color = "red";
+            form.classList.add('hidden');
+        }
     }
 
     function showToast(m, c) {
@@ -194,9 +211,9 @@
 
     function saveResult() {
         const t = document.getElementById('ten-hs').value, l = document.getElementById('lop-hs').value;
-        if(!t || !l) return alert("Nhập đủ thông tin!");
+        if(!t || !l) return alert("Em hãy nhập tên và lớp để thầy lưu điểm nhé!");
         firebase.database().ref('ketqua/tuan19/' + Date.now()).set({ hoTen: t, lop: l, diem: score })
-        .then(() => { alert("Đã lưu!"); location.reload(); });
+        .then(() => { alert("Đã ghi danh thành công!"); location.reload(); });
     }
 
     window.onload = () => {
