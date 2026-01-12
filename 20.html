@@ -3,167 +3,217 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cán Cân Công Lý - Tuần 20</title>
+    <title>Tuần 20: Cán Cân Công Lý - EduRobot</title>
     <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <style>
-        :root { --justice-blue: #2c3e50; --gold: #f1c40f; --marble: #ecf0f1; --law-red: #e74c3c; }
-        body { font-family: 'Lexend', sans-serif; margin: 0; padding: 20px; background: var(--justice-blue); color: #fff; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
-        .game-container { max-width: 750px; width: 100%; background: #34495e; padding: 30px; border-radius: 20px; border: 4px solid var(--gold); box-shadow: 0 10px 30px rgba(0,0,0,0.5); position: relative; }
-        .status-bar { display: flex; justify-content: space-between; width: 100%; max-width: 750px; color: var(--gold); font-weight: bold; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px; }
-        .screen { background: var(--marble); color: var(--justice-blue); border-radius: 15px; padding: 25px; margin-bottom: 25px; min-height: 140px; text-align: center; border-bottom: 5px solid #bdc3c7; }
-        .q-text { font-size: 1.25rem; line-height: 1.6; font-weight: 500; }
-        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .btn-opt { background: #fff; border: 2px solid var(--justice-blue); padding: 15px; border-radius: 10px; font-family: 'Lexend'; font-weight: 600; cursor: pointer; transition: 0.2s; font-size: 1rem; color: var(--justice-blue); }
-        .btn-opt:hover { background: var(--gold); transform: translateY(-2px); border-color: var(--gold); }
-        .footer-edu { text-align: center; width: 100%; padding: 25px 0; color: #95a5a6; font-size: 0.9rem; letter-spacing: 1px; margin-top: auto; }
-        #toast { position: fixed; top: 30px; padding: 15px 40px; border-radius: 50px; font-weight: bold; z-index: 1000; opacity: 0; transition: 0.3s; }
+        :root { --parchment: #f4e4bc; --ink: #2c3e50; --gold: #c6930a; --ocean: #2980b9; --red: #e74c3c; }
+        body { font-family: 'Lexend', sans-serif; margin: 0; padding: 20px; background: #1a1a2e; color: var(--ink); display: flex; flex-direction: column; align-items: center; min-height: 100vh; position: relative; padding-bottom: 100px; }
+        .stage-banner { background: var(--gold); color: white; padding: 12px 35px; border-radius: 50px; font-weight: 700; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); border: 2px solid #fff; text-transform: uppercase; letter-spacing: 1px; font-size: 1.2rem; }
+        .map-frame { max-width: 750px; width: 100%; background: var(--parchment); padding: 30px; border-radius: 15px; border: 10px solid #8e735b; box-shadow: 0 0 40px rgba(0,0,0,0.6); position: relative; background-image: url('https://www.transparenttextures.com/patterns/parchment.png'); }
+        .status-header { display: flex; justify-content: space-between; margin-bottom: 20px; font-weight: 700; color: #5e412f; border-bottom: 2px dashed #8e735b; padding-bottom: 10px; }
+        .question-box { background: rgba(255, 255, 255, 0.5); border-radius: 12px; padding: 25px; margin-bottom: 25px; min-height: 100px; border: 1px solid #d4b996; font-size: 1.2rem; line-height: 1.6; text-align: center; font-weight: 600; }
+        .options-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .btn-opt { background: #fff; border: 2px solid #8e735b; padding: 15px; border-radius: 10px; font-family: 'Lexend'; font-weight: 600; cursor: pointer; transition: 0.2s; font-size: 1rem; color: #2c3e50; }
+        .btn-opt:hover { background: var(--gold); color: white; transform: translateY(-2px); }
+        .input-area { display: flex; flex-direction: column; align-items: center; gap: 15px; }
+        .input-ans { padding: 15px; width: 250px; font-size: 1.3rem; border: 3px solid var(--gold); border-radius: 10px; text-align: center; font-family: 'Lexend'; outline: none; }
+        .btn-submit { background: var(--ocean); color: white; padding: 12px 40px; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 1.1rem; }
+        #toast { position: fixed; top: 30px; padding: 15px 40px; border-radius: 50px; font-weight: bold; z-index: 1000; opacity: 0; transition: 0.3s; pointer-events: none; }
         .show-toast { opacity: 1 !important; top: 50px !important; }
-        .hidden { display: none; }
-        .btn-action { background: var(--law-red); color: white; padding: 15px 30px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; width: 100%; }
+        .hidden { display: none !important; }
+        .btn-final { background: var(--ocean); color: white; padding: 15px 30px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 1.1rem; }
+        #start-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1a1a2e; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; }
     </style>
 </head>
 <body>
 
+<div id="start-screen">
+    <h1 style="color: #c6930a; font-size: 2rem; text-align: center; margin-bottom: 30px;">TOÁN 5 - TUẦN 20: CÁN CÂN CÔNG LÝ</h1>
+    <button class="btn-final" onclick="startGame()" style="padding: 20px 60px; font-size: 1.5rem;">BẮT ĐẦU</button>
+</div>
+
+<audio id="sound-correct" src="https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3" preload="auto"></audio>
+<audio id="sound-wrong" src="https://assets.mixkit.co/active_storage/sfx/2003/2003-preview.mp3" preload="auto"></audio>
+
+<div id="vong-banner" class="stage-banner">VÒNG 1: KHÁM PHÁ</div>
+
+<div class="status-header" style="width: 100%; max-width: 750px; color: #f1c40f; font-size: 1.2rem;">
+    <span>ĐIỂM: <span id="diem-nhan">0</span></span>
+    <span id="mang-song">SỐ LẦN SAI CÒN LẠI: ❤️❤️❤️</span>
+</div>
+
+<div class="map-frame">
+    <div id="ui-choi">
+        <div class="status-header">
+            <span id="cau-so">CÂU 1/4</span>
+            <span id="vong-label">VÒNG 1</span>
+        </div>
+        <div class="question-box" id="noi-dung-cau-hoi">...</div>
+        <div id="khu-vuc-dap-an"></div>
+    </div>
+
+    <div id="ui-ket-thuc" class="hidden" style="text-align: center;">
+        <h2 id="title-finish">KẾT THÚC THỬ THÁCH!</h2>
+        <h1 id="diem-cuoi" style="font-size: 4rem; color: var(--gold); margin: 10px 0;">0</h1>
+        <p id="msg-finish" style="font-weight: bold; margin-bottom: 20px;"></p>
+        
+        <div id="form-dang-ky" class="hidden">
+            <input type="text" id="ten-hs" style="width:80%; padding:15px; margin:5px; border-radius:8px; border:1px solid #ccc;" placeholder="Họ và tên...">
+            <input type="text" id="lop-hs" style="width:80%; padding:15px; margin:5px; border-radius:8px; border:1px solid #ccc;" placeholder="Lớp...">
+            <button class="btn-final" style="width:85%; margin-top:10px;" onclick="saveResult()">LƯU KẾT QUẢ VÀ QUA VÒNG</button>
+        </div>
+        
+        <button id="btn-retry" class="btn-final" style="background:#7f8c8d; margin-top:10px;" onclick="location.reload()">THỬ THÁCH LẠI</button>
+    </div>
+</div>
+
 <div id="toast"></div>
 
-<div class="status-bar">
-    <span id="vong-name">Vòng 1: Tìm Điểm Cân Bằng</span>
-    <span id="score-val">ĐIỂM: 0</span>
-</div>
-
-<div class="game-container">
-    <div id="play-zone">
-        <div class="status-bar" style="color: #bdc3c7; font-size: 0.8rem;">
-            <span id="q-progress">Câu hỏi: 1/4</span>
-            <span id="lives">Lượt sai: 3/3</span>
-        </div>
-        <div class="screen">
-            <div id="q-content" class="q-text">Đang thiết lập bàn cân...</div>
-        </div>
-        <div id="options-zone" class="options-grid"></div>
-    </div>
-
-    <div id="result-zone" class="hidden" style="text-align: center;">
-        <h2 style="color: var(--gold);">CÁN CÂN HOÀN TẤT</h2>
-        <h1 id="final-score" style="font-size: 4rem; margin: 20px 0;">0</h1>
-        <input type="text" id="hs-name" style="width:80%; padding:15px; margin:5px; border-radius:8px;" placeholder="Tên học sinh...">
-        <input type="text" id="hs-class" style="width:80%; padding:15px; margin:5px; border-radius:8px;" placeholder="Lớp...">
-        <button class="btn-action" style="margin-top:15px;" onclick="saveData()">LƯU BẢNG VÀNG</button>
-        <button class="btn-action" style="background:#7f8c8d; margin-top:10px;" onclick="location.reload()">CHƠI LẠI</button>
-    </div>
-</div>
-
-<div class="footer-edu">
-    © 2026 EduRobot - Lê Thành Long
-</div>
-
 <script>
-    let score = 0;
-    let life = 3;
-    let currentStage = 1;
-    let currentIdx = 0;
-    let gameDe = [];
-
-    const firebaseConfig = {
-        apiKey: "AIzaSyC6zlWn8BKYU7P6A2-PYq6IIWOzaqJWFhc",
-        authDomain: "gamhoctap.firebaseapp.com",
-        databaseURL: "https://gamhoctap-default-rtdb.asia-southeast1.firebasedatabase.app",
-        projectId: "gamhoctap"
+    const DATA = {
+        V1: [
+            {q: "5A và 5B có 60 quyển lịch. Tỉ số lớp 5A và 5B là 7/8. Tổng số phần bằng nhau là:", opts: ["1 phần", "14 phần", "15 phần", "56 phần"], c: 2},
+            {q: "Có 49 con bò. Số bò khoang bằng 2/5 số bò vàng. Số bò khoang là:", opts: ["14 con", "35 con", "10 con", "25 con"], c: 0},
+            {q: "Sóc em = 3/5 Sóc chị. Sóc em ít hơn Sóc chị 6 hạt. Hiệu số phần bằng nhau là:", opts: ["8 phần", "15 phần", "2 phần", "3 phần"], c: 2},
+            {q: "Nam nhiều hơn nữ 10 người. Nữ bằng 2/3 nam. Số người nam là:", opts: ["20 người", "30 người", "50 người", "10 người"], c: 1},
+            {q: "Chiều dài hơn chiều rộng 10m. Dài bằng 3/2 rộng. Chiều rộng mảnh đất là:", opts: ["30m", "15m", "20m", "25m"], c: 2},
+            {q: "Tìm tỉ số phần trăm của 37 và 40, bước đầu tiên tính thương 37 : 40 được:", opts: ["9,25", "0,925", "92,5", "0,0925"], c: 1},
+            {q: "40kg nước biển có 1,4kg muối. Tỉ số phần trăm của muối là:", opts: ["1,4%", "35%", "3,5%", "0,35%"], c: 2},
+            {q: "Đội có 60 bạn, lớp 5A có 18 bạn. Tỉ số phần trăm của lớp 5A so với cả đội là:", opts: ["30%", "18%", "60%", "3%"], c: 0}
+        ],
+        V2: [
+            {q: "Dốc dài 1400m. Lên dốc = 3/4 xuống dốc. Đoạn xuống dốc dài:", opts: ["600m", "800m", "1050m", "700m"], c: 1},
+            {q: "Tổng hai số là 34000. Số thứ nhất bằng 7/10 số thứ hai. Số thứ nhất kém số thứ hai:", opts: ["14000", "20000", "6000", "3000"], c: 2},
+            {q: "Rác loại A = 3/7 loại B và ít hơn loại B là 8kg. Tổng khối lượng hai loại là:", opts: ["20kg", "14kg", "6kg", "10kg"], c: 0},
+            {q: "Mẹ hơn con 25 tuổi. 2 năm nữa con bằng 2/7 mẹ. Tuổi mẹ hiện nay là:", opts: ["35 tuổi", "33 tuổi", "10 tuổi", "7 tuổi"], c: 1},
+            {q: "Cá A nhiều hơn cá B là 6 tấn. Cá A bằng 5/2 cá B. Số cá loại B là:", opts: ["10 tấn", "4 tấn", "15 tấn", "6 tấn"], c: 1},
+            {q: "Kiểm tra 100 ô tô có 92 ô tô đạt chuẩn. Tỉ số phần trăm ô tô KHÔNG đạt chuẩn là:", opts: ["92%", "0,08%", "8%", "100%"], c: 2},
+            {q: "Kết quả tính 100,5% - 57% là:", opts: ["43%", "43,5%", "53,5%", "44,5%"], c: 1},
+            {q: "Dự định 600 cây, thực tế 690 cây. Nhà trường đã vượt mức bao nhiêu phần trăm?", opts: ["115%", "90%", "15%", "11,5%"], c: 2}
+        ],
+        V3: [
+            {q: "Chu vi 130m. Rộng = 5/8 Dài. Diện tích mảnh đất là (m2)?", ans: "1000"},
+            {q: "Mẹ hơn con 25 tuổi. Tuổi con bằng 2/7 tuổi mẹ. Khi con 10 tuổi thì cần thêm bao nhiêu năm nữa (đáp án là số năm)?", ans: "0"},
+            {q: "Trồng được 360 cây (chiếm 60% kế hoạch). Kế hoạch phải trồng bao nhiêu cây?", ans: "600"},
+            {q: "Thỏ và Rùa hái 84 nấm. Nếu Thỏ thêm 6 cây thì Thỏ = 2/3 Rùa. Thực tế Thỏ hái bao nhiêu cây?", ans: "30"}
+        ]
     };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
 
-    // DỮ LIỆU TUẦN 20
-    const POOL_V1_V2 = [
-        {q: "Sóc chị nhiều hơn sóc em 6 hạt dẻ. Tỉ số hạt dẻ em và chị là 3/5. Số hạt dẻ sóc em là:", opts: ["9 hạt", "15 hạt", "12 hạt", "6 hạt"], c: 0},
-        {q: "Lớp có 40 bạn, 37 bạn đạt chuẩn bơi lội. Tỉ số phần trăm bạn đạt chuẩn là:", opts: ["37%", "92,5%", "85%", "90%"], c: 1},
-        {q: "Tìm hai số có hiệu là 10 và tỉ số là 2/3. Số lớn là:", opts: ["20", "30", "15", "25"], c: 1},
-        {q: "Tính tỉ số phần trăm của 18 bạn thích bóng đá trong tổng số 50 học sinh:", opts: ["18%", "36%", "40%", "25%"], c: 1},
-        {q: "Hiệu số phần bằng nhau của tỉ số 3/7 là mấy phần?", opts: ["10 phần", "4 phần", "3 phần", "7 phần"], c: 1},
-        {q: "Để tìm tỉ số phần trăm của 2 và 5, ta lấy 2 chia 5 bằng 0,4 rồi:", opts: ["Cộng 100", "Nhân 100 và viết %", "Chia 100", "Viết thêm %"], c: 1},
-        {q: "Hiệu là 20, tỉ số là 1/5. Giá trị một phần là:", opts: ["4", "5", "10", "20"], c: 1},
-        {q: "Trong đợt kiểm tra, có 9 bạn chưa đạt trên tổng 100 bạn. Tỉ số phần trăm đạt là:", opts: ["9%", "91%", "100%", "81%"], c: 1}
-    ];
+    let score = 0, lives = 3, stage = 1, qIdx = 0, pool = [];
 
-    const POOL_V3 = [
-        {q: "Rác loại A bằng 3/7 loại B và ít hơn loại B là 8kg. Khối lượng rác loại B là:", opts: ["14 kg", "6 kg", "8 kg", "21 kg"], c: 0},
-        {q: "Trong 40kg nước biển có 1,4kg muối. Tỉ số phần trăm muối là:", opts: ["35%", "3,5%", "0,35%", "1,4%"], c: 1},
-        {q: "Số nam nhiều hơn nữ 10 bạn. Nữ bằng 2/3 nam. Tổng số bạn tham gia là:", opts: ["50 bạn", "30 bạn", "20 bạn", "40 bạn"], c: 0},
-        {q: "Một cửa hàng lãi 20% so với giá vốn. Nếu vốn là 1 triệu, số tiền lãi là:", opts: ["20.000đ", "200.000đ", "100.000đ", "120.000đ"], c: 1}
-    ];
-
-    function shuffle(array) { return array.sort(() => Math.random() - 0.5); }
-
-    function initGame() {
-        if(currentStage === 1) gameDe = shuffle([...POOL_V1_V2]).slice(0, 4);
-        else if(currentStage === 2) gameDe = shuffle([...POOL_V1_V2]).slice(0, 4);
-        else gameDe = shuffle([...POOL_V3]).slice(0, 2);
-        
-        currentIdx = 0;
-        showQuestion();
+    function startGame() {
+        document.getElementById('start-screen').classList.add('hidden');
+        initStage(1);
     }
 
-    function showQuestion() {
-        const item = gameDe[currentIdx];
-        document.getElementById('vong-name').innerText = `Vòng ${currentStage}: ${currentStage < 3 ? "Cân Bằng Hiệu Số" : "Công Lý Thực Tế"}`;
-        document.getElementById('q-progress').innerText = `Câu hỏi: ${currentIdx + 1}/${gameDe.length}`;
-        document.getElementById('q-content').innerText = item.q;
-        
-        let html = "";
-        item.opts.forEach((o, i) => {
-            html += `<button class="btn-opt" onclick="checkAnswer(${i})">${o}</button>`;
-        });
-        document.getElementById('options-zone').innerHTML = html;
+    function initStage(s) {
+        stage = s; qIdx = 0;
+        const b = document.getElementById('vong-banner');
+        const l = document.getElementById('vong-label');
+        if(s === 1) { b.innerText = "VÒNG 1: KHÁM PHÁ"; l.innerText = "VÒNG 1"; pool = shuffle([...DATA.V1]).slice(0, 4); }
+        else if(s === 2) { b.innerText = "VÒNG 2: LUYỆN TẬP"; l.innerText = "VÒNG 2"; pool = shuffle([...DATA.V2]).slice(0, 4); }
+        else { b.innerText = "VÒNG 3: NÂNG CAO"; l.innerText = "VÒNG 3"; pool = shuffle([...DATA.V3]).slice(0, 2); }
+        showQ();
     }
 
-    function checkAnswer(i) {
-        if(i === gameDe[currentIdx].c) {
-            score += (currentStage * 10);
-            toast("CHÍNH XÁC! ⚖️", "#27ae60");
+    function shuffle(a) { return a.sort(() => Math.random() - 0.5); }
+
+    function showQ() {
+        let item = pool[qIdx];
+        document.getElementById('cau-so').innerText = `CÂU ${qIdx+1}/${pool.length}`;
+        document.getElementById('noi-dung-cau-hoi').innerText = item.q;
+        const c = document.getElementById('khu-vuc-dap-an');
+        c.innerHTML = '';
+        if(stage < 3) {
+            c.className = "options-container";
+            item.opts.forEach((o, i) => {
+                let btn = document.createElement('button');
+                btn.className = "btn-opt"; btn.innerText = o;
+                btn.onclick = () => check(i === item.c);
+                c.appendChild(btn);
+            });
         } else {
-            life--;
-            toast("MẤT CÂN BẰNG! ❌", "#e74c3c");
-            document.getElementById('lives').innerText = `Lượt sai: ${life}/3`;
-            if(life <= 0) return end();
+            c.className = "input-area";
+            c.innerHTML = `<input type="number" id="ans-input" class="input-ans" placeholder="Nhập số..."><button class="btn-submit" onclick="checkTL()">GỬI ĐÁP ÁN</button>`;
         }
-        document.getElementById('score-val').innerText = "ĐIỂM: " + score;
-        setTimeout(next, 800);
+    }
+
+    function checkTL() { check(document.getElementById('ans-input').value.trim() === pool[qIdx].ans); }
+
+    function check(isCorrect) {
+        const sCorrect = document.getElementById('sound-correct');
+        const sWrong = document.getElementById('sound-wrong');
+        if(isCorrect) {
+            score += 10;
+            sCorrect.currentTime = 0; sCorrect.play();
+            showToast("ĐÚNG RỒI! +10đ", "#27ae60");
+            next();
+        } else {
+            sWrong.currentTime = 0; sWrong.play();
+            showToast("SAI RỒI! ❌", "#e74c3c");
+            if(stage === 1) {
+                lives--; updateHearts();
+                if(lives <= 0) {
+                    showToast("HẾT LƯỢT! SANG VÒNG 2", "#e67e22");
+                    setTimeout(() => initStage(2), 1000);
+                    return;
+                }
+            }
+            next();
+        }
+    }
+
+    function updateHearts() {
+        let h = ""; for(let i=0; i<3; i++) h += i < lives ? "❤️" : "🖤";
+        document.getElementById('mang-song').innerText = "SỐ LẦN SAI CÒN LẠI: " + h;
     }
 
     function next() {
-        currentIdx++;
-        if(currentIdx < gameDe.length) showQuestion();
-        else if(currentStage < 3) {
-            currentStage++;
-            initGame();
-        } else end();
-    }
-
-    function toast(m, c) {
-        const t = document.getElementById('toast');
-        t.innerText = m; t.style.background = c; t.style.color = "#fff";
-        t.classList.add('show-toast');
-        setTimeout(() => t.classList.remove('show-toast'), 700);
+        document.getElementById('diem-nhan').innerText = score;
+        setTimeout(() => {
+            qIdx++;
+            if(qIdx < pool.length) showQ();
+            else if(stage < 3) initStage(stage + 1);
+            else end();
+        }, 800);
     }
 
     function end() {
-        document.getElementById('play-zone').classList.add('hidden');
-        document.getElementById('result-zone').classList.remove('hidden');
-        document.getElementById('final-score').innerText = score;
+        document.getElementById('ui-choi').classList.add('hidden');
+        document.getElementById('ui-ket-thuc').classList.remove('hidden');
+        document.getElementById('diem-cuoi').innerText = score;
+        const msg = document.getElementById('msg-finish');
+        const form = document.getElementById('form-dang-ky');
+        if(score >= 50) {
+            msg.innerText = "CHÚC MỪNG! EM ĐÃ HOÀN THÀNH XUẤT SẮC TUẦN 20.";
+            msg.style.color = "green";
+            form.classList.remove('hidden');
+        } else {
+            msg.innerText = "ĐIỂM CHƯA ĐẠT (DƯỚI 50 ĐIỂM). HÃY THỬ LẠI NHÉ!";
+            msg.style.color = "red";
+            form.classList.add('hidden');
+        }
     }
 
-    function saveData() {
-        const n = document.getElementById('hs-name').value;
-        const l = document.getElementById('hs-class').value;
-        if(!n || !l) return alert("Nhập đủ thông tin em nhé!");
-        db.ref('ketqua/tuan20/' + Date.now()).set({ ten: n, lop: l, diem: score, nam: 2026 })
-        .then(() => { alert("Đã ghi danh vào sổ công lý!"); location.reload(); });
+    function showToast(m, c) {
+        const t = document.getElementById('toast'); t.innerText = m; t.style.background = c; t.style.color = "#fff";
+        t.classList.add('show-toast'); setTimeout(() => t.classList.remove('show-toast'), 1000);
     }
 
-    window.onload = initGame;
+    function saveResult() {
+        const t = document.getElementById('ten-hs').value, l = document.getElementById('lop-hs').value;
+        if(!t || !l) return alert("Nhập tên và lớp nhé!");
+        firebase.database().ref('ketqua/tuan20/' + Date.now()).set({ hoTen: t, lop: l, diem: score })
+        .then(() => { alert("Đã lưu điểm thành công!"); location.reload(); });
+    }
+
+    window.onload = () => {
+        const config = { databaseURL: "https://gamhoctap-default-rtdb.asia-southeast1.firebasedatabase.app" };
+        if (!firebase.apps.length) firebase.initializeApp(config);
+    };
 </script>
 </body>
 </html>
