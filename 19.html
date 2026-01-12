@@ -26,12 +26,18 @@
         .hidden { display: none; }
         .btn-final { background: var(--ocean); color: white; padding: 15px 30px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 1.1rem; }
         .footer-copyright { position: absolute; bottom: 20px; text-align: center; width: 100%; color: #bdc3c7; font-size: 0.9rem; letter-spacing: 0.5px; }
+        #start-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(26,26,46,0.95); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; }
     </style>
 </head>
 <body>
 
-<audio id="sound-correct" src="https://www.myinstants.com/media/sounds/ding-sound-effect_1.mp3"></audio>
-<audio id="sound-wrong" src="https://www.myinstants.com/media/sounds/buzzer_x_incorrect.mp3"></audio>
+<div id="start-screen">
+    <h1 style="color: #c6930a; margin-bottom: 20px;">TOÁN 5 - TUẦN 19</h1>
+    <button class="btn-final" onclick="startGame()" style="padding: 20px 60px; font-size: 1.5rem;">BẮT ĐẦU CHƠI</button>
+</div>
+
+<audio id="sound-correct" src="https://actions.google.com/sounds/v1/cartoon/clink_clank.ogg" preload="auto"></audio>
+<audio id="sound-wrong" src="https://actions.google.com/sounds/v1/foley/button_click_off.ogg" preload="auto"></audio>
 
 <div id="vong-banner" class="stage-banner">TUẦN 19: VÒNG 1 - KHÁM PHÁ</div>
 
@@ -72,44 +78,43 @@
 <script>
     const FULL_DATA = {
         V1: [
-            {q: "Trên bản đồ có 7 vị trí hang đá và 10 vị trí rừng cây. Tỉ số của số hang đá và số rừng cây là:", opts: ["10 : 7", "7 : 10", "7 : 17", "10 : 17"], c: 1},
-            {q: "Tỉ số của số a và số b (b khác 0) là a : b hay a/b. Tỉ số này cho biết điều gì?", opts: ["Số a bằng a/b số b", "Số b bằng a/b số a", "Số a nhiều hơn số b là a/b đơn vị", "Số a kém số b là a/b đơn vị"], c: 0},
-            {q: "Trong một cuộc khảo sát 100 bạn thì có 43 bạn thích đi tìm kho báu. Tỉ số phần trăm số bạn thích tìm kho báu là:", opts: ["4,3%", "0,43%", "43%", "430%"], c: 2},
-            {q: "Ký hiệu % trong tỉ số phần trăm được đọc là:", opts: ["Phần mười", "Phần trăm", "Phần nghìn", "Đơn vị"], c: 1},
-            {q: "Tỉ số 1 : 10 000 ghi ở phía dưới một bản đồ được gọi là:", opts: ["Tỉ số độ dài", "Tỉ lệ bản đồ", "Tỉ số phần trăm", "Tỉ số xích"], c: 1},
-            {q: "Tỉ lệ bản đồ thường được viết dưới dạng một phân số có tử số là:", opts: ["1", "10", "100", "1 000"], c: 0},
-            {q: "Tỉ lệ bản đồ 1 : 500 cho biết hình ảnh trên bản đồ đã được:", opts: ["Phóng to 500 lần", "Giữ nguyên kích thước", "Thu nhỏ 500 lần", "Thu nhỏ 1 lần"], c: 2},
-            {q: "Để tính độ dài thật dựa trên độ dài bản đồ và tỉ lệ bản đồ, ta thực hiện:", opts: ["Chia cho mẫu số tỉ lệ", "Nhân với mẫu số tỉ lệ", "Cộng với mẫu số tỉ lệ", "Lấy mẫu số chia độ dài bản đồ"], c: 1}
+            {q: "Trên bản đồ có 7 vị trí hang đá và 10 vị trí rừng cây. [cite_start]Tỉ số của số hang đá và số rừng cây là: [cite: 4, 5]", opts: ["10 : 7", "7 : 10", "7 : 17", "10 : 17"], c: 1},
+            {q: "Tỉ số của số a và số b (b khác 0) là a : b hay a/b. [cite_start]Tỉ số này cho biết điều gì? [cite: 10, 11]", opts: ["Số a bằng a/b số b", "Số b bằng a/b số a", "Số a nhiều hơn số b là a/b đơn vị", "Số a kém số b là a/b đơn vị"], c: 0},
+            {q: "Trong một cuộc khảo sát 100 bạn thì có 43 bạn thích đi tìm kho báu. [cite_start]Tỉ số phần trăm số bạn thích tìm kho báu là: [cite: 16, 17]", opts: ["4,3%", "0,43%", "43%", "430%"], c: 2},
+            [cite_start]{q: "Ký hiệu % trong tỉ số phần trăm được đọc là: [cite: 22]", opts: ["Phần mười", "Phần trăm", "Phần nghìn", "Đơn vị"], c: 1},
+            [cite_start]{q: "Tỉ số 1 : 10 000 ghi ở phía dưới một bản đồ được gọi là: [cite: 27]", opts: ["Tỉ số độ dài", "Tỉ lệ bản đồ", "Tỉ số phần trăm", "Tỉ số xích"], c: 1},
+            [cite_start]{q: "Tỉ lệ bản đồ thường được viết dưới dạng một phân số có tử số là: [cite: 32]", opts: ["1", "10", "100", "1 000"], c: 0},
+            [cite_start]{q: "Tỉ lệ bản đồ 1 : 500 cho biết hình ảnh trên bản đồ đã được: [cite: 37]", opts: ["Phóng to 500 lần", "Giữ nguyên kích thước", "Thu nhỏ 500 lần", "Thu nhỏ 1 lần"], c: 2},
+            [cite_start]{q: "Để tính độ dài thật dựa trên độ dài bản đồ và tỉ lệ bản đồ, ta thực hiện: [cite: 42]", opts: ["Chia cho mẫu số tỉ lệ", "Nhân với mẫu số tỉ lệ", "Cộng với mẫu số tỉ lệ", "Lấy mẫu số chia độ dài bản đồ"], c: 1}
         ],
         V2: [
-            {q: "Tỉ số của m = 13 and n = 17 được viết dưới dạng phân số là:", opts: ["17/13", "13 : 17", "13/17", "13/30"], c: 2},
-            {q: "Chuyển phân số 9/25 thành tỉ số phần trăm:", opts: ["9%", "36%", "25%", "45%"], c: 1},
-            {q: "Một hòn đảo có 100 cây dừa, 92 cây đã có quả. Tỉ số phần trăm cây CHƯA có quả là:", opts: ["8%", "92%", "100%", "18%"], c: 0},
-            {q: "Trên bản đồ tỉ lệ 1:1000, khoảng cách đo được 6cm. Độ dài thật là:", opts: ["6 m", "60 m", "600 m", "6 000 m"], c: 1},
-            {q: "Thực tế dài 160km. Trên bản đồ tỉ lệ 1:1.000.000, quãng đường này dài:", opts: ["160 cm", "16 cm", "1,6 cm", "16 mm"], c: 1},
-            {q: "Kết quả của phép tính: 57% + 43,5% là:", opts: ["100%", "10,05%", "100,5%", "90,5%"], c: 2},
-            {q: "Thợ săn đi được 35% con đường. Tỉ số phần trăm con đường CÒN PHẢI ĐI là:", opts: ["35%", "135%", "65%", "75%"], c: 2},
-            {q: "Trên bản đồ tỉ lệ 1:2000, khoảng cách giữa hai hòn đảo là 5cm. Độ dài thật là:", opts: ["10 m", "100 m", "1 000 m", "10 000 m"], c: 1}
+            [cite_start]{q: "Tỉ số của m = 13 và n = 17 được viết dưới dạng phân số là: [cite: 49]", opts: ["17/13", "13 : 17", "13/17", "13/30"], c: 2},
+            [cite_start]{q: "Chuyển phân số 9/25 thành tỉ số phần trăm: [cite: 54]", opts: ["9%", "36%", "25%", "45%"], c: 1},
+            {q: "Một hòn đảo có 100 cây dừa, 92 cây đã có quả. [cite_start]Tỉ số phần trăm cây CHƯA có quả là: [cite: 59, 60]", opts: ["8%", "92%", "100%", "18%"], c: 0},
+            {q: "Trên bản đồ tỉ lệ 1:1000, khoảng cách đo được 6cm. [cite_start]Độ dài thật là: [cite: 65, 66]", opts: ["6 m", "60 m", "600 m", "6 000 m"], c: 1},
+            {q: "Thực tế dài 160km. [cite_start]Trên bản đồ tỉ lệ 1:1.000.000, quãng đường này dài: [cite: 71]", opts: ["160 cm", "16 cm", "1,6 cm", "16 mm"], c: 1},
+            [cite_start]{q: "Kết quả của phép tính: 57% + 43,5% là: [cite: 76]", opts: ["100%", "10,05%", "100,5%", "90,5%"], c: 2},
+            {q: "Thợ săn đi được 35% con đường. [cite_start]Tỉ số phần trăm con đường CÒN PHẢI ĐI là: [cite: 81, 82]", opts: ["35%", "135%", "65%", "75%"], c: 2},
+            {q: "Trên bản đồ tỉ lệ 1:2000, khoảng cách giữa hai hòn đảo là 5cm. [cite_start]Độ dài thật là: [cite: 87, 88]", opts: ["10 m", "100 m", "1 000 m", "10 000 m"], c: 1}
         ],
         V3: [
-            {q: "Mảnh vườn hình chữ nhật (tỉ lệ 1:3000) có dài 3cm, rộng 2cm. Diện tích thật là bao nhiêu m2?", ans: "5400"},
-            {q: "Bản đồ thứ nhất (1:1000), bản đồ thứ hai (1:2000). Nếu bản đồ thứ nhất dài 10cm thì bản đồ thứ hai dài bao nhiêu cm?", ans: "5"},
-            {q: "Khu bảo tồn hình vuông có chu vi trên bản đồ (1:5000) là 16cm. Diện tích thật là bao nhiêu ha?", ans: "4"},
-            {q: "Chặng một (30%), chặng hai dài hơn chặng một 40m và chiếm 70% tổng đường. Tổng quãng đường là bao nhiêu m?", ans: "100"}
+            {q: "Mảnh vườn hình chữ nhật (tỉ lệ 1:3000) có dài 3cm, rộng 2cm. [cite_start]Diện tích thật là bao nhiêu m2? [cite: 95, 96]", ans: "5400"},
+            {q: "Bản đồ thứ nhất (1:1000), bản đồ thứ hai (1:2000). [cite_start]Nếu bản đồ thứ nhất dài 10cm thì bản đồ thứ hai dài bao nhiêu cm? [cite: 101]", ans: "5"},
+            {q: "Khu bảo tồn hình vuông có chu vi trên bản đồ (1:5000) là 16cm. [cite_start]Diện tích thật là bao nhiêu ha? [cite: 106, 107]", ans: "4"},
+            {q: "Chặng một (30%), chặng hai dài hơn chặng một 40m và chiếm 70% tổng đường. [cite_start]Tổng quãng đường là bao nhiêu m? [cite: 112, 113, 114]", ans: "100"}
         ]
     };
 
     let currentScore = 0, lives = 3, stage = 1, qIdx = 0, currentPool = [];
 
-    window.addEventListener('beforeunload', (e) => {
-        if (stage <= 3 && document.getElementById('ui-ket-thuc').classList.contains('hidden')) {
-            e.preventDefault(); e.returnValue = '';
-        }
-    });
+    function startGame() {
+        document.getElementById('start-screen').classList.add('hidden');
+        initStage(1);
+    }
 
     function playSound(type) {
         const s = document.getElementById(type === 'correct' ? 'sound-correct' : 'sound-wrong');
-        s.currentTime = 0; s.play();
+        s.pause(); s.currentTime = 0; s.play().catch(e => console.log("Audio play blocked"));
     }
 
     function shuffle(a) { return a.sort(() => Math.random() - 0.5); }
@@ -195,7 +200,6 @@
     window.onload = () => {
         const config = { databaseURL: "https://gamhoctap-default-rtdb.asia-southeast1.firebasedatabase.app" };
         if (!firebase.apps.length) firebase.initializeApp(config);
-        initStage(1);
     };
 </script>
 </body>
