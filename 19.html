@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bản Đồ Kho Báu - Tuần 19</title>
+    <title>Tuần 19: Bản Đồ Kho Báu - EduRobot</title>
     <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -13,10 +13,10 @@
         body { font-family: 'Lexend', sans-serif; margin: 0; padding: 20px; background: #1a1a2e; color: var(--ink); display: flex; flex-direction: column; align-items: center; min-height: 100vh; position: relative; padding-bottom: 100px; }
         
         .stage-banner { 
-            background: var(--gold); color: white; padding: 10px 30px; 
+            background: var(--gold); color: white; padding: 12px 35px; 
             border-radius: 50px; font-weight: 700; margin-bottom: 15px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.3); border: 2px solid #fff;
-            text-transform: uppercase; letter-spacing: 1px;
+            text-transform: uppercase; letter-spacing: 1px; font-size: 1.2rem;
         }
 
         .map-frame { max-width: 750px; width: 100%; background: var(--parchment); padding: 30px; border-radius: 15px; border: 10px solid #8e735b; box-shadow: 0 0 40px rgba(0,0,0,0.6); position: relative; background-image: url('https://www.transparenttextures.com/patterns/parchment.png'); }
@@ -35,98 +35,124 @@
         #toast { position: fixed; top: 30px; padding: 15px 40px; border-radius: 50px; font-weight: bold; z-index: 1000; opacity: 0; transition: 0.3s; pointer-events: none; }
         .show-toast { opacity: 1 !important; top: 50px !important; }
         .hidden { display: none; }
-        
         .btn-final { background: var(--ocean); color: white; padding: 15px 30px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 1.1rem; }
         
-        /* FOOTER BẢN QUYỀN */
-        .footer-copyright {
-            position: absolute; bottom: 20px; text-align: center; width: 100%;
-            color: #bdc3c7; font-size: 0.85rem; letter-spacing: 0.5px;
-            border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;
-        }
+        .footer-copyright { position: absolute; bottom: 20px; text-align: center; width: 100%; color: #bdc3c7; font-size: 0.9rem; letter-spacing: 0.5px; }
     </style>
 </head>
 <body>
 
-<div id="vong-banner" class="stage-banner">VÒNG 1: KHÁM PHÁ</div>
+<audio id="sound-correct" src="https://www.myinstants.com/media/sounds/ding-sound-effect_1.mp3"></audio>
+<audio id="sound-wrong" src="https://www.myinstants.com/media/sounds/buzzer_x_incorrect.mp3"></audio>
+
+<div id="vong-banner" class="stage-banner">TUẦN 19: VÒNG 1 - KHÁM PHÁ</div>
 
 <div class="status-header" style="width: 100%; max-width: 750px; color: #f1c40f; font-size: 1.2rem;">
     <span>ĐIỂM: <span id="diem-nhan">0</span> / 100</span>
-    <span id="mang-song" style="color: #ff7675;">GIÁP: ❤️❤️❤️</span>
+    <span id="mang-song">GIÁP: ❤️❤️❤️</span>
 </div>
 
 <div class="map-frame">
     <div id="ui-choi">
         <div class="status-header">
             <span id="cau-so">CÂU 1/4</span>
-            <span style="color: #8e735b;">TUẦN 19</span>
+            <span style="color: #8e735b;">MATH 5</span>
         </div>
-        <div class="question-box" id="noi-dung-cau-hoi">Đang chuẩn bị...</div>
+        <div class="question-box" id="noi-dung-cau-hoi">Đang mở bản đồ kho báu...</div>
         <div id="khu-vuc-dap-an"></div>
     </div>
 
     <div id="ui-ket-thuc" class="hidden" style="text-align: center;">
-        <h2 style="color: #5e412f;">HÀNH TRÌNH KẾT THÚC! 🏆</h2>
+        <h2 id="title-finish" style="color: #5e412f;">KẾT THÚC HÀNH TRÌNH!</h2>
         <h1 id="diem-cuoi" style="font-size: 4rem; margin: 15px 0; color: var(--gold);">0</h1>
+        <p id="msg-finish" style="font-weight: bold;"></p>
         <div id="form-dang-ky">
-            <input type="text" id="ten-hs" style="width:80%; padding:15px; margin:5px; border-radius:8px; border:1px solid #ccc;" placeholder="Họ và tên học sinh...">
+            <input type="text" id="ten-hs" style="width:80%; padding:15px; margin:5px; border-radius:8px; border:1px solid #ccc;" placeholder="Họ và tên...">
             <input type="text" id="lop-hs" style="width:80%; padding:15px; margin:5px; border-radius:8px; border:1px solid #ccc;" placeholder="Lớp...">
-            <button class="btn-final" style="width:85%; margin-top:15px;" onclick="saveResult()">GHI DANH BẢNG VÀNG</button>
+            <button class="btn-final" style="width:85%; margin-top:15px;" onclick="saveResult()">LƯU KẾT QUẢ</button>
         </div>
-        <button class="btn-final" style="background:#7f8c8d; margin-top:15px;" onclick="location.reload()">THỰC HIỆN LẠI</button>
+        <button class="btn-final" style="background:#7f8c8d; margin-top:15px;" onclick="location.reload()">THỬ THÁCH LẠI</button>
     </div>
 </div>
 
 <div id="toast"></div>
 
 <div class="footer-copyright">
-     ©2026 EduRobot - Lê Thành Long
+    @ 2026 EduRobot - Lê Thành Long
 </div>
 
 <script>
+    [cite_start]// Dữ liệu câu hỏi lấy từ file Word [cite: 1]
+    const FULL_DATA = {
+        V1: [
+            [cite_start]{q: "Trên bản đồ có 7 vị trí hang đá và 10 vị trí rừng cây. Tỉ số của số hang đá và số rừng cây là: [cite: 4, 5][cite_start]", opts: ["10 : 7", "7 : 10", "7 : 17", "10 : 17"], c: 1}, // Đáp án B [cite: 120]
+            [cite_start]{q: "Tỉ số của số a và số b (b khác 0) là a : b hay a/b. Tỉ số này cho biết điều gì? [cite: 10, 11][cite_start]", opts: ["Số a bằng a/b số b", "Số b bằng a/b số a", "Số a nhiều hơn số b là a/b đơn vị", "Số a kém số b là a/b đơn vị"], c: 0}, // Đáp án A [cite: 120]
+            [cite_start]{q: "Trong một cuộc khảo sát 100 bạn thì có 43 bạn thích đi tìm kho báu. Tỉ số phần trăm số bạn thích tìm kho báu là: [cite: 16, 17][cite_start]", opts: ["4,3%", "0,43%", "43%", "430%"], c: 2}, // Đáp án C [cite: 120]
+            [cite_start]{q: "Ký hiệu % trong tỉ số phần trăm được đọc là: [cite: 22][cite_start]", opts: ["Phần mười", "Phần trăm", "Phần nghìn", "Đơn vị"], c: 1}, // Đáp án B [cite: 120]
+            [cite_start]{q: "Tỉ số 1 : 10 000 ghi ở phía dưới một bản đồ được gọi là: [cite: 27][cite_start]", opts: ["Tỉ số độ dài", "Tỉ lệ bản đồ", "Tỉ số phần trăm", "Tỉ số xích"], c: 1}, // Đáp án B [cite: 120]
+            [cite_start]{q: "Tỉ lệ bản đồ thường được viết dưới dạng một phân số có tử số là: [cite: 32][cite_start]", opts: ["1", "10", "100", "1 000"], c: 0}, // Đáp án A [cite: 120]
+            [cite_start]{q: "Tỉ lệ bản đồ 1 : 500 cho biết hình ảnh trên bản đồ đã được: [cite: 37][cite_start]", opts: ["Phóng to 500 lần", "Giữ nguyên kích thước", "Thu nhỏ 500 lần", "Thu nhỏ 1 lần"], c: 2}, // Đáp án C [cite: 120]
+            [cite_start]{q: "Để tính độ dài thật dựa trên độ dài bản đồ và tỉ lệ bản đồ, ta thực hiện: [cite: 42][cite_start]", opts: ["Chia cho mẫu số tỉ lệ", "Nhân với mẫu số tỉ lệ", "Cộng với mẫu số tỉ lệ", "Lấy mẫu số chia độ dài bản đồ"], c: 1} // Đáp án B [cite: 120]
+        ],
+        V2: [
+            [cite_start]{q: "Tỉ số của m = 13 và n = 17 được viết dưới dạng phân số là: [cite: 49][cite_start]", opts: ["17/13", "13 : 17", "13/17", "13/30"], c: 2}, // Đáp án C [cite: 121]
+            [cite_start]{q: "Chuyển phân số 9/25 thành tỉ số phần trăm: [cite: 54][cite_start]", opts: ["9%", "36%", "25%", "45%"], c: 1}, // Đáp án B [cite: 121]
+            [cite_start]{q: "Một hòn đảo có 100 cây dừa, 92 cây đã có quả. Tỉ số phần trăm cây CHƯA có quả là: [cite: 59, 60][cite_start]", opts: ["8%", "92%", "100%", "18%"], c: 0}, // Đáp án A [cite: 121]
+            [cite_start]{q: "Trên bản đồ tỉ lệ 1:1000, khoảng cách đo được 6cm. Độ dài thật là: [cite: 65, 66][cite_start]", opts: ["6 m", "60 m", "600 m", "6 000 m"], c: 1}, // Đáp án B [cite: 121]
+            [cite_start]{q: "Thực tế dài 160km. Trên bản đồ tỉ lệ 1:1.000.000, quãng đường này dài: [cite: 71][cite_start]", opts: ["160 cm", "16 cm", "1,6 cm", "16 mm"], c: 1}, // Đáp án B [cite: 121]
+            [cite_start]{q: "Kết quả của phép tính: 57% + 43,5% là: [cite: 76][cite_start]", opts: ["100%", "10,05%", "100,5%", "90,5%"], c: 2}, // Đáp án C [cite: 121]
+            [cite_start]{q: "Thợ săn đi được 35% con đường. Tỉ số phần trăm con đường CÒN PHẢI ĐI là: [cite: 81, 82][cite_start]", opts: ["35%", "135%", "65%", "75%"], c: 2}, // Đáp án C [cite: 121]
+            [cite_start]{q: "Trên bản đồ tỉ lệ 1:2000, khoảng cách giữa hai hòn đảo là 5cm. Độ dài thật là: [cite: 87, 88][cite_start]", opts: ["10 m", "100 m", "1 000 m", "10 000 m"], c: 1} // Đáp án B [cite: 121]
+        ],
+        V3: [
+            [cite_start]{q: "Mảnh vườn hình chữ nhật (tỉ lệ 1:3000) có dài 3cm, rộng 2cm. Diện tích thật là bao nhiêu m2? [cite: 95, 96][cite_start]", ans: "5400"}, // Đáp án C (5400 m2) [cite: 122]
+            [cite_start]{q: "Bản đồ thứ nhất (1:1000), bản đồ thứ hai (1:2000). Nếu bản đồ thứ nhất dài 10cm thì bản đồ thứ hai dài bao nhiêu cm? [cite: 101][cite_start]", ans: "5"}, // Đáp án B (5 cm) [cite: 122]
+            [cite_start]{q: "Khu bảo tồn hình vuông có chu vi trên bản đồ (1:5000) là 16cm. Diện tích thật là bao nhiêu ha? [cite: 106, 107][cite_start]", ans: "4"}, // Đáp án B (4 ha) [cite: 109, 122]
+            [cite_start]{q: "Chặng một (30%), chặng hai dài hơn chặng một 40m và chiếm 70% tổng đường. Tổng quãng đường là bao nhiêu m? [cite: 112, 113, 114][cite_start]", ans: "100"} // Đáp án A (100 m) [cite: 115, 122]
+        ]
+    };
+
     let currentScore = 0;
     let lives = 3;
     let stage = 1;
     let qIdx = 0;
     let currentPool = [];
 
-    // DATA VÒNG 1 (40đ)
-    const DATA_V1 = [
-        {q: "Tỉ số của 3 và 5 được viết là:", opts: ["3 + 5", "5 : 3", "3/5", "3 x 5"], c: 2},
-        {q: "Tỉ số phần trăm của 25 và 100 là:", opts: ["2,5%", "25%", "0,25", "250%"], c: 1},
-        {q: "Để viết 0,45 thành tỉ số phần trăm, ta viết:", opts: ["4,5%", "450%", "45%", "0,45%"], c: 2},
-        {q: "1/2 viết dưới dạng tỉ số phần trăm là:", opts: ["20%", "50%", "12%", "5%"], c: 1}
-    ];
+    // Chống tải lại trang
+    window.addEventListener('beforeunload', (e) => {
+        if (stage <= 3 && document.getElementById('ui-ket-thuc').classList.contains('hidden')) {
+            e.preventDefault();
+            e.returnValue = '';
+        }
+    });
 
-    // DATA VÒNG 2 (40đ)
-    const DATA_V2 = [
-        {q: "Lớp có 20 nam và 25 nữ. Tỉ số của số nam và số nữ là:", opts: ["20/25", "25/20", "20/45", "45/20"], c: 0},
-        {q: "Tỉ số phần trăm của 15 và 60 là:", opts: ["20%", "15%", "25%", "30%"], c: 2},
-        {q: "Trên bản đồ tỉ lệ 1:1000, 1cm ứng với thực tế là:", opts: ["10m", "100m", "1m", "1000m"], c: 0},
-        {q: "Tìm 20% của 500kg:", opts: ["10kg", "100kg", "50kg", "200kg"], c: 1}
-    ];
+    function playSound(type) {
+        const correct = document.getElementById('sound-correct');
+        const wrong = document.getElementById('sound-wrong');
+        if(type === 'correct') {
+            correct.currentTime = 0;
+            correct.play();
+        } else {
+            wrong.currentTime = 0;
+            wrong.play();
+        }
+    }
 
-    // DATA VÒNG 3 (20đ - TỰ LUẬN)
-    const DATA_V3 = [
-        {q: "Một cửa hàng có 500kg gạo, đã bán 150kg. Số gạo đã bán chiếm bao nhiêu %? (Điền số)", ans: "30"},
-        {q: "Lãi suất là 0,6%/tháng. Gửi 2.000.000 đồng thì tiền lãi 1 tháng là bao nhiêu đồng?", ans: "12000"}
-    ];
+    function shuffle(a) { return a.sort(() => Math.random() - 0.5); }
 
     function initStage(s) {
         stage = s; qIdx = 0;
-        lives = 3; // Reset giáp cho mỗi vòng mới
-        updateHearts();
-        
         const banner = document.getElementById('vong-banner');
+        
         if(s === 1) {
-            banner.innerText = "VÒNG 1: KHÁM PHÁ";
-            currentPool = shuffle([...DATA_V1]);
+            banner.innerText = "TUẦN 19: VÒNG 1 - KHÁM PHÁ";
+            currentPool = shuffle([...FULL_DATA.V1]).slice(0, 4);
         } else if(s === 2) {
-            banner.innerText = "VÒNG 2: LUYỆN TẬP";
-            currentPool = shuffle([...DATA_V2]);
+            banner.innerText = "TUẦN 19: VÒNG 2 - LUYỆN TẬP";
+            currentPool = shuffle([...FULL_DATA.V2]).slice(0, 4);
         } else {
-            banner.innerText = "VÒNG 3: LUYỆN TẬP NÂNG CAO";
-            currentPool = shuffle([...DATA_V3]).slice(0, 2);
+            banner.innerText = "TUẦN 19: VÒNG 3 - NÂNG CAO (ĐIỀN SỐ)";
+            currentPool = shuffle([...FULL_DATA.V3]).slice(0, 2);
         }
         showQ();
     }
@@ -150,8 +176,8 @@
         } else {
             container.className = "input-area";
             container.innerHTML = `
-                <input type="number" id="ans-input" class="input-ans" placeholder="Nhập kết quả...">
-                <button class="btn-submit" onclick="checkTL()">XÁC NHẬN</button>
+                <input type="number" id="ans-input" class="input-ans" placeholder="Nhập số kết quả...">
+                <button class="btn-submit" onclick="checkTL()">GỬI ĐÁP ÁN</button>
             `;
             setTimeout(() => document.getElementById('ans-input').focus(), 500);
         }
@@ -168,72 +194,84 @@
 
     function win() {
         currentScore += 10;
-        showToast("CHÍNH XÁC! +10đ", "#27ae60");
+        playSound('correct');
+        showToast("XUẤT SẮC! +10đ", "#27ae60");
         next();
     }
 
     function lose() {
         lives--;
+        playSound('wrong');
         updateHearts();
-        
-        if(lives <= 0) {
-            showToast("HẾT LƯỢT! CHUYỂN VÒNG TIẾP THEO", "#e67e22");
-            // Đợi 1 lát rồi chuyển sang vòng tiếp theo ngay lập tức
+        if(lives <= 0 && stage === 1) {
+            showToast("HẾT LƯỢT! TỰ ĐỘNG SANG VÒNG 2", "#e67e22");
+            setTimeout(() => initStage(2), 1500);
+        } else if (lives <= 0) {
+            showToast("HẾT LƯỢT VÒNG NÀY!", "#e67e22");
             setTimeout(() => {
                 if(stage < 3) initStage(stage + 1);
                 else end();
-            }, 1200);
+            }, 1500);
         } else {
-            showToast("CHƯA ĐÚNG RỒI! ❌", "#e74c3c");
+            showToast("CHƯA CHÍNH XÁC! ❌", "#e74c3c");
             next();
         }
     }
 
     function updateHearts() {
-        let hearths = ""; 
-        for(let i=0; i<3; i++) hearths += i < lives ? "❤️" : "🖤";
-        document.getElementById('mang-song').innerText = "GIÁP: " + hearths;
+        let h = ""; for(let i=0; i<3; i++) h += i < lives ? "❤️" : "🖤";
+        document.getElementById('mang-song').innerText = "GIÁP: " + h;
     }
 
     function next() {
         document.getElementById('diem-nhan').innerText = currentScore;
         setTimeout(() => {
             qIdx++;
-            if(qIdx < currentPool.length) {
-                showQ();
-            } else {
-                // Hết câu hỏi trong vòng này
-                if(stage < 3) initStage(stage + 1);
-                else end();
-            }
-        }, 800);
+            if(qIdx < currentPool.length) showQ();
+            else if(stage < 3) initStage(stage + 1);
+            else end();
+        }, 1000);
     }
 
     function end() {
         document.getElementById('ui-choi').classList.add('hidden');
         document.getElementById('ui-ket-thuc').classList.remove('hidden');
         document.getElementById('diem-cuoi').innerText = currentScore;
-        document.getElementById('vong-banner').innerText = "HOÀN THÀNH";
+        
+        const title = document.getElementById('title-finish');
+        const msg = document.getElementById('msg-finish');
+        
+        if(currentScore >= 50) {
+            title.innerText = "CHÚC MỪNG CHIẾN THẮNG! 🎉";
+            msg.innerText = "Em đã hoàn thành xuất sắc thử thách Tuần 19!";
+            msg.style.color = "green";
+        } else {
+            title.innerText = "CẦN CỐ GẮNG HƠN! 💪";
+            msg.innerText = "Điểm của em chưa đạt (Dưới 50đ). Hãy thử lại nhé!";
+            msg.style.color = "red";
+        }
     }
 
     function showToast(m, c) {
         const t = document.getElementById('toast');
         t.innerText = m; t.style.background = c; t.style.color = "#fff";
         t.classList.add('show-toast');
-        setTimeout(() => t.classList.remove('show-toast'), 1000);
+        setTimeout(() => t.classList.remove('show-toast'), 1200);
     }
-
-    function shuffle(a) { return a.sort(() => Math.random() - 0.5); }
 
     function saveResult() {
         const t = document.getElementById('ten-hs').value;
         const l = document.getElementById('lop-hs').value;
-        if(!t || !l) return alert("Em cần điền đầy đủ tên và lớp nhé!");
+        if(!t || !l) return alert("Em nhập tên và lớp để thầy lưu điểm nhé!");
         firebase.database().ref('ketqua/tuan19/' + Date.now()).set({ hoTen: t, lop: l, diem: currentScore })
-        .then(() => { alert("Thông tin của em đã được lưu!"); location.reload(); });
+        .then(() => { alert("Đã ghi danh thành công!"); location.reload(); });
     }
 
-    window.onload = () => initStage(1);
+    window.onload = () => {
+        const config = { databaseURL: "https://gamhoctap-default-rtdb.asia-southeast1.firebasedatabase.app" };
+        if (!firebase.apps.length) firebase.initializeApp(config);
+        initStage(1);
+    };
 </script>
 </body>
 </html>
