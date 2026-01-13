@@ -92,9 +92,8 @@
             flex-direction: column; justify-content: center; align-items: center;
             z-index: 10000; text-align: center; padding: 20px;
         }
-        .timer-box { font-size: clamp(1.5rem, 8vw, 3rem); font-family: 'Bungee'; color: #00FF00; margin: 20px 0; }
+        .timer-box { font-size: clamp(1.2rem, 5vw, 2.5rem); font-family: 'Bungee'; color: #00FF00; margin: 20px 0; }
         
-        /* Nút Đã hiểu riêng biệt để không bị dài dọc */
         .btn-understand {
             background: var(--primary); color: white; border: none;
             padding: 12px 30px; border-radius: 10px; font-weight: bold;
@@ -102,7 +101,7 @@
             min-width: 120px; transition: 0.2s;
         }
 
-        /* CHÂN TRANG - HIỆN 1 DÒNG TRÊN MOBILE */
+        /* CHÂN TRANG */
         .game-footer { background: #222; padding: 10px 5px; border-top: 3px solid var(--primary); position: sticky; bottom: 0; z-index: 1000; }
         .footer-buttons { 
             display: flex; justify-content: center; gap: 4px; 
@@ -112,7 +111,7 @@
             flex: 1; background: #333; border: 1px solid var(--primary); 
             color: var(--primary); padding: 8px 1px; border-radius: 8px; 
             font-weight: bold; text-decoration: none; text-align: center; 
-            font-size: clamp(0.55rem, 2.4vw, 0.8rem); /* Chữ nhỏ lại để vừa 1 dòng */
+            font-size: clamp(0.55rem, 2.4vw, 0.8rem); 
             cursor: pointer; display: flex; align-items: center; justify-content: center; 
             gap: 2px; white-space: nowrap;
         }
@@ -171,7 +170,7 @@
                 <div class="landmark-tag" id="tag-22">🏛️ Hà Nội</div>
                 <div class="landmark-tag" id="tag-25">🕌 Huế</div>
                 <div class="landmark-tag" id="tag-30">🏢 TP.HCM</div>
-                <div class="landmark-tag" id="tag-33">🛶 Cà Mau</div>
+                <div class="landmark-tag" id="tag-33"> Canoe Cà Mau</div>
 
                 <script>
                     for(let i=19; i<=35; i++) {
@@ -195,8 +194,8 @@
     </main>
 
     <div id="countdown-overlay">
-        <h2 style="font-family:'Bungee'; color:var(--gold);">VÒNG THI CHƯA MỞ</h2>
-        <p>Robot đang chuẩn bị dữ liệu thám hiểm!</p>
+        <h2 id="overlay-title" style="font-family:'Bungee'; color:var(--gold);">VÒNG THI CHƯA MỞ</h2>
+        <p id="overlay-desc">Robot đang chuẩn bị dữ liệu thám hiểm!</p>
         <div class="timer-box" id="timer-display">00:00:00:00</div>
         <button class="btn-understand" onclick="closeCountdown()">ĐÃ HIỂU</button>
     </div>
@@ -208,10 +207,7 @@
             <button id="btn-login" class="btn-nav" onclick="setStudentName()">👤 NHẬP TÊN</button>
             <button id="btn-logout" class="btn-nav" onclick="clearData()">⚙️ THOÁT</button>
         </div>
-        
-        <div class="copyright-text">
-            © 2026 EduRobot - Lê Thành Long
-        </div>
+        <div class="copyright-text">© 2026 EduRobot - Lê Thành Long</div>
     </footer>
 
     <script>
@@ -220,7 +216,7 @@
         const db = firebase.database();
 
         const GAME_SCHEDULE = {
-            19: "2026-01-16T14:00:00", 20: "2026-01-23T14:00:00", 21: "2026-01-30T14:00:00",
+            19: "2026-01-13T00:00:00", 20: "2026-01-23T14:00:00", 21: "2026-01-30T14:00:00",
             22: "2026-02-06T14:00:00", 23: "2026-02-23T14:00:00", 24: "2026-03-02T14:00:00",
             25: "2026-03-09T14:00:00", 26: "2026-03-16T14:00:00", 27: "2026-03-23T14:00:00",
             28: "2026-03-30T14:00:00", 29: "2026-04-06T14:00:00", 30: "2026-04-13T14:00:00",
@@ -236,17 +232,14 @@
                 document.getElementById('user-display').innerText = currentStudent;
                 document.getElementById('btn-login').classList.add('hidden');
                 document.getElementById('btn-logout').classList.remove('hidden');
-            } else {
-                document.getElementById('btn-login').classList.remove('hidden');
-                document.getElementById('btn-logout').classList.add('hidden');
             }
             updateStationStyles();
             loadLeaderboard();
         };
 
         function setStudentName() {
-            const name = prompt("🤖 Nhập Tên của em:");
-            if (name && name.trim().length > 3) {
+            const name = prompt("🤖 Nhập Tên của em để mở khóa hành trình:");
+            if (name && name.trim().length >= 3) {
                 localStorage.setItem('studentName', name.trim());
                 location.reload();
             }
@@ -255,11 +248,32 @@
         function clearData() { if(confirm("Đăng xuất tài khoản?")) { localStorage.removeItem('studentName'); location.reload(); } }
 
         function handleStageClick(weekNo) {
-            if (!currentStudent) { setStudentName(); return; }
+            // Trường hợp Vòng 19: Luôn cho vào kể cả là khách
+            if (weekNo === 19) {
+                window.location.href = "19.html";
+                return;
+            }
+
+            // Trường hợp từ Vòng 20 trở đi:
+            if (!currentStudent) {
+                // Nếu chưa đăng nhập -> Hiện overlay báo phải nhập tên
+                document.getElementById('overlay-title').innerText = "YÊU CẦU DANH TÍNH";
+                document.getElementById('overlay-desc').innerText = "Em cần nhập tên để mở khóa các chặng từ 20 trở đi!";
+                document.getElementById('timer-display').innerText = "👤 Vui lòng bấm Nhập Tên ở chân trang";
+                document.getElementById('countdown-overlay').style.display = 'flex';
+                return;
+            }
+
+            // Nếu đã đăng nhập -> Kiểm tra thời gian
             const now = new Date();
             const openTime = new Date(GAME_SCHEDULE[weekNo] || "2026-12-31T14:00:00");
-            if (now >= openTime) { window.location.href = weekNo + ".html"; } 
-            else { showCountdown(openTime); }
+            if (now >= openTime) {
+                window.location.href = weekNo + ".html";
+            } else {
+                document.getElementById('overlay-title').innerText = "CHẶNG ĐƯỜNG PHÍA TRƯỚC";
+                document.getElementById('overlay-desc').innerText = "Robot đang chuẩn bị dữ liệu cho chặng này!";
+                showCountdown(openTime);
+            }
         }
 
         function showCountdown(endTime) {
@@ -282,9 +296,22 @@
             const now = new Date();
             for (let i = 19; i <= 35; i++) {
                 const el = document.getElementById(`st-${i}`);
-                if (el) {
+                if (!el) continue;
+
+                // Vòng 19 không bao giờ bị khóa (xóa class locked)
+                if (i === 19) {
+                    el.classList.remove('locked');
+                    continue;
+                }
+
+                // Nếu chưa đăng nhập -> Khóa tất cả các vòng > 19
+                if (!currentStudent) {
+                    el.classList.add('locked');
+                } else {
+                    // Nếu đã đăng nhập -> Khóa theo thời gian
                     const openTime = new Date(GAME_SCHEDULE[i] || "2026-12-31T14:00:00");
                     if (now < openTime) el.classList.add('locked');
+                    else el.classList.remove('locked');
                 }
             }
         }
