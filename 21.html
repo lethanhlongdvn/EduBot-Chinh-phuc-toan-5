@@ -20,7 +20,6 @@
             background: #1a252f; color: white; min-height: 100vh;
         }
 
-        /* Thân máy Casio */
         .casio-case {
             max-width: 650px; width: 100%; background: var(--casio-body);
             padding: 30px; border-radius: 20px 20px 60px 60px;
@@ -28,7 +27,6 @@
             border: 5px solid #141a21; margin-bottom: 20px;
         }
 
-        /* Màn hình hiển thị */
         .screen {
             background: var(--screen-bg); border-radius: 12px; padding: 20px;
             margin-bottom: 30px; border: 8px solid #57606f;
@@ -46,7 +44,6 @@
 
         .score-info { display: flex; justify-content: space-between; margin-bottom: 15px; font-weight: bold; color: #bdc3c7; width: 100%; max-width: 650px;}
 
-        /* Lưới ghép đôi */
         .match-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .match-column { display: flex; flex-direction: column; gap: 10px; }
         .match-item {
@@ -59,7 +56,6 @@
         .match-item.active { background: var(--btn-orange); color: white; border-bottom-color: #d35400; }
         .match-item.matched { opacity: 0; pointer-events: none; visibility: hidden; }
 
-        /* Nút trắc nghiệm */
         .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .btn-opt {
             background: var(--btn-gray); color: #2d3436; border: none; padding: 20px;
@@ -68,7 +64,7 @@
         }
         .btn-opt:hover { background: white; }
 
-        .hidden { display: none; }
+        .hidden { display: none !important; }
         .footer-edu { text-align: center; width: 100%; padding: 20px 0; color: #7f8c8d; font-size: 0.9rem; letter-spacing: 1px; }
         .btn-action { background: var(--btn-orange); color: white; padding: 15px 30px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 1.1rem; }
     </style>
@@ -87,7 +83,7 @@
             <span id="hearts-count">❤️ MẠNG: 3/3</span>
         </div>
         <div class="screen-content" id="main-display">
-            Chào mừng các em! Hãy vượt qua 10 thử thách để trở thành Siêu cấp Casio.
+            Đang tải dữ liệu thám hiểm...
         </div>
     </div>
 
@@ -98,31 +94,30 @@
             <h2 id="status-msg">KẾT QUẢ BÀI THI</h2>
             <div style="font-size: 4rem; color: var(--btn-orange); margin: 10px 0;" id="score-val">0/100</div>
             <p id="sub-msg" style="color: #bdc3c7;"></p>
-            
-            <div id="save-form" class="hidden">
-                <input type="text" id="p-name" style="width: 85%; padding: 15px; border-radius: 10px; margin-bottom: 10px;" placeholder="Họ và Tên...">
-                <input type="text" id="p-class" style="width: 85%; padding: 15px; border-radius: 10px; margin-bottom: 20px;" placeholder="Lớp...">
-                <button class="btn-action" onclick="saveData()">GHI DANH BẢNG VÀNG</button>
-            </div>
-            <button id="retry-btn" class="btn-action" style="background:#7f8c8d; margin-top:10px;" onclick="location.reload()">THỬ LẠI</button>
+            <p id="save-status" style="color: #a3cb38; font-weight: bold;"></p>
+            <button class="btn-action" onclick="location.href='index.html'">QUAY LẠI BẢN ĐỒ</button>
         </div>
     </div>
 </div>
 
 <div class="footer-edu">
-    © 2026 EduRobot - Lê Thành Long
+    © 2026 EduRobot.id.vn - Lê Thành Long
 </div>
 
 <script>
-    // Cấu hình Firebase
-    const firebaseConfig = {
-        apiKey: "AIzaSyC6zlWn8BKYU7P6A2-PYq6IIWOzaqJWFhc",
-        authDomain: "gamhoctap.firebaseapp.com",
-        databaseURL: "https://gamhoctap-default-rtdb.asia-southeast1.firebasedatabase.app",
-        projectId: "gamhoctap"
-    };
-    firebase.initializeApp(firebaseConfig);
+    // 1. CẤU HÌNH FIREBASE
+    const firebaseConfig = { databaseURL: "https://gamhoctap-default-rtdb.asia-southeast1.firebasedatabase.app" };
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
+
+    // 2. KIỂM TRA HỒ SƠ (BẢO MẬT)
+    const savedName = localStorage.getItem('studentName');
+    const savedClass = localStorage.getItem('studentClass');
+
+    if (!savedName || !savedClass) {
+        alert("Em cần nhập tên ở trang chủ trước!");
+        window.location.href = "index.html";
+    }
 
     const Q_POOL1 = [
         {q: "Muốn tìm 60% của 300, em tính?", a: "300 × 60 ÷ 100"},
@@ -139,27 +134,22 @@
         {q: "70% của 120 m² là:", opts: ["84 m²", "70 m²", "94 m²", "80 m²"], c: 0, h: "120 × 70 ÷ 100"},
         {q: "24,5% của 2 kg là:", opts: ["0,5 kg", "0,49 kg", "4,9 kg", "0,24 kg"], c: 1, h: "2 × 24,5 ÷ 100"},
         {q: "Ba lô 250.000đ giảm giá 15%. Số tiền giảm là:", opts: ["25.000đ", "30.000đ", "37.500đ", "40.000đ"], c: 2, h: "250.000 × 15 ÷ 100"},
-        {q: "May 850 bộ đồ, đã xong 70%. Số bộ đã xong:", opts: ["595 bộ", "600 bộ", "500 bộ", "700 bộ"], c: 0, h: "850 × 70 ÷ 100"},
-        {q: "Thịt bò có 18% đạm. 250g thịt có bao nhiêu đạm?", opts: ["45 g", "18 g", "50 g", "35 g"], c: 0, h: "250 × 18 ÷ 100"},
-        {q: "Đội 300 người, 40% mặc áo đỏ. Số người áo đỏ:", opts: ["100", "120", "150", "200"], c: 1, h: "300 × 40 ÷ 100"},
-        {q: "Gửi 250 triệu lãi suất 8%/năm. Tiền lãi 1 năm:", opts: ["15 triệu", "20 triệu", "25 triệu", "10 triệu"], c: 1, h: "250tr × 8 ÷ 100"},
-        {q: "Kết quả biểu thức: 1,975 + 2,025 là:", opts: ["3,9", "4,0", "4,1", "4,2"], c: 1, h: "1,975 + 2,025 = 4"}
+        {q: "May 850 bộ đồ, đã xong 70%. Số bộ đã xong:", opts: ["595 bộ", "600 bộ", "500 bộ", "700 bộ"], c: 0, h: "850 × 70 ÷ 100"}
     ];
 
     const Q_POOL3 = [
-        {q: "Hoàn tiền 10% cho đơn 1.004.000đ. Số tiền hoàn:", opts: ["100.000đ", "100.400đ", "10.040đ", "1.004đ"], c: 1, h: "1.004.000 × 10 ÷ 100"},
-        {q: "Thùng 33,2 m³. Hàng chiếm 80%, thể tích trống là:", opts: ["26,56 m³", "6,64 m³", "7,2 m³", "10 m³"], c: 1, h: "Trống 20%: 33,2 × 20 ÷ 100"},
-        {q: "Gửi 35 triệu lãi 7,4%/năm. Tổng gốc + lãi 1 năm:", opts: ["37.590.000đ", "35.740.000đ", "38.000.000đ", "2.590.000đ"], c: 0, h: "Lãi 2.590.000 + Gốc 35.000.000"},
-        {q: "Bán 7 vòng giá 25k/cái. Ban GK góp 20% số tiền đó:", opts: ["25.000đ", "35.000đ", "40.000đ", "15.000đ"], c: 1, h: "Tổng 175.000 × 20 ÷ 100"}
+        {q: "Thịt bò có 18% đạm. 250g thịt có bao nhiêu đạm?", opts: ["45 g", "18 g", "50 g", "35 g"], c: 0, h: "250 × 18 ÷ 100"},
+        {q: "Đội 300 người, 40% mặc áo đỏ. Số người áo đỏ:", opts: ["100", "120", "150", "200"], c: 1, h: "300 × 40 ÷ 100"}
     ];
 
     let game1, game2, game3;
-    let score = 0, currentStage = 1, qIdx = 0, lives = 3;
+    let score = 0, currentStage = 1, qIdx = 0, lives = 3, startTime;
     let selQ = null, selA = null;
 
     function shuffle(arr) { return arr.sort(() => 0.5 - Math.random()); }
 
     function initStage1() {
+        startTime = Date.now();
         game1 = shuffle([...Q_POOL1]).slice(0, 4);
         game2 = shuffle([...Q_POOL2]).slice(0, 4);
         game3 = shuffle([...Q_POOL3]).slice(0, 2);
@@ -243,23 +233,40 @@
     function finish() {
         document.getElementById('play-area').classList.add('hidden');
         document.getElementById('result-screen').classList.remove('hidden');
-        document.getElementById('score-val').innerText = score + "/100";
-        if(score >= 50) {
-            document.getElementById('status-msg').innerText = "🎉 CHÚC MỪNG SIÊU CẤP CASIO!";
-            document.getElementById('save-form').classList.remove('hidden');
-            document.getElementById('retry-btn').classList.add('hidden');
-        } else {
-            document.getElementById('status-msg').innerText = "❌ CẦN CỐ GẮNG HƠN";
-            document.getElementById('sub-msg').innerText = "Hãy luyện tập thêm để đạt ít nhất 50 điểm nhé!";
-        }
-    }
+        
+        let finalScore = (score > 100) ? 100 : score;
+        document.getElementById('score-val').innerText = finalScore + "/100";
+        
+        const duration = Math.floor((Date.now() - startTime) / 1000);
+        const ref = db.ref('scores/Tuan_21');
 
-    function saveData() {
-        const name = document.getElementById('p-name').value;
-        const cls = document.getElementById('p-class').value;
-        if(!name || !cls) return alert("Điền đủ thông tin em nhé!");
-        db.ref('scores/tuan21/' + Date.now()).set({ name, class: cls, score, year: 2026 })
-        .then(() => { alert("Đã ghi danh Bảng Vàng!"); location.reload(); });
+        // KIỂM TRA SỐ LẦN THI VÀ LƯU ĐIỂM
+        ref.once('value', (snap) => {
+            let attemptCount = 1;
+            const data = snap.val();
+            if (data) {
+                for (let id in data) {
+                    const oldName = (data[id].fullName || data[id].name || "").toLowerCase();
+                    const oldClass = (data[id].className || "");
+                    if (oldName === savedName.toLowerCase() && oldClass === savedClass) {
+                        attemptCount++;
+                    }
+                }
+            }
+
+            ref.push({
+                fullName: savedName,
+                className: savedClass,
+                score: finalScore,
+                duration: duration,
+                attempt: attemptCount,
+                date: new Date().toLocaleString('vi-VN'),
+                timestamp: firebase.database.ServerValue.TIMESTAMP
+            }, () => {
+                document.getElementById('save-status').innerText = `✅ Đã lưu điểm lần ${attemptCount} thành công!`;
+                setTimeout(() => { window.location.href = "index.html"; }, 3000);
+            });
+        });
     }
 
     window.onload = initStage1;
