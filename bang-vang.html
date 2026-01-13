@@ -17,8 +17,7 @@
         .admin-container { max-width: 1100px; margin: -30px auto 50px; padding: 0 20px; flex: 1; width: 100%; box-sizing: border-box; }
         .game-block { background: white; border-radius: 20px; box-shadow: 0 6px 20px rgba(0,0,0,0.05); margin-bottom: 30px; overflow: hidden; border: 1px solid #eee; }
         .game-header { padding: 20px; background: #fff; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--bg); }
-        .btn-excel { background: var(--primary); color: white; border: none; padding: 10px 18px; border-radius: 12px; cursor: pointer; font-family: 'Lexend'; font-weight: bold; transition: 0.3s; }
-        .btn-excel:hover { background: #388E3C; transform: scale(1.05); }
+        .btn-excel { background: var(--primary); color: white; border: none; padding: 10px 18px; border-radius: 12px; cursor: pointer; font-family: 'Lexend'; font-weight: bold; }
         table { width: 100%; border-collapse: collapse; min-width: 800px; }
         th { text-align: left; padding: 15px; background: #f8f9fa; color: #7f8c8d; font-size: 0.85rem; text-transform: uppercase; }
         td { padding: 15px; border-bottom: 1px solid #f1f1f1; }
@@ -26,11 +25,9 @@
         tr:nth-child(1) .rank { background: #FFD700; color: white; }
         tr:nth-child(2) .rank { background: #C0C0C0; color: white; }
         tr:nth-child(3) .rank { background: #CD7F32; color: white; }
-        .score-badge { background: #E3F2FD; color: var(--secondary); padding: 6px 15px; border-radius: 20px; font-weight: bold; white-space: nowrap; }
-        .time-badge { color: #e67e22; font-weight: bold; font-size: 0.9rem; white-space: nowrap; }
+        .score-badge { background: #E3F2FD; color: var(--secondary); padding: 6px 15px; border-radius: 20px; font-weight: bold; }
         .attempt-badge { background: #fff3e0; color: #ef6c00; padding: 4px 10px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; border: 1px solid #ffe0b2; }
         .class-badge { background: #f1f1f1; padding: 4px 10px; border-radius: 5px; font-size: 0.9rem; color: #555; border: 1px solid #ddd; }
-        
         footer { background: var(--dark); color: rgba(255,255,255,0.7); text-align: center; padding: 20px; font-size: 0.9rem; border-top: 4px solid var(--primary); }
     </style>
 </head>
@@ -54,6 +51,7 @@
     </footer>
 
     <script>
+        // Cấu hình Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyC6zlWn8BKYU7P6A2-PYq6IIWOzaqJWFhc",
             authDomain: "gamhoctap.firebaseapp.com",
@@ -70,9 +68,32 @@
             return m > 0 ? `${m}ph ${s}s` : `${s}s`;
         }
 
+        // HÀM XUẤT EXCEL ĐÃ SỬA LỖI ĐỊNH DẠNG LỚP
         function exportExcel(id, name) {
             const table = document.getElementById('table-' + id);
-            const wb = XLSX.utils.table_to_book(table);
+            
+            // Tạo một bản sao dữ liệu để xử lý định dạng text cho cột Lớp
+            const rows = table.querySelectorAll('tr');
+            const data = [];
+            
+            rows.forEach((row) => {
+                const cols = row.querySelectorAll('th, td');
+                const rowData = [];
+                cols.forEach((col, index) => {
+                    let value = col.innerText.replace('⏱ ', '').replace(' / 100', '');
+                    // Nếu là cột Lớp (cột index 2), thêm dấu nháy đơn ' phía trước để Excel hiểu là Text
+                    if (index === 2 && row.parentElement.tagName === 'TBODY') {
+                        rowData.push({ v: value, t: 's' }); // Ép kiểu string
+                    } else {
+                        rowData.push(value);
+                    }
+                });
+                data.push(rowData);
+            });
+
+            const ws = XLSX.utils.aoa_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "KetQua");
             XLSX.writeFile(wb, `BangVang_${name}.xlsx`);
         }
 
@@ -82,18 +103,16 @@
             container.innerHTML = '';
 
             if(!data) { 
-                container.innerHTML = "<div class='game-block' style='padding:40px; text-align:center;'>Chưa có dữ liệu học sinh.</div>"; 
+                container.innerHTML = "<div class='game-block' style='padding:40px; text-align:center;'>Chưa có dữ liệu.</div>"; 
                 return; 
             }
 
             for (let gameId in data) {
-                // Sắp xếp: Điểm cao -> Thời gian ít -> Lần thi ít
                 let students = Object.values(data[gameId]).sort((a,b) => {
                     if(b.score !== a.score) return b.score - a.score;
                     let timeA = a.duration || 9999;
                     let timeB = b.duration || 9999;
-                    if(timeA !== timeB) return timeA - timeB;
-                    return (a.attempt || 1) - (b.attempt || 1);
+                    return timeA - timeB;
                 });
 
                 let gameTitle = gameId.replace(/_/g, ' ');
@@ -101,7 +120,7 @@
                 let html = `
                     <div class="game-block">
                         <div class="game-header">
-                            <div style="font-size:1.2rem; font-weight:bold; color:var(--dark)">📊 ${gameTitle}</div>
+                            <div style="font-size:1.2rem; font-weight:bold;">📊 ${gameTitle}</div>
                             <button class="btn-excel" onclick="exportExcel('${gameId}', '${gameTitle}')">📄 Xuất Excel</button>
                         </div>
                         <div style="overflow-x: auto;">
@@ -124,7 +143,7 @@
                                             <td><b>${s.fullName || s.name || "---"}</b></td>
                                             <td><span class="class-badge">${s.className || "---"}</span></td>
                                             <td><span class="score-badge">${s.score} / 100</span></td>
-                                            <td><span class="time-badge">⏱ ${formatTime(s.duration)}</span></td>
+                                            <td><span style="color:#e67e22; font-weight:bold;">⏱ ${formatTime(s.duration)}</span></td>
                                             <td><span class="attempt-badge">Lần ${s.attempt || 1}</span></td>
                                             <td style="font-size:0.85rem; color:#888">${s.date || "---"}</td>
                                         </tr>
