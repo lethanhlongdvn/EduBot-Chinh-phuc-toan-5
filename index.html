@@ -55,7 +55,10 @@
             background: #444 !important; border-color: #666 !important;
             color: #888 !important; opacity: 0.7; filter: grayscale(1);
         }
-        .station.locked::after { content: '🔒'; position: absolute; font-size: 10px; bottom: -12px; }
+        .station.locked::after { 
+            content: '🔒'; position: absolute; font-size: 10px; bottom: -12px; 
+            left: 50%; transform: translateX(-50%);
+        }
 
         .landmark-tag {
             position: absolute; background: rgba(0, 0, 0, 0.7);
@@ -78,16 +81,24 @@
         .footer-buttons { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; max-width: 600px; margin: 0 auto; }
         .btn-nav { background: #333; border: 2px solid var(--primary); color: var(--primary); padding: 10px; border-radius: 8px; font-weight: bold; text-decoration: none; text-align: center; font-size: 0.8rem; cursor: pointer; }
 
-        /* TỌA ĐỘ */
-        #st-19 { top: 2%; left: 40%; }    #tag-19 { top: 2%; left: 47%; }
+        /* TỌA ĐỘ CÁC TRẠM (Giữ nguyên từ bản thầy gửi) */
+        #st-19 { top: 1.5%; left: 40%; }    #tag-19 { top: 2%; left: 44%; }
         #st-20 { top: 8%; left: 45%; }
         #st-21 { top: 10%; left: 23%; }
-        #st-22 { top: 12%; left: 40%; }  #tag-22 { top: 15%; left: 47%; }
+        #st-22 { top: 12%; left: 40%; }  #tag-22 { top: 15%; left: 42%; }
         #st-23 { top: 17%; left: 54%; }
         #st-24 { top: 27%; left: 44%; }
-        #st-25 { top: 38%; left: 52%; }  #tag-25 { top: 44%; left: 58%; }
-        #st-30 { top: 78%; left: 61%; }  #tag-30 { top: 82%; left: 50%; }
-        #st-33 { top: 89%; left: 35%; }  #tag-33 { top: 92%; left: 42%; }
+        #st-25 { top: 38%; left: 52%; }  #tag-25 { top: 47%; left: 67%; }
+        #st-26 { top: 46%; left: 63%; }
+        #st-27 { top: 54%; left: 70%; }
+        #st-28 { top: 62%; left: 73%; }
+        #st-29 { top: 70%; left: 74%; }
+        #st-30 { top: 78%; left: 61%; }  #tag-30 { top: 83%; left: 50%; }
+        #st-31 { top: 79%; left: 50%; }
+        #st-32 { top: 80%; left: 35%; }
+        #st-33 { top: 89%; left: 35%; }  #tag-33 { top: 94%; left: 37%; }
+        #st-34 { top: 90%; left: 80%; }
+        #st-35 { top: 46%; left: 85%; }
     </style>
 </head>
 <body>
@@ -113,17 +124,25 @@
                 <div class="station" id="st-23" onclick="handleStageClick(23)">23</div>
                 <div class="station" id="st-24" onclick="handleStageClick(24)">24</div>
                 <div class="station" id="st-25" onclick="handleStageClick(25)">25</div>
+                <div class="station" id="st-26" onclick="handleStageClick(26)">26</div>
+                <div class="station" id="st-27" onclick="handleStageClick(27)">27</div>
+                <div class="station" id="st-28" onclick="handleStageClick(28)">28</div>
+                <div class="station" id="st-29" onclick="handleStageClick(29)">29</div>
                 <div class="station" id="st-30" onclick="handleStageClick(30)">30</div>
+                <div class="station" id="st-31" onclick="handleStageClick(31)">31</div>
+                <div class="station" id="st-32" onclick="handleStageClick(32)">32</div>
                 <div class="station" id="st-33" onclick="handleStageClick(33)">33</div>
+                <div class="station" id="st-34" onclick="handleStageClick(34)">34</div>
+                <div class="station" id="st-35" onclick="handleStageClick(35)">35</div>
             </div>
         </div>
     </main>
 
     <div id="countdown-overlay">
-        <h2 style="font-family:'Bungee'; color:var(--primary);">VÒNG THI CHƯA MỞ</h2>
-        <p>Robot đang canh giữ, quay lại sau nhé!</p>
+        <h2 style="font-family:'Bungee'; color:var(--primary);">CHƯA ĐẾN GIỜ THÁM HIỂM</h2>
+        <p>Thử thách tiếp theo sẽ mở sau:</p>
         <div class="timer-box" id="timer-display">00:00:00:00</div>
-        <button class="btn-nav" onclick="closeCountdown()" style="width:150px">ĐÃ HIỂU</button>
+        <button class="btn-nav" onclick="closeCountdown()" style="width:150px; background: var(--primary); color:white">ĐÃ HIỂU</button>
     </div>
 
     <footer class="game-footer">
@@ -134,16 +153,18 @@
     </footer>
 
     <script>
-        // FIREBASE & DATA
+        // FIREBASE CONFIG
         const firebaseConfig = { databaseURL: "https://gamhoctap-default-rtdb.asia-southeast1.firebasedatabase.app" };
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 
+        // LỊCH TRÌNH ĐẦY ĐỦ
         const GAME_SCHEDULE = {
-            19: "2026-01-16T00:00:00",
-            20: "2026-01-23T00:00:00",
-            21: "2026-01-30T00:00:00",
-            22: "2026-02-06T00:00:00",
-            23: "2026-02-23T00:00:00"
+            19: "2026-01-16T00:00:00", 20: "2026-01-23T00:00:00", 21: "2026-01-30T00:00:00",
+            22: "2026-02-06T00:00:00", 23: "2026-02-23T00:00:00", 24: "2026-03-02T00:00:00",
+            25: "2026-03-09T00:00:00", 26: "2026-03-16T00:00:00", 27: "2026-03-23T00:00:00",
+            28: "2026-03-30T00:00:00", 29: "2026-04-06T00:00:00", 30: "2026-04-13T00:00:00",
+            31: "2026-04-20T00:00:00", 32: "2026-04-27T00:00:00", 33: "2026-05-04T00:00:00",
+            34: "2026-05-11T00:00:00", 35: "2026-05-18T00:00:00"
         };
 
         let currentStudent = localStorage.getItem('studentName');
@@ -155,11 +176,11 @@
         };
 
         function setStudentName() {
-            const name = prompt("🤖 Nhập Tên của em:");
+            const name = prompt("🤖 Nhập Tên của em để thám hiểm:");
             if (name) { localStorage.setItem('studentName', name); location.reload(); }
         }
 
-        function clearData() { localStorage.removeItem('studentName'); location.reload(); }
+        function clearData() { if(confirm("Đăng xuất?")) { localStorage.removeItem('studentName'); location.reload(); } }
 
         function handleStageClick(weekNo) {
             if (!currentStudent) { setStudentName(); return; }
@@ -180,13 +201,14 @@
             if(cdInterval) clearInterval(cdInterval);
             
             cdInterval = setInterval(() => {
-                const distance = endTime - new Date();
+                const now = new Date();
+                const distance = endTime - now;
                 if (distance < 0) { location.reload(); return; }
-                const d = Math.floor(distance / 86400000);
-                const h = Math.floor((distance % 86400000) / 3600000);
-                const m = Math.floor((distance % 3600000) / 60000);
-                const s = Math.floor((distance % 60000) / 1000);
-                document.getElementById('timer-display').innerHTML = `${d} ngày ${h}:${m}:${s}`;
+                const d = Math.floor(distance / (1000 * 60 * 60 * 24));
+                const h = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const s = Math.floor((distance % (1000 * 60)) / 1000);
+                document.getElementById('timer-display').innerHTML = `${d} ngày ${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
             }, 1000);
         }
 
@@ -197,10 +219,18 @@
 
         function updateStationStyles() {
             const now = new Date();
-            Object.keys(GAME_SCHEDULE).forEach(week => {
-                const el = document.getElementById(`st-${week}`);
-                if (el && now < new Date(GAME_SCHEDULE[week])) el.classList.add('locked');
-            });
+            // Quét sạch tất cả các ID từ 19 đến 35
+            for (let i = 19; i <= 35; i++) {
+                const el = document.getElementById(`st-${i}`);
+                if (el) {
+                    const openTime = new Date(GAME_SCHEDULE[i] || "2026-12-31T00:00:00");
+                    if (now < openTime) {
+                        el.classList.add('locked');
+                    } else {
+                        el.classList.remove('locked');
+                    }
+                }
+            }
         }
     </script>
 </body>
