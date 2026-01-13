@@ -206,26 +206,45 @@
 
     // TỰ ĐỘNG LƯU ĐIỂM
     function finishGame(title) {
-        document.getElementById('ui-choi').classList.add('hidden');
-        document.getElementById('ui-ket-thuc').classList.remove('hidden');
-        document.getElementById('title-finish').innerText = title;
-        document.getElementById('diem-cuoi').innerText = score + " / 100";
-        
-        const duration = Math.floor((Date.now() - startTime) / 1000);
-        const ref = db.ref('scores/Tuan_19');
+    document.getElementById('ui-choi').classList.add('hidden');
+    document.getElementById('ui-ket-thuc').classList.remove('hidden');
+    document.getElementById('title-finish').innerText = title;
+    document.getElementById('diem-cuoi').innerText = score + " / 100";
+    
+    const duration = Math.floor((Date.now() - startTime) / 1000);
+    const ref = db.ref('scores/Tuan_19');
 
+    // BƯỚC SỬA LỖI: Kiểm tra dữ liệu cũ để tính số lần thi
+    ref.once('value', (snap) => {
+        let attemptCount = 1;
+        const data = snap.val();
+        
+        if (data) {
+            for (let id in data) {
+                const oldName = (data[id].fullName || data[id].name || "").toLowerCase();
+                const oldClass = (data[id].className || "");
+                // Nếu trùng tên và lớp thì tăng số lần thi lên
+                if (oldName === savedName.toLowerCase() && oldClass === savedClass) {
+                    attemptCount++;
+                }
+            }
+        }
+
+        // Gửi dữ liệu mới kèm theo số lần thi (attempt) vừa tính được
         ref.push({
             fullName: savedName,
             className: savedClass,
             score: score,
             duration: duration,
+            attempt: attemptCount, // Cột lần thi sẽ chính xác
             date: new Date().toLocaleString('vi-VN'),
             timestamp: firebase.database.ServerValue.TIMESTAMP
         }, () => {
-            document.getElementById('save-status').innerText = "✅ Đã lưu điểm thành công! Đang quay lại bản đồ...";
+            document.getElementById('save-status').innerText = `✅ Đã lưu điểm lần ${attemptCount} thành công! Đang quay lại bản đồ...`;
             setTimeout(() => { window.location.href = "index.html"; }, 3000);
         });
-    }
+    });
+}
 </script>
 </body>
 </html>
