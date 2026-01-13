@@ -26,13 +26,16 @@
         .hidden { display: none !important; }
         .btn-final { background: var(--ocean); color: white; padding: 15px 30px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 1.1rem; }
         #start-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1a1a2e; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; }
+        footer { margin-top: 50px; color: #fff; font-size: 0.8rem; opacity: 0.6; }
     </style>
 </head>
 <body>
 
 <div id="start-screen">
-    <h1 style="color: #c6930a; font-size: 2rem; text-align: center; margin-bottom: 30px;">TOÁN 5 - TUẦN 20: CÁN CÂN CÔNG LÝ</h1>
-    <button class="btn-final" onclick="startGame()" style="padding: 20px 60px; font-size: 1.5rem;">BẮT ĐẦU</button>
+    <h1 style="color: #c6930a; font-size: 2rem; text-align: center; margin-bottom: 10px;">TOÁN 5 - TUẦN 20</h1>
+    <h2 style="color: #fff; margin-bottom: 30px;">CÁN CÂN CÔNG LÝ</h2>
+    <p id="welcome-msg" style="color: #fff; margin-bottom: 20px;"></p>
+    <button class="btn-final" id="btn-start-trigger" onclick="startGame()" style="padding: 20px 60px; font-size: 1.5rem;">BẮT ĐẦU</button>
 </div>
 
 <audio id="sound-correct" src="https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3" preload="auto"></audio>
@@ -42,7 +45,7 @@
 
 <div class="status-header" style="width: 100%; max-width: 750px; color: #f1c40f; font-size: 1.2rem;">
     <span>ĐIỂM: <span id="diem-nhan">0</span></span>
-    <span id="mang-song">SỐ LẦN SAI CÒN LẠI: ❤️❤️❤️</span>
+    <span id="mang-song">LỖI CHO PHÉP: ❤️❤️❤️</span>
 </div>
 
 <div class="map-frame">
@@ -59,20 +62,35 @@
         <h2 id="title-finish">KẾT THÚC THỬ THÁCH!</h2>
         <h1 id="diem-cuoi" style="font-size: 4rem; color: var(--gold); margin: 10px 0;">0</h1>
         <p id="msg-finish" style="font-weight: bold; margin-bottom: 20px;"></p>
-        
-        <div id="form-dang-ky" class="hidden">
-            <input type="text" id="ten-hs" style="width:80%; padding:15px; margin:5px; border-radius:8px; border:1px solid #ccc;" placeholder="Họ và tên...">
-            <input type="text" id="lop-hs" style="width:80%; padding:15px; margin:5px; border-radius:8px; border:1px solid #ccc;" placeholder="Lớp...">
-            <button class="btn-final" style="width:85%; margin-top:10px;" onclick="saveResult()">LƯU KẾT QUẢ VÀ QUA VÒNG</button>
-        </div>
-        
-        <button id="btn-retry" class="btn-final" style="background:#7f8c8d; margin-top:10px;" onclick="location.reload()">THỬ THÁCH LẠI</button>
+        <p id="save-status" style="color: var(--ocean); font-weight: bold;"></p>
+        <button class="btn-final" onclick="location.href='index.html'">QUAY LẠI BẢN ĐỒ</button>
     </div>
 </div>
 
 <div id="toast"></div>
 
+<footer>© 2026 EduRobot.id.vn - Lê Thành Long</footer>
+
 <script>
+    // 1. FIREBASE CONFIG
+    const firebaseConfig = { databaseURL: "https://gamhoctap-default-rtdb.asia-southeast1.firebasedatabase.app" };
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // 2. LẤY DỮ LIỆU TỪ TRANG CHỦ (BẢO MẬT)
+    const savedName = localStorage.getItem('studentName');
+    const savedClass = localStorage.getItem('studentClass');
+
+    window.onload = function() {
+        if (!savedName || !savedClass) {
+            document.getElementById('welcome-msg').innerHTML = "<b style='color:red'>⚠️ Em cần đăng ký tên ở trang chủ trước!</b>";
+            document.getElementById('btn-start-trigger').innerText = "VỀ TRANG CHỦ";
+            document.getElementById('btn-start-trigger').onclick = () => window.location.href = "index.html";
+        } else {
+            document.getElementById('welcome-msg').innerText = `Nhà thám hiểm: ${savedName} - Lớp: ${savedClass}`;
+        }
+    };
+
     const DATA = {
         V1: [
             {q: "5A và 5B có 60 quyển lịch. Tỉ số lớp 5A và 5B là 7/8. Tổng số phần bằng nhau là:", opts: ["1 phần", "14 phần", "15 phần", "56 phần"], c: 2},
@@ -102,10 +120,13 @@
         ]
     };
 
-    let score = 0, lives = 3, stage = 1, qIdx = 0, pool = [];
+    let score = 0, lives = 3, stage = 1, qIdx = 0, pool = [], startTime;
+
+    function shuffle(a) { return a.sort(() => Math.random() - 0.5); }
 
     function startGame() {
         document.getElementById('start-screen').classList.add('hidden');
+        startTime = Date.now();
         initStage(1);
     }
 
@@ -118,8 +139,6 @@
         else { b.innerText = "VÒNG 3: NÂNG CAO"; l.innerText = "VÒNG 3"; pool = shuffle([...DATA.V3]).slice(0, 2); }
         showQ();
     }
-
-    function shuffle(a) { return a.sort(() => Math.random() - 0.5); }
 
     function showQ() {
         let item = pool[qIdx];
@@ -137,11 +156,14 @@
             });
         } else {
             c.className = "input-area";
-            c.innerHTML = `<input type="number" id="ans-input" class="input-ans" placeholder="Nhập số..."><button class="btn-submit" onclick="checkTL()">GỬI ĐÁP ÁN</button>`;
+            c.innerHTML = `<input type="number" id="ans-input" class="input-ans" placeholder="?"><button class="btn-submit" onclick="checkTL()">GỬI</button>`;
         }
     }
 
-    function checkTL() { check(document.getElementById('ans-input').value.trim() === pool[qIdx].ans); }
+    function checkTL() { 
+        const val = document.getElementById('ans-input').value.trim();
+        if(val !== "") check(val === pool[qIdx].ans); 
+    }
 
     function check(isCorrect) {
         const sCorrect = document.getElementById('sound-correct');
@@ -150,70 +172,76 @@
             score += 10;
             sCorrect.currentTime = 0; sCorrect.play();
             showToast("ĐÚNG RỒI! +10đ", "#27ae60");
-            next();
         } else {
             sWrong.currentTime = 0; sWrong.play();
             showToast("SAI RỒI! ❌", "#e74c3c");
-            if(stage === 1) {
-                lives--; updateHearts();
-                if(lives <= 0) {
-                    showToast("HẾT LƯỢT! SANG VÒNG 2", "#e67e22");
-                    setTimeout(() => initStage(2), 1000);
-                    return;
-                }
-            }
-            next();
+            if(stage === 1) { lives--; updateHearts(); }
+        }
+        
+        qIdx++;
+        document.getElementById('diem-nhan').innerText = score;
+        if(lives <= 0 && stage === 1) {
+            showToast("HẾT LƯỢT! QUA VÒNG 2", "#e67e22");
+            setTimeout(() => initStage(2), 1000);
+        } else if(qIdx < pool.length) {
+            setTimeout(showQ, 800);
+        } else if(stage < 3) {
+            setTimeout(() => initStage(stage + 1), 1000);
+        } else {
+            setTimeout(finishGame, 1000);
         }
     }
 
     function updateHearts() {
         let h = ""; for(let i=0; i<3; i++) h += i < lives ? "❤️" : "🖤";
-        document.getElementById('mang-song').innerText = "SỐ LẦN SAI CÒN LẠI: " + h;
+        document.getElementById('mang-song').innerText = "LỖI CHO PHÉP: " + h;
     }
 
-    function next() {
-        document.getElementById('diem-nhan').innerText = score;
-        setTimeout(() => {
-            qIdx++;
-            if(qIdx < pool.length) showQ();
-            else if(stage < 3) initStage(stage + 1);
-            else end();
-        }, 800);
-    }
-
-    function end() {
+    function finishGame() {
         document.getElementById('ui-choi').classList.add('hidden');
         document.getElementById('ui-ket-thuc').classList.remove('hidden');
-        document.getElementById('diem-cuoi').innerText = score;
-        const msg = document.getElementById('msg-finish');
-        const form = document.getElementById('form-dang-ky');
-        if(score >= 50) {
-            msg.innerText = "CHÚC MỪNG! EM ĐÃ HOÀN THÀNH XUẤT SẮC TUẦN 20.";
-            msg.style.color = "green";
-            form.classList.remove('hidden');
-        } else {
-            msg.innerText = "ĐIỂM CHƯA ĐẠT (DƯỚI 50 ĐIỂM). HÃY THỬ LẠI NHÉ!";
-            msg.style.color = "red";
-            form.classList.add('hidden');
-        }
+        
+        let finalScore = score;
+        if(finalScore > 100) finalScore = 100;
+        document.getElementById('diem-cuoi').innerText = finalScore + " / 100";
+        
+        const duration = Math.floor((Date.now() - startTime) / 1000);
+        const ref = db.ref('scores/Tuan_20');
+
+        // KIỂM TRA SỐ LẦN THI
+        ref.once('value', (snap) => {
+            let attemptCount = 1;
+            const data = snap.val();
+            if (data) {
+                for (let id in data) {
+                    const oldName = (data[id].fullName || data[id].name || "").toLowerCase();
+                    const oldClass = (data[id].className || "");
+                    if (oldName === savedName.toLowerCase() && oldClass === savedClass) {
+                        attemptCount++;
+                    }
+                }
+            }
+
+            // GỬI KẾT QUẢ
+            ref.push({
+                fullName: savedName,
+                className: savedClass,
+                score: finalScore,
+                duration: duration,
+                attempt: attemptCount,
+                date: new Date().toLocaleString('vi-VN'),
+                timestamp: firebase.database.ServerValue.TIMESTAMP
+            }, () => {
+                document.getElementById('save-status').innerText = `✅ Đã lưu điểm lần thứ ${attemptCount} thành công!`;
+                setTimeout(() => { location.href = "index.html"; }, 3000);
+            });
+        });
     }
 
     function showToast(m, c) {
         const t = document.getElementById('toast'); t.innerText = m; t.style.background = c; t.style.color = "#fff";
         t.classList.add('show-toast'); setTimeout(() => t.classList.remove('show-toast'), 1000);
     }
-
-    function saveResult() {
-        const t = document.getElementById('ten-hs').value, l = document.getElementById('lop-hs').value;
-        if(!t || !l) return alert("Nhập tên và lớp nhé!");
-        firebase.database().ref('ketqua/tuan20/' + Date.now()).set({ hoTen: t, lop: l, diem: score })
-        .then(() => { alert("Đã lưu điểm thành công!"); location.reload(); });
-    }
-
-    window.onload = () => {
-        const config = { databaseURL: "https://gamhoctap-default-rtdb.asia-southeast1.firebasedatabase.app" };
-        if (!firebase.apps.length) firebase.initializeApp(config);
-    };
 </script>
 </body>
 </html>
