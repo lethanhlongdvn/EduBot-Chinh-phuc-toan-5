@@ -94,14 +94,37 @@
         }
         .timer-box { font-size: clamp(1.5rem, 8vw, 3rem); font-family: 'Bungee'; color: #00FF00; margin: 20px 0; }
 
-        /* CHÂN TRANG */
-        .game-footer { background: #222; padding: 15px 10px; border-top: 3px solid var(--primary); position: sticky; bottom: 0; z-index: 1000; }
-        .footer-buttons { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; max-width: 600px; margin: 0 auto; margin-bottom: 15px; }
-        @media (min-width: 600px) { .footer-buttons { grid-template-columns: repeat(4, 1fr); } }
-        .btn-nav { background: #333; border: 2px solid var(--primary); color: var(--primary); padding: 10px; border-radius: 10px; font-weight: bold; text-decoration: none; text-align: center; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; }
+        /* CHÂN TRANG - CHỈNH SỬA TẠI ĐÂY ĐỂ HIỆN 1 DÒNG */
+        .game-footer { background: #222; padding: 10px 5px; border-top: 3px solid var(--primary); position: sticky; bottom: 0; z-index: 1000; }
+        .footer-buttons { 
+            display: flex; 
+            justify-content: center; 
+            gap: 5px; 
+            max-width: 800px; 
+            margin: 0 auto; 
+            margin-bottom: 10px; 
+        }
+        .btn-nav { 
+            flex: 1; /* Chia đều chiều rộng */
+            background: #333; 
+            border: 1px solid var(--primary); 
+            color: var(--primary); 
+            padding: 8px 2px; /* Giảm padding ngang để vừa 1 dòng */
+            border-radius: 8px; 
+            font-weight: bold; 
+            text-decoration: none; 
+            text-align: center; 
+            font-size: clamp(0.6rem, 2.5vw, 0.8rem); /* Chữ co giãn theo màn hình */
+            cursor: pointer; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 3px; 
+            white-space: nowrap; /* Không cho xuống dòng chữ trong nút */
+        }
         
         .copyright-text {
-            text-align: center; font-size: 0.8rem; color: #aaa; border-top: 1px solid #333; padding-top: 10px; margin-top: 5px;
+            text-align: center; font-size: 0.7rem; color: #aaa; border-top: 1px solid #333; padding-top: 5px; margin-top: 5px;
         }
         .hidden { display: none !important; }
 
@@ -181,7 +204,7 @@
         <h2 style="font-family:'Bungee'; color:var(--gold);">VÒNG THI CHƯA MỞ</h2>
         <p>Robot đang chuẩn bị dữ liệu thám hiểm!</p>
         <div class="timer-box" id="timer-display">00:00:00:00</div>
-        <button class="btn-nav" onclick="closeCountdown()" style="width:150px; background:var(--primary); color:white; border:none; margin: 0 auto;">ĐÃ HIỂU</button>
+        <button class="btn-nav" onclick="closeCountdown()" style="max-width:150px; background:var(--primary); color:white; border:none; margin: 0 auto; padding: 10px 20px;">ĐÃ HIỂU</button>
     </div>
 
     <footer class="game-footer">
@@ -202,7 +225,6 @@
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // MỞ VÒNG LÚC 14 GIỜ
         const GAME_SCHEDULE = {
             19: "2026-01-16T14:00:00", 20: "2026-01-23T14:00:00", 21: "2026-01-30T14:00:00",
             22: "2026-02-06T14:00:00", 23: "2026-02-23T14:00:00", 24: "2026-03-02T14:00:00",
