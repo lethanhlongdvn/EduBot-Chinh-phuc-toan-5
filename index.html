@@ -114,7 +114,7 @@
         </div>
 
         <section class="leaderboard-sidebar">
-            <h3 id="lb-title-text" class="leaderboard-title">🏆 TOP 10 CAO THỦ</h3>
+            <h3 id="lb-title" class="leaderboard-title">🏆 TOP 10 CAO THỦ</h3>
             <table>
                 <thead>
                     <tr style="background:var(--primary); color:black;">
@@ -142,8 +142,8 @@
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // CÀI ĐẶT TUẦN HIỂN THỊ BẢNG XẾP HẠNG TẠI ĐÂY
-        const CURRENT_WEEK_DISPLAY = 19; 
+        // CHỈNH SỐ TUẦN Ở ĐÂY ĐỂ HIỂN THỊ TRÊN BẢNG XẾP HẠNG
+        const WEEK_NUMBER = 19; 
 
         const SCHEDULE = { 
             19: "2026-01-13T00:00:00", 
@@ -156,8 +156,8 @@
         let noticeInterval;
 
         window.onload = function() {
-            // Cập nhật tiêu đề tuần cho bảng xếp hạng
-            document.getElementById('lb-title-text').innerText = `🏆 TOP 10 CAO THỦ - TUẦN ${CURRENT_WEEK_DISPLAY}`;
+            // Cập nhật tiêu đề bảng xếp hạng có số tuần
+            document.getElementById('lb-title').innerText = `🏆 TOP 10 CAO THỦ - TUẦN ${WEEK_NUMBER}`;
             
             updateUI();
             updateStationStyles(); 
@@ -225,6 +225,7 @@
 
         function showNoticeCountdown(endTime) {
             document.getElementById('countdown-overlay').style.display = 'flex';
+            if(noticeInterval) clearInterval(noticeInterval);
             noticeInterval = setInterval(() => {
                 const distance = endTime - new Date();
                 if (distance < 0) { location.reload(); return; }
@@ -239,32 +240,28 @@
         function closeNotice() { document.getElementById('countdown-overlay').style.display = 'none'; clearInterval(noticeInterval); }
 
         function loadLeaderboard() {
-            // Chỉ lấy dữ liệu của tuần hiện tại để tối ưu tốc độ
-            db.ref(`scores/Tuan_${CURRENT_WEEK_DISPLAY}`).on('value', (snap) => {
+            // CHỈ lấy dữ liệu của TUẦN HIỆN TẠI để tăng tốc độ tải
+            db.ref(`scores/Tuan_${WEEK_NUMBER}`).on('value', (snap) => {
                 const data = snap.val();
                 const listUI = document.getElementById('leaderboard-list-ui');
                 if (!data) {
-                    listUI.innerHTML = '<tr><td colspan="3">Chưa có dữ liệu</td></tr>';
+                    listUI.innerHTML = '<tr><td colspan="3" style="padding:15px; color:#888;">Chưa có dữ liệu tuần này</td></tr>';
                     return;
                 }
-                
                 let all = [];
                 for (let id in data) all.push(data[id]);
-                
                 all.sort((a, b) => b.score - a.score);
-                
                 const top10 = []; const seen = new Set();
                 for (let s of all) {
-                    let name = s.fullName || s.name || "Ẩn danh";
-                    let key = name + (s.className || "");
+                    let name = s.fullName || s.name;
+                    let key = name + s.className;
                     if (!seen.has(key)) { top10.push(s); seen.add(key); }
                     if (top10.length >= 10) break;
                 }
-                
                 listUI.innerHTML = top10.map((s, i) => `
                     <tr style="border-bottom:1px solid #333;">
                         <td>${i+1}</td>
-                        <td style="text-align:left; padding:10px;"><b>${s.fullName || s.name}</b><br><small>Lớp: ${s.className || "??"}</small></td>
+                        <td style="text-align:left; padding:10px;"><b>${s.fullName || s.name}</b><br><small>Lớp: ${s.className}</small></td>
                         <td>${s.score}</td>
                     </tr>
                 `).join('');
