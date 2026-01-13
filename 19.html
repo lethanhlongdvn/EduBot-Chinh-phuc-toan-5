@@ -21,8 +21,8 @@
         .input-area { display: flex; flex-direction: column; align-items: center; gap: 15px; }
         .input-ans { padding: 15px; width: 250px; font-size: 1.3rem; border: 3px solid var(--gold); border-radius: 10px; text-align: center; font-family: 'Lexend'; outline: none; }
         .btn-submit { background: var(--ocean); color: white; padding: 12px 40px; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 1.1rem; }
-        #toast { position: fixed; top: 30px; padding: 15px 40px; border-radius: 50px; font-weight: bold; z-index: 1000; opacity: 0; transition: 0.3s; pointer-events: none; }
-        .show-toast { opacity: 1 !important; top: 50px !important; }
+        #toast { position: fixed; top: -100px; left: 50%; transform: translateX(-50%); padding: 15px 40px; border-radius: 50px; color: white; font-weight: bold; z-index: 10000; transition: 0.5s; pointer-events: none; }
+        .show-toast { top: 50px !important; }
         .hidden { display: none !important; }
         .btn-final { background: var(--ocean); color: white; padding: 15px 30px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 1.1rem; }
         #start-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1a1a2e; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; }
@@ -42,7 +42,7 @@
 
 <div class="status-header" style="width: 100%; max-width: 750px; color: #f1c40f; font-size: 1.2rem;">
     <span>ĐIỂM: <span id="diem-nhan">0</span></span>
-    <span id="mang-song">SỐ LẦN SAI CÒN LẠI CỦA BẠN: ❤️❤️❤️</span>
+    <span id="mang-song">SỐ LẦN SAI CÒN LẠI: ❤️❤️❤️</span>
 </div>
 
 <div class="map-frame">
@@ -51,7 +51,7 @@
             <span id="cau-so">CÂU 1/4</span>
             <span id="vong-label">VÒNG 1</span>
         </div>
-        <div class="question-box" id="noi-dung-cau-hoi">...</div>
+        <div class="question-box" id="noi-dung-cau-hoi">Đang tải câu hỏi...</div>
         <div id="khu-vuc-dap-an"></div>
     </div>
 
@@ -61,18 +61,25 @@
         <p id="msg-finish" style="font-weight: bold; margin-bottom: 20px;"></p>
         
         <div id="form-dang-ky" class="hidden">
-            <input type="text" id="ten-hs" style="width:80%; padding:15px; margin:5px; border-radius:8px; border:1px solid #ccc;" placeholder="Họ và tên...">
-            <input type="text" id="lop-hs" style="width:80%; padding:15px; margin:5px; border-radius:8px; border:1px solid #ccc;" placeholder="Lớp...">
-            <button class="btn-final" style="width:85%; margin-top:10px;" onclick="saveResult()">LƯU KẾT QUẢ VÀ QUA VÒNG</button>
+            <input type="text" id="ten-hs" style="width:80%; padding:15px; margin:5px; border-radius:8px; border:1px solid #ccc;" placeholder="Họ và tên học sinh...">
+            <input type="text" id="lop-hs" style="width:80%; padding:15px; margin:5px; border-radius:8px; border:1px solid #ccc;" placeholder="Lớp (Ví dụ: 5A1)...">
+            <button class="btn-final" style="width:85%; margin-top:10px;" onclick="saveResult()">LƯU KẾT QUẢ & VỀ TRANG CHỦ</button>
         </div>
         
         <button id="btn-retry" class="btn-final" style="background:#7f8c8d; margin-top:10px;" onclick="location.reload()">THỬ THÁCH LẠI</button>
     </div>
 </div>
 
-<div id="toast"></div>
+<div id="toast">Thông báo</div>
 
 <script>
+    // Cấu hình Firebase
+    const firebaseConfig = { 
+        databaseURL: "https://gamhoctap-default-rtdb.asia-southeast1.firebasedatabase.app" 
+    };
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
     const DATA = {
         V1: [
             {q: "Tỉ số của 7 hang đá và 10 rừng cây là:", opts: ["10:7", "7:10", "7:17", "10:17"], c: 1},
@@ -95,17 +102,18 @@
             {q: "Tỉ lệ 1:2000, bản đồ 5cm. Độ dài thật là:", opts: ["10m", "100m", "1000m", "10km"], c: 1}
         ],
         V3: [
-            {q: "Tỉ lệ 1:3000, dài 3cm, rộng 2cm. Diện tích thật (m2)?", ans: "5400"},
-            {q: "Bản đồ 1 (1:1000) dài 10cm. Bản đồ 2 (1:2000) dài bao nhiêu cm?", ans: "5"},
-            {q: "Hình vuông chu vi bản đồ (1:5000) là 16cm. Diện tích thật (ha)?", ans: "4"},
-            {q: "Chặng 1 (30%), chặng 2 chiếm 70% và hơn chặng 1 là 40m. Tổng đường (m)?", ans: "100"}
+            {q: "Tỉ lệ 1:3000, chiều dài 3cm, chiều rộng 2cm. Tính diện tích thật ngoài đời thực (đơn vị m2)?", ans: "5400"},
+            {q: "Bản đồ thứ nhất (1:1000) dài 10cm. Bản đồ thứ hai (1:2000) dài bao nhiêu cm?", ans: "5"},
+            {q: "Hình vuông có chu vi trên bản đồ (1:5000) là 16cm. Tính diện tích thật (đơn vị ha)?", ans: "4"},
+            {q: "Chặng 1 chiếm 30%, chặng 2 chiếm 70% và hơn chặng 1 là 40m. Tổng quãng đường (m)?", ans: "100"}
         ]
     };
 
-    let score = 0, lives = 3, stage = 1, qIdx = 0, pool = [];
+    let score = 0, lives = 3, stage = 1, qIdx = 0, pool = [], startTime;
 
     function startGame() {
         document.getElementById('start-screen').classList.add('hidden');
+        startTime = Date.now();
         initStage(1);
     }
 
@@ -113,9 +121,16 @@
         stage = s; qIdx = 0;
         const b = document.getElementById('vong-banner');
         const l = document.getElementById('vong-label');
-        if(s === 1) { b.innerText = "VÒNG 1: KHÁM PHÁ"; l.innerText = "VÒNG 1"; pool = shuffle([...DATA.V1]).slice(0, 4); }
-        else if(s === 2) { b.innerText = "VÒNG 2: LUYỆN TẬP"; l.innerText = "VÒNG 2"; pool = shuffle([...DATA.V2]).slice(0, 4); }
-        else { b.innerText = "VÒNG 3: LUYỆN TẬP NÂNG CAO"; l.innerText = "VÒNG 3"; pool = shuffle([...DATA.V3]).slice(0, 2); }
+        if(s === 1) { 
+            b.innerText = "VÒNG 1: KHÁM PHÁ"; l.innerText = "VÒNG 1"; 
+            pool = shuffle([...DATA.V1]).slice(0, 4); 
+        } else if(s === 2) { 
+            b.innerText = "VÒNG 2: LUYỆN TẬP"; l.innerText = "VÒNG 2"; 
+            pool = shuffle([...DATA.V2]).slice(0, 4); 
+        } else { 
+            b.innerText = "VÒNG 3: VỀ ĐÍCH (NÂNG CAO)"; l.innerText = "VÒNG 3"; 
+            pool = shuffle([...DATA.V3]).slice(0, 2); 
+        }
         showQ();
     }
 
@@ -127,6 +142,7 @@
         document.getElementById('noi-dung-cau-hoi').innerText = item.q;
         const c = document.getElementById('khu-vuc-dap-an');
         c.innerHTML = '';
+        
         if(stage < 3) {
             c.className = "options-container";
             item.opts.forEach((o, i) => {
@@ -137,89 +153,93 @@
             });
         } else {
             c.className = "input-area";
-            c.innerHTML = `<input type="number" id="ans-input" class="input-ans" placeholder="Nhập kết quả..."><button class="btn-submit" onclick="checkTL()">GỬI ĐÁP ÁN</button>`;
+            c.innerHTML = `
+                <input type="number" id="ans-input" class="input-ans" placeholder="Nhập số...">
+                <button class="btn-submit" onclick="checkTL()">GỬI ĐÁP ÁN</button>
+            `;
+            // Tự động focus vào ô nhập
+            setTimeout(() => document.getElementById('ans-input').focus(), 100);
         }
     }
 
-    function checkTL() { check(document.getElementById('ans-input').value.trim() === pool[qIdx].ans); }
+    function checkTL() {
+        const userAns = document.getElementById('ans-input').value.trim();
+        check(userAns === pool[qIdx].ans);
+    }
 
     function check(isCorrect) {
-        const sCorrect = document.getElementById('sound-correct');
-        const sWrong = document.getElementById('sound-wrong');
-        
         if(isCorrect) {
-            score += 10;
-            sCorrect.currentTime = 0; sCorrect.play();
-            showToast("ĐÚNG RỒI! +10đ", "#27ae60");
-            next();
+            score += (stage === 3 ? 2 : 1);
+            document.getElementById('diem-nhan').innerText = score;
+            showToast("CHÍNH XÁC! 🌟", "#27ae60");
+            document.getElementById('sound-correct').play();
         } else {
-            sWrong.currentTime = 0; sWrong.play();
-            showToast("SAI RỒI! ❌", "#e74c3c");
-            
-            if(stage === 1) {
-                lives--;
-                updateHearts();
-                if(lives <= 0) {
-                    showToast("HẾT SỐ LẦN SAI! SANG VÒNG 2", "#e67e22");
-                    setTimeout(() => initStage(2), 1000);
-                    return;
-                }
+            lives--;
+            document.getElementById('mang-song').innerText = "SỐ LẦN SAI CÒN LẠI: " + "❤️".repeat(lives);
+            showToast("SAI MẤT RỒI! ❌", "#e74c3c");
+            document.getElementById('sound-wrong').play();
+            if(lives <= 0) { finishGame("BẠN ĐÃ HẾT LƯỢT!"); return; }
+        }
+        
+        qIdx++;
+        if(qIdx < pool.length) {
+            setTimeout(showQ, 800);
+        } else {
+            if(stage < 3) {
+                setTimeout(() => initStage(stage + 1), 1000);
+            } else {
+                setTimeout(() => finishGame("XUẤT SẮC HOÀN THÀNH!"), 1000);
             }
-            // Vòng 2 và 3 sai cũng tự chuyển
-            next();
         }
     }
 
-    function updateHearts() {
-        let h = ""; for(let i=0; i<3; i++) h += i < lives ? "❤️" : "🖤";
-        document.getElementById('mang-song').innerText = "GIÁP: " + h;
+    function showToast(msg, color) {
+        const t = document.getElementById('toast');
+        t.innerText = msg; t.style.background = color;
+        t.classList.add('show-toast');
+        setTimeout(() => t.classList.remove('show-toast'), 2000);
     }
 
-    function next() {
-        document.getElementById('diem-nhan').innerText = score;
-        setTimeout(() => {
-            qIdx++;
-            if(qIdx < pool.length) showQ();
-            else if(stage < 3) initStage(stage + 1);
-            else end();
-        }, 800);
-    }
-
-    function end() {
+    function finishGame(title) {
         document.getElementById('ui-choi').classList.add('hidden');
         document.getElementById('ui-ket-thuc').classList.remove('hidden');
+        document.getElementById('title-finish').innerText = title;
         document.getElementById('diem-cuoi').innerText = score;
         
-        const msg = document.getElementById('msg-finish');
-        const form = document.getElementById('form-dang-ky');
+        // Tự động lấy tên từ localStorage nếu có
+        const savedName = localStorage.getItem('studentName');
+        if(savedName) document.getElementById('ten-hs').value = savedName;
         
-        if(score >= 50) {
-            msg.innerText = "CHÚC MỪNG! EM ĐÃ HOÀN THÀNH VÒNG THI TUẦN 19.";
-            msg.style.color = "green";
-            form.classList.remove('hidden');
-        } else {
-            msg.innerText = "ĐIỂM CỦA EM CHƯA ĐẠT (DƯỚI 50 ĐIỂM). HÃY THỬ LẠI NHÉ!";
-            msg.style.color = "red";
-            form.classList.add('hidden');
-        }
-    }
-
-    function showToast(m, c) {
-        const t = document.getElementById('toast'); t.innerText = m; t.style.background = c; t.style.color = "#fff";
-        t.classList.add('show-toast'); setTimeout(() => t.classList.remove('show-toast'), 1000);
+        document.getElementById('form-dang-ky').classList.remove('hidden');
     }
 
     function saveResult() {
-        const t = document.getElementById('ten-hs').value, l = document.getElementById('lop-hs').value;
-        if(!t || !l) return alert("Em hãy nhập tên và lớp để thầy lưu điểm nhé!");
-        firebase.database().ref('ketqua/tuan19/' + Date.now()).set({ hoTen: t, lop: l, diem: score })
-        .then(() => { alert("Đã ghi danh thành công!"); location.reload(); });
-    }
+        const name = document.getElementById('ten-hs').value.trim();
+        const lop = document.getElementById('lop-hs').value.trim();
+        
+        if(!name || !lop) {
+            alert("Em vui lòng nhập đầy đủ Họ tên và Lớp nhé!");
+            return;
+        }
 
-    window.onload = () => {
-        const config = { databaseURL: "https://gamhoctap-default-rtdb.asia-southeast1.firebasedatabase.app" };
-        if (!firebase.apps.length) firebase.initializeApp(config);
-    };
+        const duration = Math.floor((Date.now() - startTime) / 1000);
+
+        // Lưu dữ liệu vào nhánh Tuan_19
+        db.ref('scores/Tuan_19').push({
+            fullName: name,
+            className: lop,
+            score: score,
+            duration: duration,
+            date: new Date().toLocaleString('vi-VN')
+        }, (error) => {
+            if (error) {
+                alert("Lỗi lưu điểm: " + error);
+            } else {
+                alert("Chúc mừng " + name + "! Điểm của em đã được lưu lên Bảng Vàng.");
+                window.location.href = "index.html";
+            }
+        });
+    }
 </script>
 </body>
 </html>
