@@ -32,6 +32,7 @@
 
 <div id="start-screen">
     <h1 style="color: #c6930a; font-size: 2rem; text-align: center; margin-bottom: 30px;">TOÁN 5 - TUẦN 19: BẢN ĐỒ KHO BÁU</h1>
+    <p style="color: white; margin-bottom: 20px;">Vượt qua 10 thử thách để đạt 100 điểm!</p>
     <button class="btn-final" onclick="startGame()" style="padding: 20px 60px; font-size: 1.5rem;">BẮT ĐẦU</button>
 </div>
 
@@ -41,7 +42,7 @@
 <div id="vong-banner" class="stage-banner">VÒNG 1: KHÁM PHÁ</div>
 
 <div class="status-header" style="width: 100%; max-width: 750px; color: #f1c40f; font-size: 1.2rem;">
-    <span>ĐIỂM: <span id="diem-nhan">0</span></span>
+    <span>ĐIỂM: <span id="diem-nhan">0</span> / 100</span>
     <span id="mang-song">SỐ LẦN SAI CÒN LẠI: ❤️❤️❤️</span>
 </div>
 
@@ -73,10 +74,7 @@
 <div id="toast">Thông báo</div>
 
 <script>
-    // Cấu hình Firebase
-    const firebaseConfig = { 
-        databaseURL: "https://gamhoctap-default-rtdb.asia-southeast1.firebasedatabase.app" 
-    };
+    const firebaseConfig = { databaseURL: "https://gamhoctap-default-rtdb.asia-southeast1.firebasedatabase.app" };
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
@@ -123,13 +121,13 @@
         const l = document.getElementById('vong-label');
         if(s === 1) { 
             b.innerText = "VÒNG 1: KHÁM PHÁ"; l.innerText = "VÒNG 1"; 
-            pool = shuffle([...DATA.V1]).slice(0, 4); 
+            pool = shuffle([...DATA.V1]).slice(0, 4); // 4 câu
         } else if(s === 2) { 
             b.innerText = "VÒNG 2: LUYỆN TẬP"; l.innerText = "VÒNG 2"; 
-            pool = shuffle([...DATA.V2]).slice(0, 4); 
+            pool = shuffle([...DATA.V2]).slice(0, 4); // 4 câu
         } else { 
-            b.innerText = "VÒNG 3: VỀ ĐÍCH (NÂNG CAO)"; l.innerText = "VÒNG 3"; 
-            pool = shuffle([...DATA.V3]).slice(0, 2); 
+            b.innerText = "VÒNG 3: VỀ ĐÍCH"; l.innerText = "VÒNG 3"; 
+            pool = shuffle([...DATA.V3]).slice(0, 2); // 2 câu -> Tổng là 10 câu
         }
         showQ();
     }
@@ -157,28 +155,28 @@
                 <input type="number" id="ans-input" class="input-ans" placeholder="Nhập số...">
                 <button class="btn-submit" onclick="checkTL()">GỬI ĐÁP ÁN</button>
             `;
-            // Tự động focus vào ô nhập
             setTimeout(() => document.getElementById('ans-input').focus(), 100);
         }
     }
 
     function checkTL() {
         const userAns = document.getElementById('ans-input').value.trim();
+        if(!userAns) return;
         check(userAns === pool[qIdx].ans);
     }
 
     function check(isCorrect) {
         if(isCorrect) {
-            score += (stage === 3 ? 2 : 1);
+            score += 10; // CẬP NHẬT: 10 ĐIỂM MỖI CÂU
             document.getElementById('diem-nhan').innerText = score;
-            showToast("CHÍNH XÁC! 🌟", "#27ae60");
+            showToast("CHÍNH XÁC! +10đ 🌟", "#27ae60");
             document.getElementById('sound-correct').play();
         } else {
             lives--;
             document.getElementById('mang-song').innerText = "SỐ LẦN SAI CÒN LẠI: " + "❤️".repeat(lives);
-            showToast("SAI MẤT RỒI! ❌", "#e74c3c");
+            showToast("CHƯA ĐÚNG! ❌", "#e74c3c");
             document.getElementById('sound-wrong').play();
-            if(lives <= 0) { finishGame("BẠN ĐÃ HẾT LƯỢT!"); return; }
+            if(lives <= 0) { finishGame("CẦN CỐ GẮNG HƠN!"); return; }
         }
         
         qIdx++;
@@ -188,7 +186,7 @@
             if(stage < 3) {
                 setTimeout(() => initStage(stage + 1), 1000);
             } else {
-                setTimeout(() => finishGame("XUẤT SẮC HOÀN THÀNH!"), 1000);
+                setTimeout(() => finishGame("HOÀN THÀNH XUẤT SẮC!"), 1000);
             }
         }
     }
@@ -197,47 +195,35 @@
         const t = document.getElementById('toast');
         t.innerText = msg; t.style.background = color;
         t.classList.add('show-toast');
-        setTimeout(() => t.classList.remove('show-toast'), 2000);
+        setTimeout(() => t.classList.remove('show-toast'), 1500);
     }
 
     function finishGame(title) {
         document.getElementById('ui-choi').classList.add('hidden');
         document.getElementById('ui-ket-thuc').classList.remove('hidden');
         document.getElementById('title-finish').innerText = title;
-        document.getElementById('diem-cuoi').innerText = score;
+        document.getElementById('diem-cuoi').innerText = score + " / 100";
         
-        // Tự động lấy tên từ localStorage nếu có
         const savedName = localStorage.getItem('studentName');
         if(savedName) document.getElementById('ten-hs').value = savedName;
-        
         document.getElementById('form-dang-ky').classList.remove('hidden');
     }
 
     function saveResult() {
         const name = document.getElementById('ten-hs').value.trim();
         const lop = document.getElementById('lop-hs').value.trim();
-        
-        if(!name || !lop) {
-            alert("Em vui lòng nhập đầy đủ Họ tên và Lớp nhé!");
-            return;
-        }
+        if(!name || !lop) return alert("Em nhập tên và lớp để lưu điểm nhé!");
 
         const duration = Math.floor((Date.now() - startTime) / 1000);
-
-        // Lưu dữ liệu vào nhánh Tuan_19
         db.ref('scores/Tuan_19').push({
             fullName: name,
             className: lop,
             score: score,
             duration: duration,
             date: new Date().toLocaleString('vi-VN')
-        }, (error) => {
-            if (error) {
-                alert("Lỗi lưu điểm: " + error);
-            } else {
-                alert("Chúc mừng " + name + "! Điểm của em đã được lưu lên Bảng Vàng.");
-                window.location.href = "index.html";
-            }
+        }, () => {
+            alert("Lưu điểm thành công!");
+            window.location.href = "index.html";
         });
     }
 </script>
