@@ -32,7 +32,7 @@
         }
         .robot-head-top { width: clamp(35px, 8vw, 50px); height: auto; }
 
-        /* HEADER NHÀ THÁM HIỂM */
+        /* HEADER */
         .game-header {
             background: #222; padding: 10px 20px;
             display: flex; justify-content: space-between; align-items: center;
@@ -51,7 +51,7 @@
         .map-relative-box { position: relative; width: 100%; margin: 0 auto; }
         .map-image { width: 100%; height: auto; display: block; border-radius: 10px; }
 
-        /* TRẠM VÀ KHÓA */
+        /* TRẠM */
         .station {
             position: absolute; width: 5.8%; aspect-ratio: 1/1;
             background: white; border: 2px solid var(--dark-green);
@@ -75,7 +75,7 @@
             pointer-events: none; white-space: nowrap;
         }
 
-        /* BẢNG VÀNG SIDEBAR */
+        /* BẢNG VÀNG */
         .leaderboard-sidebar {
             flex: 3; background: #222; border: 2px solid var(--primary);
             border-radius: 15px; padding: 15px; height: fit-content;
@@ -85,7 +85,7 @@
         th { background: var(--primary); color: #000; padding: 8px; font-size: 0.75rem; }
         td { padding: 8px; border-bottom: 1px solid #333; text-align: center; font-size: 0.8rem; }
 
-        /* MÀN HÌNH ĐẾM NGƯỢC */
+        /* COUNTDOWN OVERLAY */
         #countdown-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.96); display: none;
@@ -93,32 +93,13 @@
             z-index: 10000; text-align: center; padding: 20px;
         }
         .timer-box { font-size: clamp(1.2rem, 5vw, 2.5rem); font-family: 'Bungee'; color: #00FF00; margin: 20px 0; }
-        
-        .btn-understand {
-            background: var(--primary); color: white; border: none;
-            padding: 12px 30px; border-radius: 10px; font-weight: bold;
-            font-family: 'Lexend', sans-serif; cursor: pointer; font-size: 1rem;
-            min-width: 120px; transition: 0.2s;
-        }
+        .btn-understand { background: var(--primary); color: white; border: none; padding: 12px 30px; border-radius: 10px; font-weight: bold; cursor: pointer; }
 
-        /* CHÂN TRANG */
+        /* FOOTER */
         .game-footer { background: #222; padding: 10px 5px; border-top: 3px solid var(--primary); position: sticky; bottom: 0; z-index: 1000; }
-        .footer-buttons { 
-            display: flex; justify-content: center; gap: 4px; 
-            max-width: 900px; margin: 0 auto 5px auto; 
-        }
-        .btn-nav { 
-            flex: 1; background: #333; border: 1px solid var(--primary); 
-            color: var(--primary); padding: 8px 1px; border-radius: 8px; 
-            font-weight: bold; text-decoration: none; text-align: center; 
-            font-size: clamp(0.55rem, 2.4vw, 0.8rem); 
-            cursor: pointer; display: flex; align-items: center; justify-content: center; 
-            gap: 2px; white-space: nowrap;
-        }
-        
-        .copyright-text {
-            text-align: center; font-size: 0.65rem; color: #aaa; border-top: 1px solid #333; padding-top: 5px; margin-top: 5px;
-        }
+        .footer-buttons { display: flex; justify-content: center; gap: 4px; max-width: 900px; margin: 0 auto 5px auto; }
+        .btn-nav { flex: 1; background: #333; border: 1px solid var(--primary); color: var(--primary); padding: 8px 1px; border-radius: 8px; font-weight: bold; text-decoration: none; text-align: center; font-size: clamp(0.55rem, 2.4vw, 0.8rem); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 2px; }
+        .copyright-text { text-align: center; font-size: 0.65rem; color: #aaa; border-top: 1px solid #333; padding-top: 5px; margin-top: 5px; }
         .hidden { display: none !important; }
 
         /* TỌA ĐỘ TRẠM */
@@ -170,7 +151,7 @@
                 <div class="landmark-tag" id="tag-22">🏛️ Hà Nội</div>
                 <div class="landmark-tag" id="tag-25">🕌 Huế</div>
                 <div class="landmark-tag" id="tag-30">🏢 TP.HCM</div>
-                <div class="landmark-tag" id="tag-33"> Canoe Cà Mau</div>
+                <div class="landmark-tag" id="tag-33">🛶 Cà Mau</div>
 
                 <script>
                     for(let i=19; i<=35; i++) {
@@ -215,6 +196,7 @@
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
+        // Lịch mở: Vòng 19 mở ngày 13, Vòng 20 mở ngày 23
         const GAME_SCHEDULE = {
             19: "2026-01-13T00:00:00", 20: "2026-01-23T14:00:00", 21: "2026-01-30T14:00:00",
             22: "2026-02-06T14:00:00", 23: "2026-02-23T14:00:00", 24: "2026-03-02T14:00:00",
@@ -248,31 +230,55 @@
         function clearData() { if(confirm("Đăng xuất tài khoản?")) { localStorage.removeItem('studentName'); location.reload(); } }
 
         function handleStageClick(weekNo) {
-            // Trường hợp Vòng 19: Luôn cho vào kể cả là khách
+            // VÒNG 19: Luôn mở cho mọi đối tượng
             if (weekNo === 19) {
                 window.location.href = "19.html";
                 return;
             }
 
-            // Trường hợp từ Vòng 20 trở đi:
+            // TỪ VÒNG 20 TRỞ ĐI:
+            const now = new Date();
+            const openTime = new Date(GAME_SCHEDULE[weekNo] || "2026-12-31T14:00:00");
+
+            // Kiểm tra tên (Yêu cầu đăng ký)
             if (!currentStudent) {
-                // Nếu chưa đăng nhập -> Hiện overlay báo phải nhập tên
                 document.getElementById('overlay-title').innerText = "YÊU CẦU DANH TÍNH";
                 document.getElementById('overlay-desc').innerText = "Em cần nhập tên để mở khóa các chặng từ 20 trở đi!";
-                document.getElementById('timer-display').innerText = "👤 Vui lòng bấm Nhập Tên ở chân trang";
+                document.getElementById('timer-display').innerText = "👤 Bấm [NHẬP TÊN] ở dưới cùng trang";
                 document.getElementById('countdown-overlay').style.display = 'flex';
                 return;
             }
 
-            // Nếu đã đăng nhập -> Kiểm tra thời gian
-            const now = new Date();
-            const openTime = new Date(GAME_SCHEDULE[weekNo] || "2026-12-31T14:00:00");
+            // Kiểm tra thời gian
             if (now >= openTime) {
                 window.location.href = weekNo + ".html";
             } else {
                 document.getElementById('overlay-title').innerText = "CHẶNG ĐƯỜNG PHÍA TRƯỚC";
                 document.getElementById('overlay-desc').innerText = "Robot đang chuẩn bị dữ liệu cho chặng này!";
                 showCountdown(openTime);
+            }
+        }
+
+        function updateStationStyles() {
+            const now = new Date();
+            for (let i = 19; i <= 35; i++) {
+                const el = document.getElementById(`st-${i}`);
+                if (!el) continue;
+
+                // Vòng 19: Không bao giờ bị khóa
+                if (i === 19) {
+                    el.classList.remove('locked');
+                    continue;
+                }
+
+                const openTime = new Date(GAME_SCHEDULE[i] || "2026-12-31T14:00:00");
+
+                // ĐIỀU KIỆN KHÓA: Chưa có tên HOẶC chưa tới ngày
+                if (!currentStudent || now < openTime) {
+                    el.classList.add('locked');
+                } else {
+                    el.classList.remove('locked');
+                }
             }
         }
 
@@ -291,30 +297,6 @@
         }
 
         function closeCountdown() { document.getElementById('countdown-overlay').style.display = 'none'; clearInterval(cdInterval); }
-
-        function updateStationStyles() {
-            const now = new Date();
-            for (let i = 19; i <= 35; i++) {
-                const el = document.getElementById(`st-${i}`);
-                if (!el) continue;
-
-                // Vòng 19 không bao giờ bị khóa (xóa class locked)
-                if (i === 19) {
-                    el.classList.remove('locked');
-                    continue;
-                }
-
-                // Nếu chưa đăng nhập -> Khóa tất cả các vòng > 19
-                if (!currentStudent) {
-                    el.classList.add('locked');
-                } else {
-                    // Nếu đã đăng nhập -> Khóa theo thời gian
-                    const openTime = new Date(GAME_SCHEDULE[i] || "2026-12-31T14:00:00");
-                    if (now < openTime) el.classList.add('locked');
-                    else el.classList.remove('locked');
-                }
-            }
-        }
 
         function loadLeaderboard() {
             db.ref('scores').on('value', (snapshot) => {
