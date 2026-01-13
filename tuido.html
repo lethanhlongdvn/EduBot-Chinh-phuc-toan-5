@@ -1,157 +1,29 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Túi Đồ Nhà Thám Hiểm - EduRobot</title>
-    <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Lexend:wght@400;700&display=swap" rel="stylesheet">
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-
-    <style>
-        :root {
-            --primary: #FF9800;
-            --gold: #FFD700;
-            --silver: #C0C0C0;
-            --bronze: #CD7F32;
-            --bg-dark: #1a1a1a;
-        }
-
-        body {
-            margin: 0; padding: 0;
-            font-family: 'Lexend', sans-serif;
-            background-color: var(--bg-dark);
-            color: white;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .container { padding: 20px; max-width: 800px; margin: auto; flex: 1; }
-
-        .header {
-            text-align: center; margin-bottom: 30px;
-            border-bottom: 2px solid var(--primary);
-            padding-bottom: 10px;
-        }
-
-        .header h1 { font-family: 'Bungee'; color: var(--gold); margin: 0; }
-
-        /* KHU VỰC HUY CHƯƠNG */
-        .medal-section {
-            display: flex; justify-content: space-around;
-            background: #2c2c2c;
-            padding: 20px; border-radius: 20px;
-            margin-bottom: 30px; border: 1px solid #444;
-        }
-
-        .medal-item { text-align: center; }
-        .medal-icon { font-size: 3rem; display: block; filter: drop-shadow(0 0 5px rgba(0,0,0,0.5)); }
-        .medal-count { font-size: 1.5rem; font-weight: bold; color: var(--gold); margin-top: 5px; }
-        .medal-label { font-size: 0.7rem; color: #aaa; text-transform: uppercase; }
-
-        /* LƯỚI VẬT PHẨM QUÀ TẶNG */
-        .item-grid {
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-            gap: 15px; margin-top: 20px;
-        }
-
-        .item-card {
-            background: #2c2c2c; border-radius: 15px; padding: 15px;
-            text-align: center; border: 2px solid #333;
-            transition: 0.3s; position: relative;
-            filter: grayscale(100%); opacity: 0.4; /* Mặc định là chưa có thì mờ và đen trắng */
-        }
-
-        .item-card.unlocked { 
-            filter: grayscale(0%); opacity: 1; 
-            border-color: var(--primary); 
-            background: radial-gradient(circle, #444 0%, #2c2c2c 100%);
-        }
-
-        .item-card .icon { font-size: 2.5rem; margin-bottom: 8px; display: block; }
-        .item-card .name { font-size: 0.75rem; font-weight: bold; color: #eee; height: 32px; display: flex; align-items: center; justify-content: center; }
-        .item-card .status { font-size: 0.65rem; margin-top: 5px; color: var(--primary); font-weight: bold; }
-
-        .section-title {
-            color: var(--primary); font-family: 'Bungee'; font-size: 1.1rem;
-            margin-top: 30px; border-left: 5px solid var(--primary); padding-left: 10px;
-        }
-
-        .btn-back {
-            display: inline-block; margin: 40px 0;
-            background: var(--primary); color: black;
-            text-decoration: none; padding: 12px 35px;
-            border-radius: 50px; font-weight: bold; transition: 0.3s;
-        }
-        .btn-back:hover { transform: scale(1.1); box-shadow: 0 0 20px rgba(255, 152, 0, 0.4); }
-
-        .game-footer {
-            background: #222; padding: 20px; text-align: center;
-            border-top: 3px solid var(--primary);
-        }
-        .footer-copyright { color: #ffffff; font-size: 0.8rem; opacity: 0.9; }
-    </style>
-</head>
-<body>
-
-<div class="container">
-    <div class="header">
-        <h1>TÚI ĐỒ CỦA EM</h1>
-        <p>👤 Nhà thám hiểm: <span id="student-name" style="color:var(--gold)">...</span></p>
-    </div>
-
-    <div class="medal-section">
-        <div class="medal-item">
-            <span class="medal-icon">🥇</span>
-            <div id="gold-count" class="medal-count">0</div>
-            <div class="medal-label">Vàng</div>
-        </div>
-        <div class="medal-item">
-            <span class="medal-icon">🥈</span>
-            <div id="silver-count" class="medal-count">0</div>
-            <div class="medal-label">Bạc</div>
-        </div>
-        <div class="medal-item">
-            <span class="medal-icon">🥉</span>
-            <div id="bronze-count" class="medal-count">0</div>
-            <div class="medal-label">Đồng</div>
-        </div>
-    </div>
-
-    <div class="section-title">🎒 VẬT PHẨM ĐÃ THU THẬP</div>
-    <div class="item-grid" id="item-list">
-        </div>
-
-    <center><a href="index.html" class="btn-back">QUAY LẠI BẢN ĐỒ</a></center>
-</div>
-
-<footer class="game-footer">
-    <div class="footer-copyright">
-        &copy; 2026 EduRobot - GV. Lê Thành Long
-    </div>
-</footer>
-
 <script>
     const firebaseConfig = {
-        apiKey: "AIzaSyC6zlWn8BKYU7P6A2-PYq6IIWOzaqJWFhc",
-        authDomain: "gamhoctap.firebaseapp.com",
-        databaseURL: "https://gamhoctap-default-rtdb.asia-southeast1.firebasedatabase.app",
-        projectId: "gamhoctap"
+        databaseURL: "https://gamhoctap-default-rtdb.asia-southeast1.firebasedatabase.app"
     };
-    firebase.initializeApp(firebaseConfig);
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // Danh sách vật phẩm quà tặng cho từng chặng thám hiểm
+    // DANH SÁCH VẬT PHẨM ĐẦY ĐỦ TỪ TUẦN 19 ĐẾN 35
     const ITEMS_DATA = {
-        19: { name: "Ống nhòm tầm xa", icon: "🔭", table: "tisophantram", deadline: "2026-01-17" },
-        20: { name: "Cân tiểu ly", icon: "⚖️", table: "cancancongly", deadline: "2026-01-24" },
-        21: { name: "Máy tính bỏ túi", icon: "📟", table: "sieucapcasio", deadline: "2026-01-31" },
-        22: { name: "Bản đồ Hà Nội", icon: "🗺️", table: "daihoitoanhoc", deadline: "2026-02-07" },
-        23: { name: "Thước cuộn", icon: "📏", table: "donvisieudang", deadline: "2026-02-28" },
-        24: { name: "Mũ kiến trúc sư", icon: "🏗️", table: "kientrucsunhi", deadline: "2026-03-07" },
-        25: { name: "Hộp quà xứ Huế", icon: "🎁", table: "xuongdonghop", deadline: "2026-03-14" },
-        26: { name: "Đồng hồ cát", icon: "⏳", table: "thosanthoigian", deadline: "2026-03-21" }
+        19: { name: "Ống nhòm tầm xa", icon: "🔭", table: "19", deadline: "2026-01-17" },
+        20: { name: "Cân tiểu ly", icon: "⚖️", table: "20", deadline: "2026-01-24" },
+        21: { name: "Máy tính bỏ túi", icon: "📟", table: "21", deadline: "2026-01-31" },
+        22: { name: "Bản đồ Hà Nội", icon: "🗺️", table: "22", deadline: "2026-02-07" },
+        23: { name: "Thước cuộn", icon: "📏", table: "23", deadline: "2026-02-28" },
+        24: { name: "Mũ kiến trúc sư", icon: "🏗️", table: "24", deadline: "2026-03-07" },
+        25: { name: "Hộp quà xứ Huế", icon: "🎁", table: "25", deadline: "2026-03-14" },
+        26: { name: "Đồng hồ cát", icon: "⏳", table: "26", deadline: "2026-03-21" },
+        27: { name: "Com-pa bạc", icon: "📐", table: "27", deadline: "2026-03-28" },
+        28: { name: "Bánh lái tàu", icon: "🎡", table: "28", deadline: "2026-04-04" },
+        29: { name: "Đèn pin năng lượng", icon: "🔦", table: "29", deadline: "2026-04-11" },
+        30: { name: "Tòa tháp Bitexco", icon: "🏢", table: "30", deadline: "2026-04-18" },
+        31: { name: "La bàn số", icon: "🧭", table: "31", deadline: "2026-04-25" },
+        32: { name: "Vé tàu cao tốc", icon: "🎫", table: "32", deadline: "2026-05-02" },
+        33: { name: "Mũ tai bèo thám hiểm", icon: "👒", table: "33", deadline: "2026-05-09" },
+        34: { name: "Cờ lệnh về đích", icon: "🚩", table: "34", deadline: "2026-05-16" },
+        35: { name: "Huân chương vinh quang", icon: "🎖️", table: "35", deadline: "2026-05-23" }
     };
 
     const currentStudent = localStorage.getItem('studentName');
@@ -170,6 +42,7 @@
 
         for (let week in ITEMS_DATA) {
             const item = ITEMS_DATA[week];
+            // Truy vấn vào bảng scores/{số tuần} đúng như thầy đặt ở bản đồ
             const snapshot = await db.ref(`scores/${item.table}`).once('value');
             const scores = snapshot.val();
 
@@ -177,7 +50,7 @@
             let medalThisWeek = "";
 
             if (scores) {
-                let results = Object.values(scores).filter(s => s.fullName === currentStudent);
+                let results = Object.values(scores).filter(s => (s.fullName === currentStudent || s.name === currentStudent));
                 if (results.length > 0) {
                     results.sort((a, b) => b.score - a.score);
                     const topScore = results[0].score;
@@ -186,7 +59,7 @@
 
                     if (topScore >= 50) unlocked = true;
 
-                    // Tính huy chương nếu nộp bài đúng hạn (trước Thứ 7 hàng tuần) 
+                    // Tính huy chương dựa trên điểm số
                     if (new Date(timestamp) <= deadlineDate) {
                         if (topScore === 100) { medals.gold++; medalThisWeek = "🥇"; }
                         else if (topScore >= 80) { medals.silver++; medalThisWeek = "🥈"; }
@@ -212,6 +85,3 @@
 
     loadInventory();
 </script>
-
-</body>
-</html>
