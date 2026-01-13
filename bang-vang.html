@@ -9,31 +9,35 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.19.2/package/dist/xlsx.full.min.js"></script>
     <style>
-        :root { --primary: #4CAF50; --secondary: #2196F3; --bg: #f4f7f6; }
-        body { font-family: 'Lexend', sans-serif; background: var(--bg); margin: 0; }
+        :root { --primary: #4CAF50; --secondary: #2196F3; --bg: #f4f7f6; --dark: #2c3e50; }
+        body { font-family: 'Lexend', sans-serif; background: var(--bg); margin: 0; display: flex; flex-direction: column; min-height: 100vh; }
         header { background: white; padding: 1rem 5%; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; }
         .logo { font-size: 1.5rem; font-weight: bold; color: var(--primary); text-decoration: none; }
         .hero { text-align: center; padding: 40px 20px; background: linear-gradient(135deg, var(--secondary), #64B5F6); color: white; }
-        .admin-container { max-width: 1000px; margin: -30px auto 50px; padding: 0 20px; }
+        .admin-container { max-width: 1100px; margin: -30px auto 50px; padding: 0 20px; flex: 1; width: 100%; box-sizing: border-box; }
         .game-block { background: white; border-radius: 20px; box-shadow: 0 6px 20px rgba(0,0,0,0.05); margin-bottom: 30px; overflow: hidden; border: 1px solid #eee; }
         .game-header { padding: 20px; background: #fff; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--bg); }
-        .btn-excel { background: var(--primary); color: white; border: none; padding: 10px 18px; border-radius: 12px; cursor: pointer; font-family: 'Lexend'; font-weight: bold; }
-        table { width: 100%; border-collapse: collapse; }
+        .btn-excel { background: var(--primary); color: white; border: none; padding: 10px 18px; border-radius: 12px; cursor: pointer; font-family: 'Lexend'; font-weight: bold; transition: 0.3s; }
+        .btn-excel:hover { background: #388E3C; transform: scale(1.05); }
+        table { width: 100%; border-collapse: collapse; min-width: 800px; }
         th { text-align: left; padding: 15px; background: #f8f9fa; color: #7f8c8d; font-size: 0.85rem; text-transform: uppercase; }
         td { padding: 15px; border-bottom: 1px solid #f1f1f1; }
         .rank { width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: #f0f0f0; font-weight: bold; }
         tr:nth-child(1) .rank { background: #FFD700; color: white; }
         tr:nth-child(2) .rank { background: #C0C0C0; color: white; }
         tr:nth-child(3) .rank { background: #CD7F32; color: white; }
-        .score-badge { background: #E3F2FD; color: var(--secondary); padding: 6px 15px; border-radius: 20px; font-weight: bold; }
-        .time-badge { color: #e67e22; font-weight: bold; font-size: 0.9rem; }
+        .score-badge { background: #E3F2FD; color: var(--secondary); padding: 6px 15px; border-radius: 20px; font-weight: bold; white-space: nowrap; }
+        .time-badge { color: #e67e22; font-weight: bold; font-size: 0.9rem; white-space: nowrap; }
+        .attempt-badge { background: #fff3e0; color: #ef6c00; padding: 4px 10px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; border: 1px solid #ffe0b2; }
         .class-badge { background: #f1f1f1; padding: 4px 10px; border-radius: 5px; font-size: 0.9rem; color: #555; border: 1px solid #ddd; }
+        
+        footer { background: var(--dark); color: rgba(255,255,255,0.7); text-align: center; padding: 20px; font-size: 0.9rem; border-top: 4px solid var(--primary); }
     </style>
 </head>
 <body>
     <header>
         <a href="index.html" class="logo">EduRobot 🤖</a>
-        <nav><a href="index.html" style="text-decoration:none; color:#333;">Trang chủ</a></nav>
+        <nav><a href="index.html" style="text-decoration:none; color:#333; font-weight: 600;">Trang chủ</a></nav>
     </header>
 
     <section class="hero">
@@ -42,8 +46,12 @@
     </section>
 
     <main class="admin-container" id="main-content">
-        <p style="text-align:center; padding:50px; color: #666;">Đang tải dữ liệu từ hệ thống...</p>
+        <p style="text-align:center; padding:50px; color: #666;">Đang tải dữ liệu vinh danh...</p>
     </main>
+
+    <footer>
+        &copy; 2026 EduRobot - Lê Thành Long
+    </footer>
 
     <script>
         const firebaseConfig = {
@@ -56,7 +64,7 @@
         const db = firebase.database();
 
         function formatTime(seconds) {
-            if (!seconds) return "---";
+            if (!seconds || seconds === 9999) return "---";
             const m = Math.floor(seconds / 60);
             const s = seconds % 60;
             return m > 0 ? `${m}ph ${s}s` : `${s}s`;
@@ -65,7 +73,7 @@
         function exportExcel(id, name) {
             const table = document.getElementById('table-' + id);
             const wb = XLSX.utils.table_to_book(table);
-            XLSX.writeFile(wb, `KetQua_${name}.xlsx`);
+            XLSX.writeFile(wb, `BangVang_${name}.xlsx`);
         }
 
         db.ref('scores').on('value', (snap) => {
@@ -79,15 +87,13 @@
             }
 
             for (let gameId in data) {
-                // THAY ĐỔI LOGIC SẮP XẾP TẠI ĐÂY
+                // Sắp xếp: Điểm cao -> Thời gian ít -> Lần thi ít
                 let students = Object.values(data[gameId]).sort((a,b) => {
-                    // 1. So sánh điểm (Điểm cao đứng trước)
                     if(b.score !== a.score) return b.score - a.score;
-                    // 2. Nếu bằng điểm, so sánh thời gian (Ít giây hơn đứng trước)
-                    // Lưu ý: Nếu dữ liệu cũ không có duration, coi như cực lớn
                     let timeA = a.duration || 9999;
                     let timeB = b.duration || 9999;
-                    return timeA - timeB; 
+                    if(timeA !== timeB) return timeA - timeB;
+                    return (a.attempt || 1) - (b.attempt || 1);
                 });
 
                 let gameTitle = gameId.replace(/_/g, ' ');
@@ -95,7 +101,7 @@
                 let html = `
                     <div class="game-block">
                         <div class="game-header">
-                            <div style="font-size:1.2rem; font-weight:bold;">📊 ${gameTitle}</div>
+                            <div style="font-size:1.2rem; font-weight:bold; color:var(--dark)">📊 ${gameTitle}</div>
                             <button class="btn-excel" onclick="exportExcel('${gameId}', '${gameTitle}')">📄 Xuất Excel</button>
                         </div>
                         <div style="overflow-x: auto;">
@@ -107,6 +113,7 @@
                                         <th>Lớp</th>
                                         <th>Điểm</th>
                                         <th>Thời gian</th>
+                                        <th>Lần thi</th>
                                         <th>Ngày hoàn thành</th>
                                     </tr>
                                 </thead>
@@ -114,10 +121,11 @@
                                     ${students.map((s, i) => `
                                         <tr>
                                             <td><div class="rank">${i+1}</div></td>
-                                            <td><b>${s.fullName || "---"}</b></td>
+                                            <td><b>${s.fullName || s.name || "---"}</b></td>
                                             <td><span class="class-badge">${s.className || "---"}</span></td>
-                                            <td><span class="score-badge">${s.score} / 12</span></td>
+                                            <td><span class="score-badge">${s.score} / 100</span></td>
                                             <td><span class="time-badge">⏱ ${formatTime(s.duration)}</span></td>
+                                            <td><span class="attempt-badge">Lần ${s.attempt || 1}</span></td>
                                             <td style="font-size:0.85rem; color:#888">${s.date || "---"}</td>
                                         </tr>
                                     `).join('')}
