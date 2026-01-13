@@ -1,299 +1,138 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Hành Trình Xuyên Việt: EduRobot Toán 5</title>
-    <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Lexend:wght@400;700&display=swap" rel="stylesheet">
+<style>
+    /* CSS bổ sung để khóa vòng và làm hiệu ứng đẹp hơn */
+    .station.locked {
+        background: #444 !important;
+        border-color: #666 !important;
+        color: #888 !important;
+        cursor: not-allowed !important;
+        filter: grayscale(1);
+        opacity: 0.7;
+    }
     
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    .station.locked::after {
+        content: '🔒';
+        position: absolute;
+        font-size: 10px;
+        bottom: -12px;
+        left: 50%;
+        transform: translateX(-50%);
+    }
 
-    <style>
-        :root { 
-            --primary: #FF9800; 
-            --dark-green: #2e7d32; 
-            --gold: #ffd700; 
-            --bg-dark: #1a1a1a;
+    /* Màn hình đếm ngược chuyên nghiệp */
+    #countdown-overlay {
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.95);
+        display: none;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        color: white;
+        text-align: center;
+        padding: 20px;
+    }
+
+    .timer-box {
+        font-size: 2.5rem;
+        font-family: 'Bungee';
+        color: var(--gold);
+        margin: 20px 0;
+        text-shadow: 0 0 20px rgba(255,215,0,0.5);
+    }
+
+    .btn-close-cd {
+        background: var(--primary);
+        color: white;
+        border: none;
+        padding: 10px 30px;
+        border-radius: 50px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+</style>
+
+<div id="countdown-overlay">
+    <h2 style="font-family:'Bungee'; color:var(--primary);">CHƯA ĐẾN GIỜ THÁM HIỂM!</h2>
+    <p id="cd-msg">Vòng này đang được Robot bảo vệ, quay lại sau nhé!</p>
+    <div class="timer-box" id="timer-display">00:00:00:00</div>
+    <button class="btn-close-cd" onclick="closeCountdown()">ĐÃ HIỂU</button>
+</div>
+
+<script>
+    // Cập nhật lịch mở vòng chuẩn của thầy
+    const GAME_SCHEDULE = {
+        19: "2026-01-16T00:00:00",
+        20: "2026-01-23T00:00:00",
+        21: "2026-01-30T00:00:00",
+        22: "2026-02-06T00:00:00",
+        23: "2026-02-23T00:00:00"
+    };
+
+    let countdownInterval;
+
+    function handleStageClick(weekNo) {
+        if (!currentStudent) { setStudentName(); return; }
+
+        const now = new Date();
+        const openTime = new Date(GAME_SCHEDULE[weekNo] || "2026-12-31T00:00:00");
+
+        if (now >= openTime) {
+            // ĐÃ MỞ: Cho phép vào chơi
+            window.location.href = weekNo + ".html";
+        } else {
+            // CHƯA MỞ: Khóa và hiện đếm ngược
+            showCountdown(openTime);
         }
+    }
 
-        body {
-            margin: 0; padding: 0;
-            font-family: 'Lexend', sans-serif;
-            background-color: var(--bg-dark);
-            min-height: 100vh;
-            display: flex; flex-direction: column;
-            color: white;
-        }
+    function showCountdown(endTime) {
+        const overlay = document.getElementById('countdown-overlay');
+        const display = document.getElementById('timer-display');
+        overlay.style.display = 'flex';
 
-        /* BANNER */
-        .welcome-banner {
-            background: linear-gradient(90deg, #1a1a1a, #333, #1a1a1a);
-            padding: 10px;
-            display: flex; justify-content: center; align-items: center;
-            gap: 15px; border-bottom: 2px solid var(--primary);
-        }
-        .welcome-text {
-            font-family: 'Bungee', cursive;
-            font-size: clamp(1rem, 5vw, 1.8rem); color: white;
-            text-shadow: 2px 2px 0px var(--primary);
-            margin: 0; text-align: center;
-        }
-        .robot-head-top { width: 40px; height: auto; }
+        if(countdownInterval) clearInterval(countdownInterval);
 
-        /* HEADER */
-        .game-header {
-            background: #222; padding: 10px 15px;
-            display: flex; justify-content: space-between; align-items: center;
-            border-bottom: 1px solid #333;
-        }
+        countdownInterval = setInterval(() => {
+            const now = new Date().getTime();
+            const distance = endTime.getTime() - now;
 
-        /* MAIN CONTENT - RESPONSIVE GRID */
-        .game-content-wrapper { 
-            display: flex; flex-direction: row; 
-            gap: 15px; padding: 15px; flex: 1; 
-        }
-
-        @media (max-width: 900px) {
-            .game-content-wrapper { flex-direction: column; }
-        }
-
-        /* MAP AREA */
-        .map-container {
-            flex: 7; position: relative; 
-            background: #2c2c2c; border-radius: 15px; padding: 10px;
-            box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
-            overflow: hidden;
-        }
-        .map-relative-box { 
-            position: relative; width: 100%; 
-            margin: 0 auto;
-        }
-        .map-image { width: 100%; height: auto; display: block; border-radius: 10px; }
-
-        /* TRẠM DỪNG & ĐỊA DANH */
-        .station {
-            position: absolute; width: 6%; aspect-ratio: 1/1;
-            background: white; border: 2px solid var(--dark-green);
-            border-radius: 50%; display: flex; justify-content: center; align-items: center;
-            font-weight: bold; color: var(--dark-green);
-            font-size: clamp(8px, 2vw, 16px); z-index: 10; cursor: pointer;
-        }
-        
-        .station.locked {
-            background: #444 !important; border-color: #666 !important;
-            color: #888 !important; opacity: 0.8;
-        }
-
-        .landmark-tag {
-            position: absolute; background: rgba(0, 0, 0, 0.7);
-            color: var(--gold); padding: 2px 6px; border-radius: 10px;
-            font-size: clamp(7px, 1.5vw, 14px); border: 1px solid var(--gold); 
-            pointer-events: none; white-space: nowrap;
-        }
-
-        /* SIDEBAR / LEADERBOARD */
-        .leaderboard-sidebar {
-            flex: 3; background: #222; border: 2px solid var(--primary);
-            border-radius: 15px; padding: 15px;
-        }
-        .leaderboard-title { color: var(--gold); text-align: center; font-family: 'Bungee'; font-size: 1rem; margin-bottom: 10px; }
-        table { width: 100%; border-collapse: collapse; }
-        th { background: var(--primary); color: #000; padding: 8px; font-size: 0.75rem; }
-        td { padding: 8px; border-bottom: 1px solid #333; text-align: center; font-size: 0.8rem; }
-
-        /* FOOTER NỔI TRÊN ĐIỆN THOẠI */
-        .game-footer {
-            background: #222; padding: 10px; 
-            border-top: 3px solid var(--primary);
-            position: sticky; bottom: 0; z-index: 1000;
-        }
-        .footer-buttons { 
-            display: grid; grid-template-columns: repeat(2, 1fr); 
-            gap: 8px; width: 100%; max-width: 600px; margin: 0 auto;
-        }
-        @media (min-width: 600px) {
-            .footer-buttons { display: flex; flex-direction: row; justify-content: center; }
-        }
-
-        .btn-nav {
-            background: #333; border: 2px solid var(--primary); color: var(--primary); 
-            padding: 10px; border-radius: 8px; font-size: 0.8rem; font-weight: bold;
-            display: flex; align-items: center; justify-content: center; gap: 5px; 
-            text-decoration: none; cursor: pointer;
-        }
-
-        /* TỌA ĐỘ CHUẨN (Tính theo %) */
-        #st-19 { top: 2%; left: 40%; }    #tag-19 { top: 2%; left: 47%; }
-        #st-20 { top: 8%; left: 45%; }
-        #st-21 { top: 10%; left: 23%; }
-        #st-22 { top: 12%; left: 40%; }  #tag-22 { top: 15%; left: 47%; }
-        #st-23 { top: 17%; left: 54%; }
-        #st-24 { top: 27%; left: 44%; }
-        #st-25 { top: 38%; left: 52%; }  #tag-25 { top: 44%; left: 58%; }
-        #st-26 { top: 46%; left: 63%; }
-        #st-27 { top: 54%; left: 70%; }
-        #st-28 { top: 62%; left: 73%; }
-        #st-29 { top: 70%; left: 74%; }
-        #st-30 { top: 78%; left: 61%; }  #tag-30 { top: 82%; left: 50%; }
-        #st-31 { top: 79%; left: 50%; }
-        #st-32 { top: 80%; left: 35%; }
-        #st-33 { top: 89%; left: 35%; }  #tag-33 { top: 92%; left: 42%; }
-    </style>
-</head>
-<body>
-
-    <div class="welcome-banner">
-        <h1 class="welcome-text">THÁM HIỂM VIỆT NAM</h1>
-        <img src="robot-head.png" alt="Robot" class="robot-head-top">
-    </div>
-
-    <header class="game-header">
-        <div style="display:flex; align-items:center; gap:8px;">
-            <div onclick="setStudentName()" style="width:25px; height:25px; border-radius:50%; background:var(--gold); border:2px solid #fff; cursor:pointer;"></div>
-            <div>
-                <span style="font-size:0.7rem; color:#ccc; display:block;">NHÀ THÁM HIỂM</span>
-                <span id="user-lv" style="font-size:0.8rem; font-weight:bold; color:var(--gold);">Khách</span>
-            </div>
-        </div>
-        <div style="text-align:right;">
-            <span style="font-size:0.7rem; color:#ccc; display:block;">KỶ LỤC LỚP</span>
-            <span id="high-score" style="font-size:0.9rem; color:var(--primary); font-weight:bold;">0</span>
-        </div>
-    </header>
-
-    <main class="game-content-wrapper">
-        <div class="map-container">
-            <div class="map-relative-box">
-                <img src="Bandogame.jpg" alt="Bản đồ" class="map-image">
-                <div class="landmark-tag" id="tag-19">📍 Lũng Cú</div>
-                <div class="landmark-tag" id="tag-22">🏛️ Hà Nội</div>
-                <div class="landmark-tag" id="tag-25">🕌 Huế</div>
-                <div class="landmark-tag" id="tag-30">🏢 TP.HCM</div>
-                <div class="landmark-tag" id="tag-33">🛶 Cà Mau</div>
-
-                <div class="station" id="st-19" onclick="handleStageClick(19)">19</div>
-                <div class="station" id="st-20" onclick="handleStageClick(20)">20</div>
-                <div class="station" id="st-21" onclick="handleStageClick(21)">21</div>
-                <div class="station" id="st-22" onclick="handleStageClick(22)">22</div>
-                <div class="station" id="st-23" onclick="handleStageClick(23)">23</div>
-                <div class="station" id="st-24" onclick="handleStageClick(24)">24</div>
-                <div class="station" id="st-25" onclick="handleStageClick(25)">25</div>
-                <div class="station" id="st-26" onclick="handleStageClick(26)">26</div>
-                <div class="station" id="st-27" onclick="handleStageClick(27)">27</div>
-                <div class="station" id="st-28" onclick="handleStageClick(28)">28</div>
-                <div class="station" id="st-29" onclick="handleStageClick(29)">29</div>
-                <div class="station" id="st-30" onclick="handleStageClick(30)">30</div>
-                <div class="station" id="st-31" onclick="handleStageClick(31)">31</div>
-                <div class="station" id="st-32" onclick="handleStageClick(32)">32</div>
-                <div class="station" id="st-33" onclick="handleStageClick(33)">33</div>
-            </div>
-        </div>
-
-        <section class="leaderboard-sidebar">
-            <h3 class="leaderboard-title">🏆 BẢNG VÀNG TOP 10</h3>
-            <div style="max-height: 300px; overflow-y: auto;">
-                <table>
-                    <thead>
-                        <tr><th>Hạng</th><th>Tên</th><th>Điểm</th></tr>
-                    </thead>
-                    <tbody id="leaderboard-body-list">
-                        <tr><td colspan="3">Đang tải...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </section>
-    </main>
-
-    <footer class="game-footer">
-        <div class="footer-buttons">
-            <a href="tuido.html" class="btn-nav">🎒 TÚI ĐỒ</a>
-            <a href="bang-vang.html" class="btn-nav" style="color:var(--gold); border-color:var(--gold);">🏆 BẢNG VÀNG</a>
-            <button class="btn-nav" onclick="setStudentName()">👤 ĐỔI TÊN</button>
-            <button class="btn-nav" onclick="clearData()">⚙️ THOÁT</button>
-        </div>
-        <div style="text-align:center; font-size:0.7rem; margin-top:10px; opacity:0.7;">
-            &copy; 2025 EduRobot - Lê Thành Long
-        </div>
-    </footer>
-
-    <script>
-        // Cấu hình Firebase
-        const firebaseConfig = {
-            apiKey: "AIzaSyC6zlWn8BKYU7P6A2-PYq6IIWOzaqJWFhc",
-            authDomain: "gamhoctap.firebaseapp.com",
-            databaseURL: "https://gamhoctap-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "gamhoctap"
-        };
-        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-
-        // Lịch mở tuần
-        const GAME_SCHEDULE = {
-            19: "2026-01-16", 20: "2026-01-23", 21: "2026-01-30", 22: "2026-02-06", 23: "2026-02-23"
-        };
-
-        let currentStudent = localStorage.getItem('studentName');
-
-        window.onload = function() {
-            if (currentStudent) document.getElementById('user-lv').innerText = currentStudent;
-            updateStationStyles();
-        };
-
-        function setStudentName() {
-            const name = prompt("🤖 Nhập Họ và Tên của em:");
-            if (name && name.trim().length > 2) {
-                localStorage.setItem('studentName', name.trim());
-                location.reload();
-            }
-        }
-
-        function clearData() {
-            if(confirm("Đăng xuất?")) { localStorage.removeItem('studentName'); location.reload(); }
-        }
-
-        function handleStageClick(weekNo) {
-            if (!currentStudent) { setStudentName(); return; }
-            
-            const now = new Date();
-            const openDate = new Date(GAME_SCHEDULE[weekNo] || "2026-06-01" + "T00:00:00");
-
-            if (now >= openDate) {
-                window.location.href = weekNo + ".html";
-            } else {
-                alert("Vòng thi này sẽ mở vào ngày: " + openDate.toLocaleDateString('vi-VN'));
-            }
-        }
-
-        function updateStationStyles() {
-            const now = new Date();
-            Object.keys(GAME_SCHEDULE).forEach(week => {
-                const openDate = new Date(GAME_SCHEDULE[week] + "T00:00:00");
-                const el = document.getElementById(`st-${week}`);
-                if (el && now < openDate) el.classList.add('locked');
-            });
-        }
-
-        // Tải bảng vàng
-        db.ref('scores').limitToLast(100).on('value', (snapshot) => {
-            const data = snapshot.val();
-            const tbody = document.getElementById('leaderboard-body-list');
-            if (!data) return;
-            let list = [];
-            for (let week in data) for (let id in data[week]) list.push(data[week][id]);
-            list.sort((a, b) => b.score - a.score);
-            
-            // Lọc trùng tên
-            const unique = []; const seen = new Set();
-            for (const item of list) {
-                if (!seen.has(item.name)) { unique.push(item); seen.add(item.name); }
+            if (distance < 0) {
+                clearInterval(countdownInterval);
+                location.reload(); // Tự động mở khóa khi hết giờ
+                return;
             }
 
-            tbody.innerHTML = unique.slice(0, 10).map((s, i) => `
-                <tr><td>${i+1}</td><td style="text-align:left">${s.name}</td><td>${s.score}</td></tr>
-            `).join('');
-            if(unique.length > 0) document.getElementById('high-score').innerText = unique[0].score;
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            display.innerHTML = `${days}d : ${hours}h : ${minutes}m : ${seconds}s`;
+        }, 1000);
+    }
+
+    function closeCountdown() {
+        document.getElementById('countdown-overlay').style.display = 'none';
+        clearInterval(countdownInterval);
+    }
+
+    function updateStationStyles() {
+        const now = new Date();
+        Object.keys(GAME_SCHEDULE).forEach(week => {
+            const openTime = new Date(GAME_SCHEDULE[week]);
+            const el = document.getElementById(`st-${week}`);
+            if (el) {
+                if (now < openTime) {
+                    el.classList.add('locked');
+                    el.title = "Chưa đến ngày mở";
+                } else {
+                    el.classList.remove('locked');
+                }
+            }
         });
-    </script>
-</body>
-</html>
+    }
+
+    // Gọi hàm cập nhật khi tải trang
+    updateStationStyles();
+</script>
