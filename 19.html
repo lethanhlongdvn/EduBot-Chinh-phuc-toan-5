@@ -1,83 +1,12 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tuần 19: Bản Đồ Kho Báu - EduRobot</title>
-    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;600;700&display=swap" rel="stylesheet">
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-
-    <style>
-        :root { --parchment: #f4e4bc; --ink: #2c3e50; --gold: #c6930a; --ocean: #2980b9; --red: #e74c3c; }
-        body { font-family: 'Lexend', sans-serif; margin: 0; padding: 20px; background: #1a1a2e; color: var(--ink); display: flex; flex-direction: column; align-items: center; min-height: 100vh; position: relative; padding-bottom: 100px; }
-        .stage-banner { background: var(--gold); color: white; padding: 12px 35px; border-radius: 50px; font-weight: 700; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); border: 2px solid #fff; text-transform: uppercase; letter-spacing: 1px; font-size: 1.2rem; }
-        .map-frame { max-width: 750px; width: 100%; background: var(--parchment); padding: 30px; border-radius: 15px; border: 10px solid #8e735b; box-shadow: 0 0 40px rgba(0,0,0,0.6); position: relative; background-image: url('https://www.transparenttextures.com/patterns/parchment.png'); }
-        .status-header { display: flex; justify-content: space-between; margin-bottom: 20px; font-weight: 700; color: #5e412f; border-bottom: 2px dashed #8e735b; padding-bottom: 10px; }
-        .question-box { background: rgba(255, 255, 255, 0.5); border-radius: 12px; padding: 25px; margin-bottom: 25px; min-height: 100px; border: 1px solid #d4b996; font-size: 1.2rem; line-height: 1.6; text-align: center; font-weight: 600; }
-        .options-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .btn-opt { background: #fff; border: 2px solid #8e735b; padding: 15px; border-radius: 10px; font-family: 'Lexend'; font-weight: 600; cursor: pointer; transition: 0.2s; font-size: 1rem; color: #2c3e50; }
-        .btn-opt:hover { background: var(--gold); color: white; transform: translateY(-2px); }
-        .input-area { display: flex; flex-direction: column; align-items: center; gap: 15px; }
-        .input-ans { padding: 15px; width: 250px; font-size: 1.3rem; border: 3px solid var(--gold); border-radius: 10px; text-align: center; font-family: 'Lexend'; outline: none; }
-        .btn-submit { background: var(--ocean); color: white; padding: 12px 40px; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 1.1rem; }
-        #toast { position: fixed; top: -100px; left: 50%; transform: translateX(-50%); padding: 15px 40px; border-radius: 50px; color: white; font-weight: bold; z-index: 10000; transition: 0.5s; pointer-events: none; }
-        .show-toast { top: 50px !important; }
-        .hidden { display: none !important; }
-        .btn-final { background: var(--ocean); color: white; padding: 15px 30px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 1.1rem; }
-        #start-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1a1a2e; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; }
-    </style>
-</head>
-<body>
-
-<div id="start-screen">
-    <h1 style="color: #c6930a; font-size: 2rem; text-align: center; margin-bottom: 30px;">TOÁN 5 - TUẦN 19: BẢN ĐỒ KHO BÁU</h1>
-    <p style="color: white; margin-bottom: 20px;">Vượt qua 10 thử thách để đạt 100 điểm!</p>
-    <button class="btn-final" onclick="startGame()" style="padding: 20px 60px; font-size: 1.5rem;">BẮT ĐẦU</button>
-</div>
-
-<audio id="sound-correct" src="https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3" preload="auto"></audio>
-<audio id="sound-wrong" src="https://assets.mixkit.co/active_storage/sfx/2003/2003-preview.mp3" preload="auto"></audio>
-
-<div id="vong-banner" class="stage-banner">VÒNG 1: KHÁM PHÁ</div>
-
-<div class="status-header" style="width: 100%; max-width: 750px; color: #f1c40f; font-size: 1.2rem;">
-    <span>ĐIỂM: <span id="diem-nhan">0</span> / 100</span>
-    <span id="mang-song">SỐ LẦN SAI CÒN LẠI: ❤️❤️❤️</span>
-</div>
-
-<div class="map-frame">
-    <div id="ui-choi">
-        <div class="status-header">
-            <span id="cau-so">CÂU 1/4</span>
-            <span id="vong-label">VÒNG 1</span>
-        </div>
-        <div class="question-box" id="noi-dung-cau-hoi">Đang tải câu hỏi...</div>
-        <div id="khu-vuc-dap-an"></div>
-    </div>
-
-    <div id="ui-ket-thuc" class="hidden" style="text-align: center;">
-        <h2 id="title-finish">KẾT THÚC!</h2>
-        <h1 id="diem-cuoi" style="font-size: 4rem; color: var(--gold); margin: 10px 0;">0</h1>
-        <p id="msg-finish" style="font-weight: bold; margin-bottom: 20px;"></p>
-        
-        <div id="form-dang-ky" class="hidden">
-            <input type="text" id="ten-hs" style="width:80%; padding:15px; margin:5px; border-radius:8px; border:1px solid #ccc;" placeholder="Họ và tên học sinh...">
-            <input type="text" id="lop-hs" style="width:80%; padding:15px; margin:5px; border-radius:8px; border:1px solid #ccc;" placeholder="Lớp (Ví dụ: 5A1)...">
-            <button class="btn-final" style="width:85%; margin-top:10px;" onclick="saveResult()">LƯU KẾT QUẢ & VỀ TRANG CHỦ</button>
-        </div>
-        
-        <button id="btn-retry" class="btn-final" style="background:#7f8c8d; margin-top:10px;" onclick="location.reload()">THỬ THÁCH LẠI</button>
-    </div>
-</div>
-
-<div id="toast">Thông báo</div>
-
 <script>
-    const firebaseConfig = { databaseURL: "https://gamhoctap-default-rtdb.asia-southeast1.firebasedatabase.app" };
+    // 1. Cấu hình Firebase
+    const firebaseConfig = { 
+        databaseURL: "https://gamhoctap-default-rtdb.asia-southeast1.firebasedatabase.app" 
+    };
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
+    // 2. Kho dữ liệu câu hỏi (Ngân hàng đề)
     const DATA = {
         V1: [
             {q: "Tỉ số của 7 hang đá và 10 rừng cây là:", opts: ["10:7", "7:10", "7:17", "10:17"], c: 1},
@@ -109,6 +38,11 @@
 
     let score = 0, lives = 3, stage = 1, qIdx = 0, pool = [], startTime;
 
+    // Hàm xáo trộn mảng để lấy ngẫu nhiên
+    function shuffle(array) {
+        return array.sort(() => Math.random() - 0.5);
+    }
+
     function startGame() {
         document.getElementById('start-screen').classList.add('hidden');
         startTime = Date.now();
@@ -118,21 +52,20 @@
     function initStage(s) {
         stage = s; qIdx = 0;
         const b = document.getElementById('vong-banner');
-        const l = document.getElementById('vong-label');
+        
+        // Lấy ngẫu nhiên số lượng câu hỏi theo yêu cầu
         if(s === 1) { 
-            b.innerText = "VÒNG 1: KHÁM PHÁ"; l.innerText = "VÒNG 1"; 
-            pool = shuffle([...DATA.V1]).slice(0, 4); // 4 câu
+            b.innerText = "VÒNG 1: KHÁM PHÁ"; 
+            pool = shuffle([...DATA.V1]).slice(0, 4); // Lấy 4 từ 8
         } else if(s === 2) { 
-            b.innerText = "VÒNG 2: LUYỆN TẬP"; l.innerText = "VÒNG 2"; 
-            pool = shuffle([...DATA.V2]).slice(0, 4); // 4 câu
+            b.innerText = "VÒNG 2: LUYỆN TẬP"; 
+            pool = shuffle([...DATA.V2]).slice(0, 4); // Lấy 4 từ 8
         } else { 
-            b.innerText = "VÒNG 3: VỀ ĐÍCH"; l.innerText = "VÒNG 3"; 
-            pool = shuffle([...DATA.V3]).slice(0, 2); // 2 câu -> Tổng là 10 câu
+            b.innerText = "VÒNG 3: VỀ ĐÍCH"; 
+            pool = shuffle([...DATA.V3]).slice(0, 2); // Lấy 2 từ 4
         }
         showQ();
     }
-
-    function shuffle(a) { return a.sort(() => Math.random() - 0.5); }
 
     function showQ() {
         let item = pool[qIdx];
@@ -160,34 +93,30 @@
     }
 
     function checkTL() {
-        const userAns = document.getElementById('ans-input').value.trim();
-        if(!userAns) return;
-        check(userAns === pool[qIdx].ans);
+        const val = document.getElementById('ans-input').value.trim();
+        if(val) check(val === pool[qIdx].ans);
     }
 
     function check(isCorrect) {
         if(isCorrect) {
-            score += 10; // CẬP NHẬT: 10 ĐIỂM MỖI CÂU
+            score += 10;
             document.getElementById('diem-nhan').innerText = score;
-            showToast("CHÍNH XÁC! +10đ 🌟", "#27ae60");
+            showToast("ĐÚNG RỒI! +10đ", "#27ae60");
             document.getElementById('sound-correct').play();
         } else {
             lives--;
             document.getElementById('mang-song').innerText = "SỐ LẦN SAI CÒN LẠI: " + "❤️".repeat(lives);
-            showToast("CHƯA ĐÚNG! ❌", "#e74c3c");
+            showToast("SAI RỒI! ❌", "#e74c3c");
             document.getElementById('sound-wrong').play();
-            if(lives <= 0) { finishGame("CẦN CỐ GẮNG HƠN!"); return; }
+            if(lives <= 0) return finishGame("BẠN HẾT LƯỢT RỒI!");
         }
         
         qIdx++;
         if(qIdx < pool.length) {
             setTimeout(showQ, 800);
         } else {
-            if(stage < 3) {
-                setTimeout(() => initStage(stage + 1), 1000);
-            } else {
-                setTimeout(() => finishGame("HOÀN THÀNH XUẤT SẮC!"), 1000);
-            }
+            if(stage < 3) setTimeout(() => initStage(stage + 1), 1000);
+            else setTimeout(() => finishGame("XUẤT SẮC HOÀN THÀNH!"), 1000);
         }
     }
 
@@ -212,20 +141,29 @@
     function saveResult() {
         const name = document.getElementById('ten-hs').value.trim();
         const lop = document.getElementById('lop-hs').value.trim();
-        if(!name || !lop) return alert("Em nhập tên và lớp để lưu điểm nhé!");
+        if(!name || !lop) return alert("Em nhập đầy đủ thông tin nhé!");
 
         const duration = Math.floor((Date.now() - startTime) / 1000);
-        db.ref('scores/Tuan_19').push({
-            fullName: name,
-            className: lop,
-            score: score,
-            duration: duration,
-            date: new Date().toLocaleString('vi-VN')
-        }, () => {
-            alert("Lưu điểm thành công!");
-            window.location.href = "index.html";
+        const ref = db.ref('scores/Tuan_19');
+
+        ref.once('value', (snap) => {
+            let attemptCount = 1;
+            if(snap.exists()){
+                const data = snap.val();
+                attemptCount = Object.values(data).filter(i => (i.fullName || i.name) === name).length + 1;
+            }
+
+            ref.push({
+                fullName: name,
+                className: lop,
+                score: score,
+                duration: duration,
+                attempt: attemptCount,
+                date: new Date().toLocaleString('vi-VN')
+            }, () => {
+                alert(`Lưu thành công lần thi thứ ${attemptCount}!`);
+                window.location.href = "index.html";
+            });
         });
     }
 </script>
-</body>
-</html>
