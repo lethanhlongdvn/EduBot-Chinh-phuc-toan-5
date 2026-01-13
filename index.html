@@ -59,9 +59,12 @@
             font-weight: bold; color: var(--dark-green);
             font-size: clamp(8px, 1.6vw, 16px); z-index: 10; cursor: pointer; transition: 0.2s;
         }
+        
+        /* Hiệu ứng khi bị khóa */
         .station.locked {
             background: #333 !important; border-color: #555 !important;
             color: #777 !important; opacity: 0.6; filter: grayscale(1);
+            pointer-events: auto; /* Vẫn cho click để hiện thông báo/đếm ngược */
         }
         .station.locked::after { 
             content: '🔒'; position: absolute; font-size: 10px; bottom: -12px; 
@@ -94,7 +97,6 @@
         }
         .timer-box { font-size: clamp(1.5rem, 8vw, 3rem); font-family: 'Bungee'; color: #00FF00; margin: 20px 0; }
         
-        /* Nút Đã hiểu riêng biệt để không bị dài dọc */
         .btn-understand {
             background: var(--primary); color: white; border: none;
             padding: 12px 30px; border-radius: 10px; font-weight: bold;
@@ -102,7 +104,7 @@
             min-width: 120px; transition: 0.2s;
         }
 
-        /* CHÂN TRANG - HIỆN 1 DÒNG TRÊN MOBILE */
+        /* CHÂN TRANG */
         .game-footer { background: #222; padding: 10px 5px; border-top: 3px solid var(--primary); position: sticky; bottom: 0; z-index: 1000; }
         .footer-buttons { 
             display: flex; justify-content: center; gap: 4px; 
@@ -112,7 +114,7 @@
             flex: 1; background: #333; border: 1px solid var(--primary); 
             color: var(--primary); padding: 8px 1px; border-radius: 8px; 
             font-weight: bold; text-decoration: none; text-align: center; 
-            font-size: clamp(0.55rem, 2.4vw, 0.8rem); /* Chữ nhỏ lại để vừa 1 dòng */
+            font-size: clamp(0.55rem, 2.4vw, 0.8rem);
             cursor: pointer; display: flex; align-items: center; justify-content: center; 
             gap: 2px; white-space: nowrap;
         }
@@ -195,8 +197,8 @@
     </main>
 
     <div id="countdown-overlay">
-        <h2 style="font-family:'Bungee'; color:var(--gold);">VÒNG THI CHƯA MỞ</h2>
-        <p>Robot đang chuẩn bị dữ liệu thám hiểm!</p>
+        <h2 id="overlay-title" style="font-family:'Bungee'; color:var(--gold);">VÒNG THI CHƯA MỞ</h2>
+        <p id="overlay-msg">Robot đang chuẩn bị dữ liệu thám hiểm!</p>
         <div class="timer-box" id="timer-display">00:00:00:00</div>
         <button class="btn-understand" onclick="closeCountdown()">ĐÃ HIỂU</button>
     </div>
@@ -245,8 +247,8 @@
         };
 
         function setStudentName() {
-            const name = prompt("🤖 Nhập Tên của em:");
-            if (name && name.trim().length > 3) {
+            const name = prompt("🤖 Nhập Tên của em để bắt đầu thám hiểm:");
+            if (name && name.trim().length >= 2) {
                 localStorage.setItem('studentName', name.trim());
                 location.reload();
             }
@@ -255,11 +257,27 @@
         function clearData() { if(confirm("Đăng xuất tài khoản?")) { localStorage.removeItem('studentName'); location.reload(); } }
 
         function handleStageClick(weekNo) {
-            if (!currentStudent) { setStudentName(); return; }
+            // ĐIỀU KIỆN 1: Nếu chưa đăng nhập, chỉ cho phép nhấn tuần 19
+            if (!currentStudent && weekNo > 19) {
+                document.getElementById('overlay-title').innerText = "VÒNG THI ĐANG KHÓA";
+                document.getElementById('overlay-msg').innerText = "Em cần nhập tên để mở khóa các trạm thám hiểm tiếp theo!";
+                document.getElementById('timer-display').innerText = "Vui lòng Nhập Tên";
+                document.getElementById('countdown-overlay').style.display = 'flex';
+                return;
+            }
+
+            // Nếu chưa đăng nhập nhưng click tuần 19, vẫn cho vào bình thường (để học sinh thi rồi mới lưu tên)
+            
             const now = new Date();
             const openTime = new Date(GAME_SCHEDULE[weekNo] || "2026-12-31T14:00:00");
-            if (now >= openTime) { window.location.href = weekNo + ".html"; } 
-            else { showCountdown(openTime); }
+            
+            if (now >= openTime) { 
+                window.location.href = weekNo + ".html"; 
+            } else { 
+                document.getElementById('overlay-title').innerText = "VÒNG THI CHƯA MỞ";
+                document.getElementById('overlay-msg').innerText = "Robot đang chuẩn bị dữ liệu thám hiểm!";
+                showCountdown(openTime); 
+            }
         }
 
         function showCountdown(endTime) {
@@ -284,7 +302,15 @@
                 const el = document.getElementById(`st-${i}`);
                 if (el) {
                     const openTime = new Date(GAME_SCHEDULE[i] || "2026-12-31T14:00:00");
-                    if (now < openTime) el.classList.add('locked');
+                    
+                    // ĐIỀU KIỆN KHÓA: 
+                    // 1. Chưa đến giờ mở 
+                    // 2. HOẶC (Chưa đăng nhập VÀ tuần đó lớn hơn 19)
+                    if (now < openTime || (!currentStudent && i > 19)) {
+                        el.classList.add('locked');
+                    } else {
+                        el.classList.remove('locked');
+                    }
                 }
             }
         }
