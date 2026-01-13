@@ -35,8 +35,6 @@
         /* Kết thúc */
         #ui-ket-thuc { padding: 50px 20px; }
         .final-score { font-size: 4rem; color: var(--p); margin: 20px 0; }
-        .form-box { background: white; color: #333; padding: 30px; border-radius: 20px; max-width: 400px; margin: 0 auto; }
-        .form-box input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-family: 'Lexend'; }
         
         .hidden { display: none; }
         #toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); padding: 15px 30px; border-radius: 50px; font-weight: bold; z-index: 1000; display: none; }
@@ -51,8 +49,8 @@
 <div class="container">
     <div id="start-screen">
         <h1 style="color: var(--p); font-size: 2.5rem;">🤖 THÁM HIỂM VIỆT NAM</h1>
-        <p>Thử thách kiến thức về Tỉ số - Tỉ lệ bản đồ - Tỉ số phần trăm</p>
-        <button class="btn-start" onclick="startGame()">BẮT ĐẦU THI</button>
+        <p id="welcome-msg">Đang chuẩn bị hành trình...</p>
+        <button class="btn-start" id="btn-start-trigger" onclick="startGame()">BẮT ĐẦU THI</button>
     </div>
 
     <div id="ui-choi" class="game-ui hidden">
@@ -65,20 +63,13 @@
         
         <div class="question-box" id="noi-dung-cau-hoi">Đang tải câu hỏi...</div>
         
-        <div id="khu-vuc-dap-an">
-            </div>
+        <div id="khu-vuc-dap-an"></div>
     </div>
 
     <div id="ui-ket-thuc" class="hidden">
         <h1 id="title-finish">HOÀN THÀNH!</h1>
         <div class="final-score" id="diem-cuoi">0 / 100</div>
-        
-        <div class="form-box" id="form-dang-ky">
-            <h3 style="margin-top:0">Lưu kết quả vào Bảng Vàng</h3>
-            <input type="text" id="ten-hs" placeholder="Nhập họ và tên...">
-            <input type="text" id="lop-hs" placeholder="Nhập lớp (VD: 5/4)...">
-            <button class="btn-start" style="font-size: 1.1rem; padding: 12px; width:100%" onclick="saveResult()">LƯU ĐIỂM</button>
-        </div>
+        <p id="save-status" style="color: var(--s);">Đang tự động lưu điểm...</p>
     </div>
 </div>
 
@@ -87,13 +78,25 @@
 
 <script>
     // 1. CẤU HÌNH FIREBASE
-    const firebaseConfig = { 
-        databaseURL: "https://gamhoctap-default-rtdb.asia-southeast1.firebasedatabase.app" 
-    };
+    const firebaseConfig = { databaseURL: "https://gamhoctap-default-rtdb.asia-southeast1.firebasedatabase.app" };
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // 2. NGÂN HÀNG CÂU HỎI
+    // LẤY THÔNG TIN ĐÃ LƯU TỪ TRANG CHỦ
+    const savedName = localStorage.getItem('studentName');
+    const savedClass = localStorage.getItem('studentClass');
+
+    window.onload = function() {
+        if (!savedName || !savedClass) {
+            document.getElementById('welcome-msg').innerHTML = "<b style='color:red'>⚠️ Em cần nhập tên ở trang chủ trước!</b>";
+            document.getElementById('btn-start-trigger').innerText = "VỀ TRANG CHỦ";
+            document.getElementById('btn-start-trigger').onclick = () => window.location.href = "index.html";
+        } else {
+            document.getElementById('welcome-msg').innerText = `Chào thám hiểm: ${savedName} (Lớp ${savedClass})`;
+        }
+    };
+
+    // 2. NGÂN HÀNG CÂU HỎI (GIỮ NGUYÊN)
     const DATA = {
         V1: [
             {q: "Tỉ số của 7 hang đá và 10 rừng cây là:", opts: ["10:7", "7:10", "7:17", "10:17"], c: 1},
@@ -201,43 +204,26 @@
         setTimeout(() => t.classList.remove('show-toast'), 1500);
     }
 
+    // TỰ ĐỘNG LƯU ĐIỂM
     function finishGame(title) {
         document.getElementById('ui-choi').classList.add('hidden');
         document.getElementById('ui-ket-thuc').classList.remove('hidden');
         document.getElementById('title-finish').innerText = title;
         document.getElementById('diem-cuoi').innerText = score + " / 100";
         
-        const savedName = localStorage.getItem('studentName');
-        if(savedName) document.getElementById('ten-hs').value = savedName;
-    }
-
-    function saveResult() {
-        const name = document.getElementById('ten-hs').value.trim();
-        const lop = document.getElementById('lop-hs').value.trim();
-        if(!name || !lop) return alert("Nhập đủ tên và lớp nhé!");
-
-        localStorage.setItem('studentName', name);
         const duration = Math.floor((Date.now() - startTime) / 1000);
         const ref = db.ref('scores/Tuan_19');
 
-        ref.once('value', (snap) => {
-            let attemptCount = 1;
-            if(snap.exists()){
-                const data = snap.val();
-                attemptCount = Object.values(data).filter(i => (i.fullName || i.name) === name).length + 1;
-            }
-
-            ref.push({
-                fullName: name,
-                className: lop,
-                score: score,
-                duration: duration,
-                attempt: attemptCount,
-                date: new Date().toLocaleString('vi-VN')
-            }, () => {
-                alert(`Lưu thành công lần thi thứ ${attemptCount}!`);
-                window.location.href = "index.html";
-            });
+        ref.push({
+            fullName: savedName,
+            className: savedClass,
+            score: score,
+            duration: duration,
+            date: new Date().toLocaleString('vi-VN'),
+            timestamp: firebase.database.ServerValue.TIMESTAMP
+        }, () => {
+            document.getElementById('save-status').innerText = "✅ Đã lưu điểm thành công! Đang quay lại bản đồ...";
+            setTimeout(() => { window.location.href = "index.html"; }, 3000);
         });
     }
 </script>
