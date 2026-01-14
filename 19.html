@@ -15,21 +15,22 @@
         .status-bar { display: flex; justify-content: space-between; margin-bottom: 10px; font-weight: bold; width: 100%; color: var(--p); font-size: 0.9rem; }
         .screen { background: #f8f9fa; border-radius: 12px; padding: 15px; margin-bottom: 15px; color: #1e272e; border: 4px solid #bdc3c7; box-shadow: 0 8px 20px rgba(0,0,0,0.5); }
         
-        /* VÒNG 1: GHÉP ĐÔI - Tối ưu chiều cao ô */
+        /* VÒNG 1: GHÉP ĐÔI */
         .matching-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
-        .match-card { background: var(--card); color: white; padding: 5px; border-radius: 6px; cursor: pointer; border: 2px solid transparent; font-size: 0.75rem; display: flex; align-items: center; justify-content: center; min-height: 55px; transition: 0.2s; line-height: 1.2; }
-        @media (min-width: 600px) { .match-card { font-size: 0.85rem; min-height: 65px; } }
+        .match-card { background: var(--card); color: white; padding: 5px; border-radius: 6px; cursor: pointer; border: 2px solid transparent; font-size: 0.75rem; display: flex; align-items: center; justify-content: center; min-height: 55px; transition: 0.2s; }
         .match-card.selected { border-color: var(--p); background: #334155; }
         .match-card.matched { visibility: hidden; opacity: 0; pointer-events: none; }
 
-        /* VÒNG 2: KÉO THẢ */
+        /* VÒNG 2: CHỌN VÀ THẢ (Fix lỗi kéo thả) */
         .v2-table { width: 100%; border-collapse: separate; border-spacing: 0 8px; }
         .v2-td-q { width: 60%; padding: 10px; text-align: left; background: rgba(255,255,255,0.05); border-radius: 8px 0 0 8px; border: 1px solid #334155; font-size: 0.85rem; }
         .v2-td-drop { width: 40%; padding: 8px; background: rgba(255,255,255,0.08); border-radius: 0 8px 8px 0; border: 1px solid #334155; border-left: none; }
-        .drop-zone { background: #0f172a; border: 2px dashed #475569; border-radius: 6px; min-height: 40px; display: flex; align-items: center; justify-content: center; color: #64748b; font-size: 0.7rem; }
+        .drop-zone { background: #0f172a; border: 2px dashed #475569; border-radius: 6px; min-height: 40px; display: flex; align-items: center; justify-content: center; color: #64748b; font-size: 0.75rem; cursor: pointer; }
+        .drop-zone.active-zone { border-color: var(--p); background: rgba(255, 152, 0, 0.1); }
         .drop-zone.filled { background: var(--s); border-style: solid; color: white; font-weight: bold; font-size: 0.9rem; }
         .drag-items-container { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 15px; padding: 10px; border: 2px solid var(--p); border-radius: 12px; }
-        .draggable { background: var(--p); color: white; padding: 8px 15px; border-radius: 6px; cursor: grab; font-weight: bold; font-size: 0.85rem; }
+        .draggable { background: var(--p); color: white; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.85rem; transition: 0.2s; }
+        .draggable.selected-item { outline: 3px solid white; transform: scale(1.1); box-shadow: 0 0 15px var(--p); }
 
         /* VÒNG 3: TRẮC NGHIỆM */
         .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
@@ -159,9 +160,7 @@
                     if(document.querySelectorAll('.match-card:not(.matched)').length === 0) initStage2();
                 }, 300);
             } else {
-                playSound(false);
-                lives--;
-                updateLivesDisplay();
+                playSound(false); lives--; updateLivesDisplay();
                 setTimeout(() => {
                     document.getElementById(`card-${firstCard.idx}`).classList.remove('selected');
                     document.getElementById(`card-${idx}`).classList.remove('selected');
@@ -180,11 +179,12 @@
         document.getElementById('stage-name').innerText = `VÒNG 1: GHÉP ĐÔI (MẠNG: ${hearts})`;
     }
 
-    // --- VÒNG 2: KÉO THẢ ---
+    // --- VÒNG 2: CLICK-TO-DROP (Khắc phục lỗi kéo thả) ---
+    let selectedItem = null;
     function initStage2() {
-        stage = 2;
-        document.getElementById('stage-name').innerText = "VÒNG 2: KÉO THẢ TỈ LỆ";
-        document.getElementById('q-content').innerText = "Kéo đáp án thả vào ô tương ứng.";
+        stage = 2; selectedItem = null;
+        document.getElementById('stage-name').innerText = "VÒNG 2: CHỌN ĐÁP ÁN ĐÚNG";
+        document.getElementById('q-content').innerText = "Nhấn chọn đáp án bên dưới rồi nhấn vào ô trống tương ứng.";
         const area = document.getElementById('play-area');
         let questions = [...DATA.V2];
         let answers = shuffle([...DATA.V2.map(i => i.a)]);
@@ -194,28 +194,34 @@
             html += `<tr class="v2-row">
                 <td class="v2-td-q">${q.q}</td>
                 <td class="v2-td-drop">
-                    <div class="drop-zone" ondrop="drop(event, ${i})" ondragover="allowDrop(event)" id="drop-${i}">Thả vào đây</div>
+                    <div class="drop-zone" onclick="placeAnswer(${i})" id="drop-${i}">Chạm để thả</div>
                 </td>
             </tr>`;
         });
         html += `</table><div class="drag-items-container" id="drag-items">`;
         answers.forEach((ans, i) => {
-            html += `<div class="draggable" draggable="true" ondragstart="drag(event)" id="drag-${i}">${ans}</div>`;
+            html += `<div class="draggable" onclick="selectItem(event, '${ans}')" id="ans-${i}">${ans}</div>`;
         });
-        area.innerHTML = html + `</div><button class="action-btn" onclick="checkStage2()">TIẾP TỤC</button>`;
+        area.innerHTML = html + `</div><button class="action-btn" onclick="checkStage2()">KIỂM TRA VÒNG 2</button>`;
         window.stage2Correct = questions.map(i => i.a);
     }
 
-    function allowDrop(ev) { ev.preventDefault(); }
-    function drag(ev) { ev.dataTransfer.setData("text", ev.target.id); }
-    function drop(ev, idx) {
-        ev.preventDefault();
-        const data = ev.dataTransfer.setData("text");
-        const draggedEl = document.getElementById(data);
+    function selectItem(e, value) {
+        document.querySelectorAll('.draggable').forEach(el => el.classList.remove('selected-item'));
+        e.target.classList.add('selected-item');
+        selectedItem = { el: e.target, value: value };
+        document.querySelectorAll('.drop-zone:not(.filled)').forEach(z => z.classList.add('active-zone'));
+    }
+
+    function placeAnswer(idx) {
+        if(!selectedItem) { showToast("Vui lòng chọn 1 đáp án bên dưới trước!", "var(--p)"); return; }
         const zone = document.getElementById(`drop-${idx}`);
-        zone.innerHTML = draggedEl.innerText;
+        zone.innerHTML = selectedItem.value;
         zone.classList.add('filled');
-        draggedEl.style.display = 'none';
+        zone.classList.remove('active-zone');
+        selectedItem.el.style.visibility = 'hidden';
+        selectedItem = null;
+        document.querySelectorAll('.drop-zone').forEach(z => z.classList.remove('active-zone'));
     }
 
     function checkStage2() {
@@ -225,7 +231,8 @@
         });
         score += (correctCount * 6); updateScore();
         playSound(correctCount === 5);
-        setTimeout(initStage3, 1000);
+        showToast(`Bạn đúng ${correctCount}/5 câu Vòng 2!`, correctCount === 5 ? "var(--success)" : "var(--danger)");
+        setTimeout(initStage3, 2000);
     }
 
     // --- VÒNG 3: TRẮC NGHIỆM ---
@@ -267,7 +274,9 @@
             let count = 1; const data = snap.val();
             if(data) {
                 for(let id in data) {
-                    if((data[id].fullName || "").toLowerCase() === savedName.toLowerCase() && data[id].className === savedClass) count++;
+                    const oldName = (data[id].fullName || "").toLowerCase();
+                    const oldClass = (data[id].className || "");
+                    if(oldName === savedName.toLowerCase() && oldClass === savedClass) count++;
                 }
             }
             ref.push({
