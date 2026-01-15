@@ -16,7 +16,7 @@
 
         .game-header { background: #222; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; }
 
-        .game-content-wrapper { display: flex; flex-direction: column; gap: 15px; padding: 15px; flex: 1; margin-bottom: 80px; }
+        .game-content-wrapper { display: flex; flex-direction: column; gap: 15px; padding: 15px; flex: 1; margin-bottom: 100px; }
         @media (min-width: 900px) { .game-content-wrapper { flex-direction: row; } }
 
         .map-container { flex: 7; position: relative; background: #2c2c2c; border-radius: 15px; padding: 10px; box-shadow: inset 0 0 20px rgba(0,0,0,0.5); height: fit-content; }
@@ -39,11 +39,12 @@
         .auth-card input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #444; background: #111; color: white; box-sizing: border-box; }
 
         .game-footer { background: #222; padding: 10px 5px; border-top: 3px solid var(--primary); position: fixed; bottom: 0; width: 100%; z-index: 10000; }
-        .footer-buttons { display: flex; justify-content: center; gap: 8px; max-width: 900px; margin: 0 auto; }
-        .btn-nav { flex: 1; background: #333; border: 1px solid var(--primary); color: var(--primary); padding: 10px 2px; border-radius: 8px; font-weight: bold; text-decoration: none; text-align: center; font-size: clamp(0.6rem, 2.5vw, 0.85rem); cursor: pointer; }
+        .footer-buttons { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; max-width: 950px; margin: 0 auto; }
+        .btn-nav { flex: 1; min-width: 80px; background: #333; border: 1px solid var(--primary); color: var(--primary); padding: 10px 2px; border-radius: 8px; font-weight: bold; text-decoration: none; text-align: center; font-size: clamp(0.55rem, 2.2vw, 0.8rem); cursor: pointer; }
+        .btn-share { color: #fff; background: var(--dark-green); border-color: #fff; }
         .copyright-text { text-align: center; font-size: 0.6rem; color: #777; margin-top: 5px; }
 
-        /* TỌA ĐỘ TRẠM PHỤC HỒI 19-35 */
+        /* TỌA ĐỘ TRẠM 19-35 */
         #st-19 { top: 1.5%; left: 40%; } #st-20 { top: 8%; left: 45%; } #st-21 { top: 10%; left: 23%; }
         #st-22 { top: 12%; left: 40%; } #st-23 { top: 17%; left: 54%; } #st-24 { top: 27%; left: 44%; }
         #st-25 { top: 38%; left: 52%; } #st-26 { top: 46%; left: 63%; } #st-27 { top: 54%; left: 70%; }
@@ -92,7 +93,6 @@
             <div class="map-relative-box">
                 <img src="Bandogame.jpg" alt="Bản đồ" class="map-image">
                 <script>
-                    // Phục hồi vòng lặp từ 19 đến 35
                     for(let i=19; i<=35; i++) {
                         document.write(`<div class="station" id="st-${i}" onclick="handleStageClick(${i})">${i}</div>`);
                     }
@@ -120,6 +120,7 @@
         <div class="footer-buttons">
             <a href="tuido.html" class="btn-nav">🎒 TÚI ĐỒ</a>
             <a href="bang-vang.html" class="btn-nav" style="color:var(--gold);">🏆 BẢNG VÀNG</a>
+            <button class="btn-nav btn-share" onclick="shareGame()">📤 CHIA SẺ</button>
             <button id="btn-auth-action" class="btn-nav" onclick="handleAuthAction()"></button>
         </div>
         <div class="copyright-text">© 2026 EduRobot.id.vn - Lê Thành Long</div>
@@ -130,18 +131,8 @@
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // CHỈNH SỐ TUẦN HIỂN THỊ TRÊN TOP 10 TẠI ĐÂY
         const WEEK_NUMBER = 19; 
-
-        // LỊCH MỞ CỬA CÁC TRẠM
-        const SCHEDULE = { 
-            19: "2026-01-13T00:00:00", 
-            20: "2026-01-23T14:00:00", 
-            21: "2026-01-28T07:00:00",
-            22: "2026-02-05T07:00:00",
-            23: "2026-02-12T07:00:00"
-            // Thêm các trạm tiếp theo tại đây
-        };
+        const SCHEDULE = { 19: "2026-01-13T00:00:00", 20: "2026-01-23T14:00:00" };
 
         let currentName = localStorage.getItem('studentName');
         let currentClass = localStorage.getItem('studentClass');
@@ -160,16 +151,13 @@
                 document.getElementById('user-display').innerText = currentName;
                 document.getElementById('class-display').innerText = "Lớp: " + currentClass;
                 authBtn.innerHTML = "⚙️ ĐĂNG XUẤT";
-            } else {
-                authBtn.innerHTML = "👤 NHẬP TÊN";
-            }
+            } else { authBtn.innerHTML = "👤 NHẬP TÊN"; }
         }
 
         function handleAuthAction() {
             if (currentName) {
                 if(confirm("Xóa hồ sơ thám hiểm hiện tại?")) {
-                    localStorage.clear();
-                    location.reload();
+                    localStorage.clear(); location.reload();
                 }
             } else { document.getElementById('auth-overlay').style.display = 'flex'; }
         }
@@ -217,35 +205,24 @@
 
         function formatTime(seconds) {
             if (!seconds) return "00:00";
-            const m = Math.floor(seconds / 60);
-            const s = seconds % 60;
+            const m = Math.floor(seconds / 60); const s = seconds % 60;
             return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
         }
 
         function loadLeaderboard() {
             document.getElementById('lb-title').innerText = `🏆 TOP 10 CAO THỦ - TUẦN ${WEEK_NUMBER}`;
-            // Đảm bảo path này khớp với path lưu điểm của trang tuần
             db.ref(`scores/Tuan_${WEEK_NUMBER}`).on('value', (snap) => {
                 const data = snap.val();
                 const listUI = document.getElementById('leaderboard-list-ui');
                 if (!data) return listUI.innerHTML = '<tr><td colspan="4">Chưa có dữ liệu</td></tr>';
-                
-                let all = [];
-                for (let id in data) all.push(data[id]);
-                
-                // SẮP XẾP: Điểm cao -> Thời gian thấp
-                all.sort((a, b) => {
-                    if (b.score !== a.score) return b.score - a.score;
-                    return (a.duration || 999) - (b.duration || 999);
-                });
-
+                let all = []; for (let id in data) all.push(data[id]);
+                all.sort((a, b) => { if (b.score !== a.score) return b.score - a.score; return (a.duration || 999) - (b.duration || 999); });
                 const top10 = []; const seen = new Set();
                 for (let s of all) {
                     let key = ((s.fullName || s.name) + (s.className || s.class)).toLowerCase();
                     if (!seen.has(key)) { top10.push(s); seen.add(key); }
                     if (top10.length >= 10) break;
                 }
-
                 listUI.innerHTML = top10.map((s, i) => `
                     <tr>
                         <td>${i+1}</td>
@@ -256,6 +233,20 @@
                 `).join('');
                 if (top10.length > 0) document.getElementById('high-score').innerText = top10[0].score;
             });
+        }
+
+        function shareGame() {
+            const shareData = {
+                title: 'Hành trình xuyên Việt cùng Robot',
+                text: 'Mời bạn cùng thám hiểm Việt Nam và học Toán cùng mình nhé!',
+                url: window.location.href
+            };
+            if (navigator.share) {
+                navigator.share(shareData).catch((err) => console.log('Error sharing', err));
+            } else {
+                navigator.clipboard.writeText(window.location.href);
+                alert('Đã sao chép link thám hiểm! Hãy gửi cho bạn bè nhé.');
+            }
         }
     </script>
 </body>
