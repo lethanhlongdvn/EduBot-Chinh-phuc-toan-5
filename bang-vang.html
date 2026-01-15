@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Bảng Vàng Thành Tích - EduRobot</title>
     <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -13,55 +13,67 @@
     <style>
         :root { --primary: #4CAF50; --secondary: #2196F3; --bg: #f4f7f6; --dark: #2c3e50; }
         body { font-family: 'Lexend', sans-serif; background: var(--bg); margin: 0; display: flex; flex-direction: column; min-height: 100vh; }
-        header { background: white; padding: 1rem 5%; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; }
-        .logo { font-size: 1.5rem; font-weight: bold; color: var(--primary); text-decoration: none; }
-        .hero { text-align: center; padding: 30px 20px; background: linear-gradient(135deg, var(--secondary), #1976D2); color: white; }
         
-        .admin-container { max-width: 1100px; margin: 20px auto 50px; padding: 0 15px; width: 100%; box-sizing: border-box; }
+        /* Thu nhỏ Header */
+        header { background: white; padding: 0.8rem 5%; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; }
+        .logo { font-size: 1.2rem; font-weight: bold; color: var(--primary); text-decoration: none; white-space: nowrap; }
         
-        .week-accordion { background: white; border-radius: 12px; margin-bottom: 15px; overflow: hidden; border: 1px solid #ddd; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .week-header { padding: 15px 20px; background: #fff; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: 0.3s; user-select: none; }
-        .week-header:hover { background: #f9f9f9; }
+        /* Thu nhỏ Hero Section */
+        .hero { text-align: center; padding: 15px 10px; background: linear-gradient(135deg, var(--secondary), #1976D2); color: white; }
+        .hero h1 { font-size: 1.4rem; margin: 5px 0; }
+        .hero p { font-size: 0.85rem; margin: 5px 0; opacity: 0.9; }
+        
+        .admin-container { max-width: 1100px; margin: 15px auto 50px; padding: 0 10px; width: 100%; box-sizing: border-box; }
+        
+        .week-accordion { background: white; border-radius: 12px; margin-bottom: 12px; overflow: hidden; border: 1px solid #ddd; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .week-header { padding: 12px 15px; background: #fff; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: 0.3s; user-select: none; }
         .week-header.active { background: #e3f2fd; border-bottom: 2px solid var(--secondary); }
-        .week-title { font-weight: bold; font-size: 1.1rem; color: var(--dark); display: flex; align-items: center; gap: 10px; }
-        .week-badge { background: var(--secondary); color: white; padding: 2px 10px; border-radius: 20px; font-size: 0.8rem; }
+        .week-title { font-weight: bold; font-size: 1rem; color: var(--dark); display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+        .week-badge { background: var(--secondary); color: white; padding: 2px 8px; border-radius: 20px; font-size: 0.75rem; white-space: nowrap; }
         
         .week-content { display: none; padding: 0; background: white; }
         .week-content.show { display: block; }
 
-        .chart-section { padding: 20px; background: #fff; border-bottom: 1px solid #eee; }
-        .chart-container { position: relative; height: 280px; width: 100%; max-width: 800px; margin: 0 auto; }
-        .chart-title { text-align: center; font-size: 0.9rem; font-weight: bold; color: #555; margin-bottom: 15px; }
+        .chart-section { padding: 15px; background: #fff; border-bottom: 1px solid #eee; }
+        .chart-container { position: relative; height: 250px; width: 100%; max-width: 800px; margin: 0 auto; }
+        .chart-title { text-align: center; font-size: 0.85rem; font-weight: bold; color: #555; margin-bottom: 10px; }
 
-        .action-bar { padding: 10px 20px; background: #fafafa; border-bottom: 1px solid #eee; display: flex; justify-content: flex-end; }
-        .btn-excel { background: var(--primary); color: white; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-family: 'Lexend'; font-weight: bold; font-size: 0.8rem; }
+        .action-bar { padding: 10px 15px; background: #fafafa; border-bottom: 1px solid #eee; display: flex; justify-content: flex-end; }
+        .btn-excel { background: var(--primary); color: white; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-family: 'Lexend'; font-weight: bold; font-size: 0.75rem; }
 
-        table { width: 100%; border-collapse: collapse; min-width: 900px; }
-        th { text-align: left; padding: 12px; background: #f1f1f1; color: #555; font-size: 0.75rem; text-transform: uppercase; }
-        td { padding: 12px; border-bottom: 1px solid #eee; font-size: 0.85rem; }
+        /* ÉP CHỮ KHÔNG XUỐNG HÀNG TRONG BẢNG */
+        table { width: 100%; border-collapse: collapse; min-width: 600px; }
+        th { text-align: left; padding: 10px 8px; background: #f1f1f1; color: #555; font-size: 0.7rem; text-transform: uppercase; white-space: nowrap; }
+        td { padding: 10px 8px; border-bottom: 1px solid #eee; font-size: 0.85rem; white-space: nowrap; }
         
-        .rank { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: #eee; font-weight: bold; font-size: 0.8rem; }
+        /* Giúp tên học sinh hiển thị tốt */
+        td b { display: inline-block; white-space: nowrap; }
+
+        .rank { width: 25px; height: 25px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: #eee; font-weight: bold; font-size: 0.75rem; }
         tr:nth-child(1) .rank { background: #FFD700; color: #000; }
         tr:nth-child(2) .rank { background: #C0C0C0; color: #000; }
         tr:nth-child(3) .rank { background: #CD7F32; color: #000; }
 
-        .score-badge { color: var(--secondary); font-weight: bold; background: #E3F2FD; padding: 4px 10px; border-radius: 12px; }
-        .time-badge { color: #e67e22; font-weight: 600; }
-        .class-badge { background: #f0f0f0; padding: 3px 8px; border-radius: 4px; font-size: 0.8rem; border: 1px solid #ddd; }
-        .attempt-badge { background: #fff3e0; color: #ef6c00; padding: 3px 8px; border-radius: 4px; font-size: 0.8rem; border: 1px solid #ffe0b2; }
+        .score-badge { color: var(--secondary); font-weight: bold; background: #E3F2FD; padding: 3px 8px; border-radius: 10px; white-space: nowrap; }
+        .time-badge { color: #e67e22; font-weight: 600; white-space: nowrap; }
+        .class-badge { background: #f0f0f0; padding: 2px 6px; border-radius: 4px; font-size: 0.8rem; border: 1px solid #ddd; white-space: nowrap; }
+        .attempt-badge { background: #fff3e0; color: #ef6c00; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; border: 1px solid #ffe0b2; white-space: nowrap; }
 
-        footer { background: var(--dark); color: white; text-align: center; padding: 20px; font-size: 0.8rem; margin-top: auto; }
+        footer { background: var(--dark); color: white; text-align: center; padding: 15px; font-size: 0.75rem; margin-top: auto; }
+
+        /* Cuộn ngang mượt cho bảng trên mobile */
+        .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
     </style>
 </head>
 <body>
     <header>
         <a href="index.html" class="logo">EduRobot.id.vn 🤖</a>
-        <nav><a href="index.html" style="text-decoration:none; color:#333; font-weight: 600;">Trang chủ</a></nav>
+        <nav><a href="index.html" style="text-decoration:none; color:#333; font-size: 0.85rem; font-weight: 600;">Trang chủ</a></nav>
     </header>
 
     <section class="hero">
         <h1>🏆 BẢNG VÀNG VINH DANH</h1>
-        <p>Thống kê điểm số & Vinh danh thành tích tốt nhất</p>
+        <p>Thành tích xuất sắc nhất của các nhà thám hiểm</p>
     </section>
 
     <main class="admin-container" id="accordion-container"></main>
@@ -99,11 +111,11 @@
                     </div>
                     <div class="week-content" id="content-${i}">
                         <div class="chart-section" id="chart-section-${i}" style="display:none;">
-                            <div class="chart-title">Thống kê các khoảng điểm (Tuần ${i})</div>
+                            <div class="chart-title">Phân bổ khoảng điểm (Tuần ${i})</div>
                             <div class="chart-container"><canvas id="chart-canvas-${i}"></canvas></div>
                         </div>
                         <div class="action-bar"><button class="btn-excel" onclick="exportExcel(${i})">📄 Xuất Excel Tuần ${i}</button></div>
-                        <div style="overflow-x: auto;">
+                        <div class="table-responsive">
                             <table>
                                 <thead>
                                     <tr>
@@ -116,7 +128,7 @@
                                         <th>Ngày đạt</th>
                                     </tr>
                                 </thead>
-                                <tbody id="tbody-${i}"><tr><td colspan="7" style="text-align:center; padding:20px; color:#999;">Đang tải dữ liệu...</td></tr></tbody>
+                                <tbody id="tbody-${i}"><tr><td colspan="7" style="text-align:center; padding:20px; color:#999;">Đang tải...</td></tr></tbody>
                             </table>
                         </div>
                     </div>
@@ -134,18 +146,17 @@
             icon.innerText = content.classList.contains('show') ? '▲' : '▼';
         }
 
-        // Custom Plugin để vẽ số trên đầu cột
         const topLabelsPlugin = {
             id: 'topLabels',
             afterDatasetsDraw(chart) {
-                const { ctx, data } = chart;
+                const { ctx } = chart;
                 ctx.save();
                 chart.data.datasets.forEach((dataset, i) => {
                     chart.getDatasetMeta(i).data.forEach((bar, index) => {
                         const value = dataset.data[index];
                         if (value > 0) {
                             ctx.fillStyle = '#444';
-                            ctx.font = 'bold 12px Lexend';
+                            ctx.font = 'bold 10px Lexend';
                             ctx.textAlign = 'center';
                             ctx.textBaseline = 'bottom';
                             ctx.fillText(value, bar.x, bar.y - 5);
@@ -164,38 +175,24 @@
                 data: {
                     labels: ['0-29', '30-49', '50-69', '70-89', '90-100'],
                     datasets: [{
-                        label: 'Số lượng bạn',
                         data: distribution,
                         backgroundColor: [
-                            'rgba(231, 76, 60, 0.7)',  // Đỏ
-                            'rgba(230, 126, 34, 0.7)', // Cam
-                            'rgba(241, 196, 15, 0.7)', // Vàng
-                            'rgba(52, 152, 219, 0.7)', // Xanh dương
-                            'rgba(46, 204, 113, 0.7)'  // Xanh lá
+                            'rgba(231, 76, 60, 0.7)', 'rgba(230, 126, 34, 0.7)', 
+                            'rgba(241, 196, 15, 0.7)', 'rgba(52, 152, 219, 0.7)', 
+                            'rgba(46, 204, 113, 0.7)'
                         ],
-                        borderColor: 'rgba(0,0,0,0.1)',
                         borderWidth: 1,
-                        borderRadius: 6
+                        borderRadius: 4
                     }]
                 },
                 plugins: [topLabelsPlugin],
                 options: { 
                     responsive: true, 
                     maintainAspectRatio: false, 
-                    plugins: { 
-                        legend: { display: false },
-                        tooltip: { enabled: true }
-                    }, 
+                    plugins: { legend: { display: false } }, 
                     scales: { 
-                        y: { 
-                            beginAtZero: true, 
-                            ticks: { stepSize: 1, font: { family: 'Lexend' } },
-                            grid: { color: '#f0f0f0' }
-                        },
-                        x: {
-                            ticks: { font: { family: 'Lexend', weight: '600' } },
-                            grid: { display: false }
-                        }
+                        y: { beginAtZero: true, ticks: { stepSize: 1, font: { size: 9 } } },
+                        x: { ticks: { font: { size: 9, weight: '600' } } }
                     } 
                 }
             });
@@ -219,7 +216,7 @@
                 const chartSection = document.getElementById(`chart-section-${i}`);
 
                 if (!weekData) {
-                    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:20px; color:#999;">Chưa có dữ liệu.</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:15px; color:#999; font-size:0.8rem;">Chưa có dữ liệu.</td></tr>`;
                     countBadge.innerText = `0 bạn`;
                     chartSection.style.display = 'none';
                     continue;
@@ -237,7 +234,6 @@
 
                 let sorted = Array.from(filteredMap.values()).sort((a,b) => (b.score !== a.score) ? b.score - a.score : (a.duration || 999) - (b.duration || 999));
                 
-                // Tính toán 5 khoảng điểm: 0-29; 30-49; 50-69; 70-89; 90-100
                 let dist = [0, 0, 0, 0, 0];
                 sorted.forEach(s => {
                     let sc = s.score || 0;
@@ -257,7 +253,7 @@
                         <td><span class="score-badge">${s.score}/100</span></td>
                         <td><span class="time-badge">⏱ ${formatTime(s.duration)}</span></td>
                         <td><span class="attempt-badge">Lần ${s.attempt || 1}</span></td>
-                        <td style="font-size:0.8rem; color:#888;">${s.date || ""}</td>
+                        <td style="font-size:0.75rem; color:#888;">${s.date || ""}</td>
                     </tr>
                 `).join('');
                 chartSection.style.display = 'block';
