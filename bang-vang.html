@@ -8,27 +8,49 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.19.2/package/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
     <style>
         :root { --primary: #4CAF50; --secondary: #2196F3; --bg: #f4f7f6; --dark: #2c3e50; }
         body { font-family: 'Lexend', sans-serif; background: var(--bg); margin: 0; display: flex; flex-direction: column; min-height: 100vh; }
         header { background: white; padding: 1rem 5%; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; }
         .logo { font-size: 1.5rem; font-weight: bold; color: var(--primary); text-decoration: none; }
-        .hero { text-align: center; padding: 40px 20px; background: linear-gradient(135deg, var(--secondary), #64B5F6); color: white; }
-        .admin-container { max-width: 1100px; margin: -30px auto 50px; padding: 0 20px; flex: 1; width: 100%; box-sizing: border-box; }
-        .game-block { background: white; border-radius: 20px; box-shadow: 0 6px 20px rgba(0,0,0,0.05); margin-bottom: 30px; overflow: hidden; border: 1px solid #eee; }
-        .game-header { padding: 20px; background: #fff; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--bg); }
-        .btn-excel { background: var(--primary); color: white; border: none; padding: 10px 18px; border-radius: 12px; cursor: pointer; font-family: 'Lexend'; font-weight: bold; }
-        table { width: 100%; border-collapse: collapse; min-width: 800px; }
-        th { text-align: left; padding: 15px; background: #f8f9fa; color: #7f8c8d; font-size: 0.85rem; text-transform: uppercase; }
-        td { padding: 15px; border-bottom: 1px solid #f1f1f1; }
-        .rank { width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: #f0f0f0; font-weight: bold; }
-        tr:nth-child(1) .rank { background: #FFD700; color: white; }
-        tr:nth-child(2) .rank { background: #C0C0C0; color: white; }
-        tr:nth-child(3) .rank { background: #CD7F32; color: white; }
-        .score-badge { background: #E3F2FD; color: var(--secondary); padding: 6px 15px; border-radius: 20px; font-weight: bold; }
-        .attempt-badge { background: #fff3e0; color: #ef6c00; padding: 4px 10px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; border: 1px solid #ffe0b2; }
-        .class-badge { background: #f1f1f1; padding: 4px 10px; border-radius: 5px; font-size: 0.9rem; color: #555; border: 1px solid #ddd; }
-        footer { background: var(--dark); color: rgba(255,255,255,0.7); text-align: center; padding: 20px; font-size: 0.9rem; border-top: 4px solid var(--primary); }
+        .hero { text-align: center; padding: 30px 20px; background: linear-gradient(135deg, var(--secondary), #1976D2); color: white; }
+        
+        .admin-container { max-width: 1100px; margin: 20px auto 50px; padding: 0 15px; width: 100%; box-sizing: border-box; }
+        
+        .week-accordion { background: white; border-radius: 12px; margin-bottom: 15px; overflow: hidden; border: 1px solid #ddd; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .week-header { padding: 15px 20px; background: #fff; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: 0.3s; user-select: none; }
+        .week-header:hover { background: #f9f9f9; }
+        .week-header.active { background: #e3f2fd; border-bottom: 2px solid var(--secondary); }
+        .week-title { font-weight: bold; font-size: 1.1rem; color: var(--dark); display: flex; align-items: center; gap: 10px; }
+        .week-badge { background: var(--secondary); color: white; padding: 2px 10px; border-radius: 20px; font-size: 0.8rem; }
+        
+        .week-content { display: none; padding: 0; background: white; }
+        .week-content.show { display: block; }
+
+        .chart-section { padding: 20px; background: #fff; border-bottom: 1px solid #eee; }
+        .chart-container { position: relative; height: 250px; width: 100%; max-width: 800px; margin: 0 auto; }
+        .chart-title { text-align: center; font-size: 0.9rem; font-weight: bold; color: #555; margin-bottom: 10px; }
+
+        .action-bar { padding: 10px 20px; background: #fafafa; border-bottom: 1px solid #eee; display: flex; justify-content: flex-end; }
+        .btn-excel { background: var(--primary); color: white; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-family: 'Lexend'; font-weight: bold; font-size: 0.8rem; }
+
+        table { width: 100%; border-collapse: collapse; min-width: 900px; }
+        th { text-align: left; padding: 12px; background: #f1f1f1; color: #555; font-size: 0.75rem; text-transform: uppercase; }
+        td { padding: 12px; border-bottom: 1px solid #eee; font-size: 0.85rem; }
+        
+        .rank { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: #eee; font-weight: bold; font-size: 0.8rem; }
+        tr:nth-child(1) .rank { background: #FFD700; color: #000; }
+        tr:nth-child(2) .rank { background: #C0C0C0; color: #000; }
+        tr:nth-child(3) .rank { background: #CD7F32; color: #000; }
+
+        .score-badge { color: var(--secondary); font-weight: bold; background: #E3F2FD; padding: 4px 10px; border-radius: 12px; }
+        .time-badge { color: #e67e22; font-weight: 600; }
+        .class-badge { background: #f0f0f0; padding: 3px 8px; border-radius: 4px; font-size: 0.8rem; border: 1px solid #ddd; }
+        .attempt-badge { background: #fff3e0; color: #ef6c00; padding: 3px 8px; border-radius: 4px; font-size: 0.8rem; border: 1px solid #ffe0b2; }
+
+        footer { background: var(--dark); color: white; text-align: center; padding: 20px; font-size: 0.8rem; margin-top: auto; }
     </style>
 </head>
 <body>
@@ -38,17 +60,13 @@
     </header>
 
     <section class="hero">
-        <h1>🏆 BẢNG VÀNG VINH DỰ</h1>
-        <p>Thành tích tốt nhất của các nhà thám hiểm</p>
+        <h1>🏆 BẢNG VÀNG THẾ HỆ MỚI</h1>
+        <p>Thống kê điểm số & Vinh danh thành tích tốt nhất</p>
     </section>
 
-    <main class="admin-container" id="main-content">
-        <p style="text-align:center; padding:50px; color: #666;">Đang tải dữ liệu vinh danh...</p>
-    </main>
+    <main class="admin-container" id="accordion-container"></main>
 
-    <footer>
-        &copy; 2026 EduRobot.id.vn - Lê Thành Long
-    </footer>
+    <footer>&copy; 2026 EduRobot.id.vn - Lê Thành Long</footer>
 
     <script>
         const firebaseConfig = {
@@ -60,119 +78,141 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        function formatTime(seconds) {
-            if (!seconds || seconds === 9999) return "---";
-            const m = Math.floor(seconds / 60);
-            const s = seconds % 60;
-            return m > 0 ? `${m}ph ${s}s` : `${s}s`;
+        const charts = {};
+
+        function formatTime(s) {
+            if (!s || s === 9999) return "---";
+            const m = Math.floor(s / 60);
+            const rs = s % 60;
+            return m > 0 ? `${m}m ${rs}s` : `${rs}s`;
         }
 
-        function exportExcel(id, name) {
-            const table = document.getElementById('table-' + id);
-            const rows = table.querySelectorAll('tr');
-            const data = [];
-            rows.forEach((row) => {
-                const cols = row.querySelectorAll('th, td');
-                const rowData = [];
-                cols.forEach((col, index) => {
-                    let value = col.innerText.replace('⏱ ', '').replace(' / 100', '');
-                    if (index === 2 && row.parentElement.tagName === 'TBODY') {
-                        rowData.push({ v: value, t: 's' });
-                    } else {
-                        rowData.push(value);
-                    }
-                });
-                data.push(rowData);
-            });
-            const ws = XLSX.utils.aoa_to_sheet(data);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "KetQua");
-            XLSX.writeFile(wb, `BangVang_${name}.xlsx`);
-        }
-
-        db.ref('scores').on('value', (snap) => {
-            const data = snap.val();
-            const container = document.getElementById('main-content');
-            container.innerHTML = '';
-
-            if(!data) { 
-                container.innerHTML = "<div class='game-block' style='padding:40px; text-align:center;'>Chưa có dữ liệu.</div>"; 
-                return; 
-            }
-
-            for (let gameId in data) {
-                let rawScores = Object.values(data[gameId]);
-                
-                // --- LOGIC LỌC TRÙNG: GIỮ LẠI THÀNH TÍCH TỐT NHẤT ---
-                let filteredMap = new Map();
-
-                rawScores.forEach(entry => {
-                    let name = (entry.fullName || entry.name || "N/A").trim().toLowerCase();
-                    let cls = (entry.className || entry.class || "N/A").trim().toLowerCase();
-                    let key = name + "|" + cls; // Kết hợp Tên và Lớp làm khóa duy nhất
-
-                    if (!filteredMap.has(key)) {
-                        filteredMap.set(key, entry);
-                    } else {
-                        let existing = filteredMap.get(key);
-                        // Nếu lượt thi mới có điểm cao hơn, hoặc bằng điểm nhưng thời gian nhanh hơn
-                        let newScore = entry.score || 0;
-                        let oldScore = existing.score || 0;
-                        let newTime = entry.duration || 9999;
-                        let oldTime = existing.duration || 9999;
-
-                        if (newScore > oldScore || (newScore === oldScore && newTime < oldTime)) {
-                            filteredMap.set(key, entry);
-                        }
-                    }
-                });
-
-                // Chuyển Map về Array và Sắp xếp để hiển thị
-                let students = Array.from(filteredMap.values()).sort((a,b) => {
-                    if(b.score !== a.score) return b.score - a.score;
-                    return (a.duration || 9999) - (b.duration || 9999);
-                });
-
-                let gameTitle = gameId.replace(/_/g, ' ');
-
-                let html = `
-                    <div class="game-block">
-                        <div class="game-header">
-                            <div style="font-size:1.2rem; font-weight:bold;">📊 ${gameTitle}</div>
-                            <button class="btn-excel" onclick="exportExcel('${gameId}', '${gameTitle}')">📄 Xuất Excel</button>
+        function initAccordion() {
+            const container = document.getElementById('accordion-container');
+            let html = '';
+            for (let i = 19; i <= 35; i++) {
+                html += `
+                <div class="week-accordion">
+                    <div class="week-header" onclick="toggleWeek(${i})">
+                        <div class="week-title"><span>📂 Tuần ${i}</span> <span class="week-badge" id="count-${i}">0 bạn</span></div>
+                        <span id="icon-${i}">▼</span>
+                    </div>
+                    <div class="week-content" id="content-${i}">
+                        <div class="chart-section" id="chart-section-${i}" style="display:none;">
+                            <div class="chart-title">Phân bổ khoảng điểm Tuần ${i}</div>
+                            <div class="chart-container"><canvas id="chart-canvas-${i}"></canvas></div>
                         </div>
+                        <div class="action-bar"><button class="btn-excel" onclick="exportExcel(${i})">📄 Xuất Excel Tuần ${i}</button></div>
                         <div style="overflow-x: auto;">
-                            <table id="table-${gameId}">
+                            <table>
                                 <thead>
                                     <tr>
-                                        <th width="60">Hạng</th>
+                                        <th>Hạng</th>
                                         <th>Học sinh</th>
                                         <th>Lớp</th>
                                         <th>Điểm cao nhất</th>
-                                        <th>Thời gian tốt nhất</th>
-                                        <th>Tổng lần thi</th>
+                                        <th>Thời gian</th>
+                                        <th>Số lần thi</th>
                                         <th>Ngày hoàn thành</th>
                                     </tr>
                                 </thead>
-                                <tbody>
-                                    ${students.map((s, i) => `
-                                        <tr>
-                                            <td><div class="rank">${i+1}</div></td>
-                                            <td><b>${s.fullName || s.name || "---"}</b></td>
-                                            <td><span class="class-badge">${s.className || "---"}</span></td>
-                                            <td><span class="score-badge">${s.score} / 100</span></td>
-                                            <td><span style="color:#e67e22; font-weight:bold;">⏱ ${formatTime(s.duration)}</span></td>
-                                            <td><span class="attempt-badge">${s.attempt || 1} lần</span></td>
-                                            <td style="font-size:0.85rem; color:#888">${s.date || "---"}</td>
-                                        </tr>
-                                    `).join('')}
-                                </tbody>
+                                <tbody id="tbody-${i}"><tr><td colspan="7" style="text-align:center; padding:20px; color:#999;">Đang tải...</td></tr></tbody>
                             </table>
                         </div>
-                    </div>`;
-                container.innerHTML += html;
+                    </div>
+                </div>`;
+            }
+            container.innerHTML = html;
+        }
+
+        function toggleWeek(i) {
+            const content = document.getElementById(`content-${i}`);
+            const header = content.previousElementSibling;
+            const icon = document.getElementById(`icon-${i}`);
+            content.classList.toggle('show');
+            header.classList.toggle('active');
+            icon.innerText = content.classList.contains('show') ? '▲' : '▼';
+        }
+
+        function updateChart(week, distribution) {
+            const ctx = document.getElementById(`chart-canvas-${week}`).getContext('2d');
+            if (charts[week]) charts[week].destroy();
+            charts[week] = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['0-10','11-20','21-30','31-40','41-50','51-60','61-70','71-80','81-90','91-100'],
+                    datasets: [{
+                        label: 'Số lượng học sinh',
+                        data: distribution,
+                        backgroundColor: 'rgba(33, 150, 243, 0.7)',
+                        borderColor: 'rgba(33, 150, 243, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+            });
+        }
+
+        function exportExcel(week) {
+            const table = document.querySelector(`#tbody-${week}`).parentElement;
+            const ws = XLSX.utils.table_to_sheet(table);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Tuần " + week);
+            XLSX.writeFile(wb, `BangVang_Tuan_${week}.xlsx`);
+        }
+
+        db.ref('scores').on('value', (snap) => {
+            const allData = snap.val();
+            if (!allData) return;
+            for (let i = 19; i <= 35; i++) {
+                const weekData = allData[`Tuan_${i}`] || allData[`tuan${i}`];
+                const tbody = document.getElementById(`tbody-${i}`);
+                const countBadge = document.getElementById(`count-${i}`);
+                const chartSection = document.getElementById(`chart-section-${i}`);
+
+                if (!weekData) {
+                    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:20px; color:#999;">Chưa có dữ liệu.</td></tr>`;
+                    countBadge.innerText = `0 bạn`;
+                    chartSection.style.display = 'none';
+                    continue;
+                }
+
+                let filteredMap = new Map();
+                Object.values(weekData).forEach(entry => {
+                    let key = ((entry.fullName || entry.name || "") + "|" + (entry.className || entry.class || "")).toLowerCase().trim();
+                    if (!filteredMap.has(key)) filteredMap.set(key, entry);
+                    else {
+                        let old = filteredMap.get(key);
+                        if (entry.score > old.score || (entry.score === old.score && (entry.duration || 999) < (old.duration || 999))) filteredMap.set(key, entry);
+                    }
+                });
+
+                let sorted = Array.from(filteredMap.values()).sort((a,b) => (b.score !== a.score) ? b.score - a.score : (a.duration || 999) - (b.duration || 999));
+                let dist = new Array(10).fill(0);
+                sorted.forEach(s => {
+                    let idx = Math.floor((s.score - 1) / 10);
+                    if (s.score === 0) idx = 0;
+                    if (idx < 0) idx = 0;
+                    dist[idx]++;
+                });
+
+                countBadge.innerText = `${sorted.length} bạn`;
+                tbody.innerHTML = sorted.map((s, idx) => `
+                    <tr>
+                        <td><div class="rank">${idx+1}</div></td>
+                        <td><b>${s.fullName || s.name}</b></td>
+                        <td><span class="class-badge">${s.className || s.class}</span></td>
+                        <td><span class="score-badge">${s.score}/100</span></td>
+                        <td><span class="time-badge">⏱ ${formatTime(s.duration)}</span></td>
+                        <td><span class="attempt-badge">${s.attempt || 1} lần</span></td>
+                        <td style="font-size:0.8rem; color:#888;">${s.date || ""}</td>
+                    </tr>
+                `).join('');
+                chartSection.style.display = 'block';
+                updateChart(i, dist);
             }
         });
+        initAccordion();
     </script>
 </body>
 </html>
