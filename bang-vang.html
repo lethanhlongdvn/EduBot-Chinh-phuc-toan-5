@@ -39,7 +39,7 @@
 
     <section class="hero">
         <h1>🏆 BẢNG VÀNG VINH DỰ</h1>
-        <p>Ai nhanh hơn - Ai giỏi hơn?</p>
+        <p>Thành tích tốt nhất của các nhà thám hiểm</p>
     </section>
 
     <main class="admin-container" id="main-content">
@@ -51,7 +51,6 @@
     </footer>
 
     <script>
-        // Cấu hình Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyC6zlWn8BKYU7P6A2-PYq6IIWOzaqJWFhc",
             authDomain: "gamhoctap.firebaseapp.com",
@@ -68,29 +67,23 @@
             return m > 0 ? `${m}ph ${s}s` : `${s}s`;
         }
 
-        // HÀM XUẤT EXCEL ĐÃ SỬA LỖI ĐỊNH DẠNG LỚP
         function exportExcel(id, name) {
             const table = document.getElementById('table-' + id);
-            
-            // Tạo một bản sao dữ liệu để xử lý định dạng text cho cột Lớp
             const rows = table.querySelectorAll('tr');
             const data = [];
-            
             rows.forEach((row) => {
                 const cols = row.querySelectorAll('th, td');
                 const rowData = [];
                 cols.forEach((col, index) => {
                     let value = col.innerText.replace('⏱ ', '').replace(' / 100', '');
-                    // Nếu là cột Lớp (cột index 2), thêm dấu nháy đơn ' phía trước để Excel hiểu là Text
                     if (index === 2 && row.parentElement.tagName === 'TBODY') {
-                        rowData.push({ v: value, t: 's' }); // Ép kiểu string
+                        rowData.push({ v: value, t: 's' });
                     } else {
                         rowData.push(value);
                     }
                 });
                 data.push(rowData);
             });
-
             const ws = XLSX.utils.aoa_to_sheet(data);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "KetQua");
@@ -108,11 +101,36 @@
             }
 
             for (let gameId in data) {
-                let students = Object.values(data[gameId]).sort((a,b) => {
+                let rawScores = Object.values(data[gameId]);
+                
+                // --- LOGIC LỌC TRÙNG: GIỮ LẠI THÀNH TÍCH TỐT NHẤT ---
+                let filteredMap = new Map();
+
+                rawScores.forEach(entry => {
+                    let name = (entry.fullName || entry.name || "N/A").trim().toLowerCase();
+                    let cls = (entry.className || entry.class || "N/A").trim().toLowerCase();
+                    let key = name + "|" + cls; // Kết hợp Tên và Lớp làm khóa duy nhất
+
+                    if (!filteredMap.has(key)) {
+                        filteredMap.set(key, entry);
+                    } else {
+                        let existing = filteredMap.get(key);
+                        // Nếu lượt thi mới có điểm cao hơn, hoặc bằng điểm nhưng thời gian nhanh hơn
+                        let newScore = entry.score || 0;
+                        let oldScore = existing.score || 0;
+                        let newTime = entry.duration || 9999;
+                        let oldTime = existing.duration || 9999;
+
+                        if (newScore > oldScore || (newScore === oldScore && newTime < oldTime)) {
+                            filteredMap.set(key, entry);
+                        }
+                    }
+                });
+
+                // Chuyển Map về Array và Sắp xếp để hiển thị
+                let students = Array.from(filteredMap.values()).sort((a,b) => {
                     if(b.score !== a.score) return b.score - a.score;
-                    let timeA = a.duration || 9999;
-                    let timeB = b.duration || 9999;
-                    return timeA - timeB;
+                    return (a.duration || 9999) - (b.duration || 9999);
                 });
 
                 let gameTitle = gameId.replace(/_/g, ' ');
@@ -130,9 +148,9 @@
                                         <th width="60">Hạng</th>
                                         <th>Học sinh</th>
                                         <th>Lớp</th>
-                                        <th>Điểm</th>
-                                        <th>Thời gian</th>
-                                        <th>Lần thi</th>
+                                        <th>Điểm cao nhất</th>
+                                        <th>Thời gian tốt nhất</th>
+                                        <th>Tổng lần thi</th>
                                         <th>Ngày hoàn thành</th>
                                     </tr>
                                 </thead>
@@ -144,7 +162,7 @@
                                             <td><span class="class-badge">${s.className || "---"}</span></td>
                                             <td><span class="score-badge">${s.score} / 100</span></td>
                                             <td><span style="color:#e67e22; font-weight:bold;">⏱ ${formatTime(s.duration)}</span></td>
-                                            <td><span class="attempt-badge">Lần ${s.attempt || 1}</span></td>
+                                            <td><span class="attempt-badge">${s.attempt || 1} lần</span></td>
                                             <td style="font-size:0.85rem; color:#888">${s.date || "---"}</td>
                                         </tr>
                                     `).join('')}
