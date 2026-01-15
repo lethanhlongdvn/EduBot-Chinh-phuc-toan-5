@@ -4,47 +4,62 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>HÀNH TRÌNH XUYÊN VIỆT : EduRobot.id.vn</title>
-    <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Lexend:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Lexend:wght@300;400;700&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <style>
-        :root { --primary: #FF9800; --dark-green: #2e7d32; --gold: #ffd700; --bg-dark: #1a1a1a; }
-        body { margin: 0; padding: 0; font-family: 'Lexend', sans-serif; background-color: var(--bg-dark); color: white; display: flex; flex-direction: column; min-height: 100vh; overflow-x: hidden; }
+        :root { --p: #FF9800; --dg: #2e7d32; --gold: #ffd700; --bg: #0f172a; --road: #ffffff; --sea: #00f2ff; --text-sec: #94a3b8; }
+        body { margin: 0; padding: 0; font-family: 'Lexend', sans-serif; background-color: var(--bg); color: white; display: flex; flex-direction: column; min-height: 100vh; overflow-x: hidden; }
         
-        .welcome-banner { background: linear-gradient(90deg, #1a1a1a, #333, #1a1a1a); padding: 15px 20px; display: flex; justify-content: center; align-items: center; gap: 15px; border-bottom: 2px solid var(--primary); }
-        .welcome-text { font-family: 'Bungee'; font-size: clamp(1rem, 4vw, 1.8rem); color: white; text-shadow: 2px 2px 0px var(--primary); text-align: center; }
+        /* BANNER */
+        .welcome-banner { background: linear-gradient(90deg, #0f172a, #1e293b, #0f172a); padding: 15px 20px; border-bottom: 2px solid var(--p); text-align: center; }
+        .welcome-text { font-family: 'Bungee'; font-size: clamp(1rem, 4vw, 1.8rem); color: white; text-shadow: 2px 2px 0px var(--p); margin: 0; }
 
-        .game-header { background: #222; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; }
+        /* HEADER */
+        .game-header { background: #1e293b; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; }
 
-        .game-content-wrapper { display: flex; flex-direction: column; gap: 15px; padding: 15px; flex: 1; margin-bottom: 100px; }
+        /* CONTENT */
+        .game-content-wrapper { display: flex; flex-direction: column; gap: 15px; padding: 15px; flex: 1; margin-bottom: 125px; }
         @media (min-width: 900px) { .game-content-wrapper { flex-direction: row; } }
 
-        .map-container { flex: 7; position: relative; background: #2c2c2c; border-radius: 15px; padding: 10px; box-shadow: inset 0 0 20px rgba(0,0,0,0.5); height: fit-content; }
-        .map-relative-box { position: relative; width: 100%; }
-        .map-image { width: 100%; height: auto; display: block; border-radius: 10px; }
+        /* MAP & PATHS */
+        .map-container { flex: 7; position: relative; background: #1e293b; border-radius: 15px; padding: 10px; box-shadow: inset 0 0 20px rgba(0,0,0,0.5); }
+        .map-relative-box { position: relative; width: 100%; border-radius: 10px; overflow: hidden; }
+        .map-image { width: 100%; height: auto; display: block; }
+        #path-svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; }
+        .road-line { stroke: var(--road); stroke-width: 3; stroke-dasharray: 6,4; fill: none; opacity: 0.8; filter: drop-shadow(0 0 3px #fff); }
+        .sea-line { stroke: var(--sea); stroke-width: 4; stroke-dasharray: 8,4; fill: none; opacity: 1; filter: drop-shadow(0 0 5px var(--sea)); }
 
-        .station { position: absolute; width: 5.8%; aspect-ratio: 1/1; background: white; border: 2px solid var(--dark-green); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; color: var(--dark-green); font-size: clamp(8px, 1.6vw, 16px); z-index: 10; cursor: pointer; transition: 0.2s; }
-        .station.locked { background: #333 !important; border-color: #555 !important; color: #777 !important; opacity: 0.6; filter: grayscale(1); }
+        /* STATIONS */
+        .station { position: absolute; width: 5.8%; aspect-ratio: 1/1; background: white; border: 2px solid var(--dg); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; color: var(--dg); font-size: clamp(8px, 1.6vw, 16px); z-index: 10; cursor: pointer; transition: 0.2s; }
+        .station.locked { background: #334155 !important; border-color: #475569 !important; color: #94a3b8 !important; opacity: 0.6; filter: grayscale(1); }
         .station.locked::after { content: '🔒'; position: absolute; font-size: 10px; bottom: -12px; left: 50%; transform: translateX(-50%); }
 
-        .leaderboard-sidebar { flex: 3; background: #222; border: 2px solid var(--primary); border-radius: 15px; padding: 15px; height: fit-content; }
+        /* LEADERBOARD */
+        .leaderboard-sidebar { flex: 3; background: #1e293b; border: 2px solid var(--p); border-radius: 15px; padding: 15px; height: fit-content; }
         .leaderboard-title { color: var(--gold); text-align: center; font-family: 'Bungee'; font-size: 0.8rem; margin-bottom: 10px; }
         table { width: 100%; border-collapse: collapse; font-size: 0.75rem; }
-        th { background: var(--primary); color: #000; padding: 8px; font-size: 0.7rem; }
-        td { padding: 8px 4px; border-bottom: 1px solid #333; text-align: center; }
+        th { background: var(--p); color: #000; padding: 8px; }
+        td { padding: 8px 4px; border-bottom: 1px solid #334155; text-align: center; }
 
-        #countdown-overlay, #auth-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 30000; text-align: center; padding: 20px; backdrop-filter: blur(5px); }
-        .notice-box, .auth-card { background: #2c2c2c; padding: 30px; border-radius: 20px; border: 2px solid var(--primary); max-width: 350px; width: 90%; }
-        .timer-box { font-size: 1.2rem; font-family: 'Bungee'; color: #00FF00; margin: 15px 0; }
-        .auth-card input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #444; background: #111; color: white; box-sizing: border-box; }
+        /* FOOTER & COPYRIGHT */
+        .game-footer { background: #0f172a; padding: 12px 5px; border-top: 2px solid var(--p); position: fixed; bottom: 0; width: 100%; z-index: 10000; }
+        .footer-buttons { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; max-width: 950px; margin: 0 auto 12px; }
+        .btn-nav { flex: 1; min-width: 85px; background: #1e293b; border: 1.5px solid var(--p); color: var(--p); padding: 10px; border-radius: 8px; font-weight: 700; text-decoration: none; text-align: center; font-size: 0.7rem; cursor: pointer; transition: 0.2s; font-family: 'Lexend'; }
+        .btn-nav:hover { background: var(--p); color: white; }
+        .btn-share { color: var(--sea); border-color: var(--sea); }
+        
+        .copyright-box { border-top: 1px solid #334155; padding-top: 8px; text-align: center; }
+        .copyright-text { font-size: 0.65rem; color: var(--text-sec); letter-spacing: 0.5px; font-weight: 300; margin: 0; }
+        .copyright-text b { color: var(--p); font-weight: 600; }
 
-        .game-footer { background: #222; padding: 10px 5px; border-top: 3px solid var(--primary); position: fixed; bottom: 0; width: 100%; z-index: 10000; }
-        .footer-buttons { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; max-width: 950px; margin: 0 auto; }
-        .btn-nav { flex: 1; min-width: 80px; background: #333; border: 1px solid var(--primary); color: var(--primary); padding: 10px 2px; border-radius: 8px; font-weight: bold; text-decoration: none; text-align: center; font-size: clamp(0.55rem, 2.2vw, 0.8rem); cursor: pointer; }
-        .btn-share { color: #fff; background: var(--dark-green); border-color: #fff; }
-        .copyright-text { text-align: center; font-size: 0.6rem; color: #777; margin-top: 5px; }
+        /* OVERLAYS */
+        #countdown-overlay, #auth-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.95); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 30000; text-align: center; padding: 20px; backdrop-filter: blur(5px); }
+        .notice-box, .auth-card { background: #1e293b; padding: 30px; border-radius: 20px; border: 2px solid var(--p); max-width: 350px; width: 90%; }
+        .timer-box { font-size: 1.5rem; font-family: 'Bungee'; color: #2ecc71; margin: 15px 0; }
+        .auth-card input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: white; box-sizing: border-box; }
 
-        /* TỌA ĐỘ TRẠM 19-35 */
+        /* STATION COORDINATES */
         #st-19 { top: 1.5%; left: 40%; } #st-20 { top: 8%; left: 45%; } #st-21 { top: 10%; left: 23%; }
         #st-22 { top: 12%; left: 40%; } #st-23 { top: 17%; left: 54%; } #st-24 { top: 27%; left: 44%; }
         #st-25 { top: 38%; left: 52%; } #st-26 { top: 46%; left: 63%; } #st-27 { top: 54%; left: 70%; }
@@ -60,7 +75,7 @@
             <h2 style="font-family:'Bungee'; color:var(--gold);">HỒ SƠ THÁM HIỂM</h2>
             <input type="text" id="input-name" placeholder="Họ và Tên đầy đủ">
             <input type="text" id="input-class" placeholder="Lớp (Ví dụ: 5/4)">
-            <button onclick="saveAuthData()" style="background:var(--primary); padding:12px; width:100%; border-radius:10px; border:none; font-weight:bold; cursor:pointer; margin-top:10px;">BẮT ĐẦU</button>
+            <button onclick="saveAuthData()" style="background:var(--p); color:white; padding:12px; width:100%; border-radius:10px; border:none; font-weight:700; cursor:pointer; margin-top:10px;">BẮT ĐẦU</button>
         </div>
     </div>
 
@@ -76,22 +91,23 @@
 
     <header class="game-header">
         <div style="display:flex; align-items:center; gap:10px;">
-            <div style="width:30px; height:30px; border-radius:50%; background:var(--gold);"></div>
+            <div style="width:34px; height:34px; border-radius:50%; background:var(--gold); display:flex; align-items:center; justify-content:center; color:#000; font-weight:bold;">R</div>
             <div>
                 <span id="user-display" style="font-size:0.85rem; font-weight:bold; color:var(--gold);">Khách</span>
-                <span id="class-display" style="font-size:0.7rem; color:#ccc; display:block;">Cần nhập hồ sơ</span>
+                <span id="class-display" style="font-size:0.7rem; color:var(--text-sec); display:block;">Cần đăng ký</span>
             </div>
         </div>
         <div style="text-align:right;">
-            <span style="font-size:0.6rem; color:#ccc;">KỶ LỤC TUẦN</span>
-            <span id="high-score" style="font-size:1rem; color:var(--primary); font-weight:bold; display:block;">0</span>
+            <span style="font-size:0.6rem; color:var(--text-sec); display:block;">KỶ LỤC TUẦN</span>
+            <span id="high-score" style="font-size:1rem; color:var(--p); font-weight:bold;">0</span>
         </div>
     </header>
 
     <main class="game-content-wrapper">
         <div class="map-container">
-            <div class="map-relative-box">
-                <img src="Bandogame.jpg" alt="Bản đồ" class="map-image">
+            <div class="map-relative-box" id="map-box">
+                <img src="Bandogame.jpg" alt="Bản đồ" class="map-image" id="map-img">
+                <svg id="path-svg"></svg>
                 <script>
                     for(let i=19; i<=35; i++) {
                         document.write(`<div class="station" id="st-${i}" onclick="handleStageClick(${i})">${i}</div>`);
@@ -104,12 +120,7 @@
             <h3 id="lb-title" class="leaderboard-title">🏆 TOP 10 CAO THỦ</h3>
             <table>
                 <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Thí sinh</th>
-                        <th>Điểm</th>
-                        <th>Thời gian</th>
-                    </tr>
+                    <tr><th>#</th><th>Thí sinh</th><th>Điểm</th><th>Thời gian</th></tr>
                 </thead>
                 <tbody id="leaderboard-list-ui"></tbody>
             </table>
@@ -119,11 +130,13 @@
     <footer class="game-footer">
         <div class="footer-buttons">
             <a href="tuido.html" class="btn-nav">🎒 TÚI ĐỒ</a>
-            <a href="bang-vang.html" class="btn-nav" style="color:var(--gold);">🏆 BẢNG VÀNG</a>
+            <a href="bang-vang.html" class="btn-nav" style="color:var(--gold); border-color:var(--gold);">🏆 BẢNG VÀNG</a>
             <button class="btn-nav btn-share" onclick="shareGame()">📤 CHIA SẺ</button>
             <button id="btn-auth-action" class="btn-nav" onclick="handleAuthAction()"></button>
         </div>
-        <div class="copyright-text">© 2026 EduRobot.id.vn - Lê Thành Long</div>
+        <div class="copyright-box">
+            <p class="copyright-text">© 2026 <b>EduRobot.id.vn</b> - Thiết kế bởi <b>Lê Thành Long</b></p>
+        </div>
     </footer>
 
     <script>
@@ -131,8 +144,29 @@
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        const WEEK_NUMBER = 19; 
-        const SCHEDULE = { 19: "2026-01-13T00:00:00", 20: "2026-01-23T14:00:00" };
+        // ==========================================
+        // KHU VỰC TÙY CHỈNH LỊCH MỞ VÒNG (14:00 THỨ 6)
+        // ==========================================
+        const SCHEDULE = {
+            19: "2026-01-14T14:00:00", 
+            20: "2026-01-23T14:00:00", 
+            21: "2026-01-30T14:00:00", 
+            22: "2026-02-06T14:00:00", 
+            23: "2026-02-13T14:00:00", 
+            24: "2026-02-20T14:00:00", 
+            25: "2026-02-27T14:00:00", 
+            26: "2026-03-06T14:00:00", 
+            27: "2026-03-13T14:00:00", 
+            28: "2026-03-20T14:00:00", 
+            29: "2026-03-27T14:00:00", 
+            30: "2026-04-03T14:00:00", 
+            31: "2026-04-10T14:00:00", 
+            32: "2026-04-17T14:00:00", 
+            33: "2026-05-08T14:00:00", 
+            34: "2026-05-15T14:00:00", 
+            35: "2026-05-23T14:00:00"
+        };
+        const WEEK_NUMBER = 19; // Tuần hiển thị Top 10
 
         let currentName = localStorage.getItem('studentName');
         let currentClass = localStorage.getItem('studentClass');
@@ -143,7 +177,32 @@
             updateStationStyles(); 
             loadLeaderboard();
             if (!currentName) document.getElementById('auth-overlay').style.display = 'flex';
+            const mapImg = document.getElementById('map-img');
+            if (mapImg.complete) drawPaths(); else mapImg.onload = drawPaths;
         };
+
+        function drawPaths() {
+            const svg = document.getElementById('path-svg');
+            svg.innerHTML = '';
+            const now = new Date();
+            for (let i = 19; i < 35; i++) {
+                const startEl = document.getElementById(`st-${i}`);
+                const endEl = document.getElementById(`st-${i+1}`);
+                const openTimeNext = new Date(SCHEDULE[i+1]);
+                if (now >= openTimeNext) {
+                    const x1 = startEl.offsetLeft + startEl.offsetWidth / 2;
+                    const y1 = startEl.offsetTop + startEl.offsetHeight / 2;
+                    const x2 = endEl.offsetLeft + endEl.offsetWidth / 2;
+                    const y2 = endEl.offsetTop + endEl.offsetHeight / 2;
+                    const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                    line.setAttribute("x1", x1); line.setAttribute("y1", y1);
+                    line.setAttribute("x2", x2); line.setAttribute("y2", y2);
+                    line.setAttribute("class", i >= 33 ? "sea-line" : "road-line");
+                    svg.appendChild(line);
+                }
+            }
+        }
+        window.onresize = drawPaths;
 
         function updateUI() {
             const authBtn = document.getElementById('btn-auth-action');
@@ -151,15 +210,13 @@
                 document.getElementById('user-display').innerText = currentName;
                 document.getElementById('class-display').innerText = "Lớp: " + currentClass;
                 authBtn.innerHTML = "⚙️ ĐĂNG XUẤT";
+                authBtn.style.color = "#ff5252";
             } else { authBtn.innerHTML = "👤 NHẬP TÊN"; }
         }
 
         function handleAuthAction() {
-            if (currentName) {
-                if(confirm("Xóa hồ sơ thám hiểm hiện tại?")) {
-                    localStorage.clear(); location.reload();
-                }
-            } else { document.getElementById('auth-overlay').style.display = 'flex'; }
+            if (currentName) { if(confirm("Xóa hồ sơ hiện tại?")) { localStorage.clear(); location.reload(); } }
+            else { document.getElementById('auth-overlay').style.display = 'flex'; }
         }
 
         function saveAuthData() {
@@ -176,20 +233,20 @@
             for (let i = 19; i <= 35; i++) {
                 const el = document.getElementById(`st-${i}`);
                 if (!el) continue;
-                const openTime = new Date(SCHEDULE[i] || "2026-12-31");
-                if (now < openTime) el.classList.add('locked');
+                if (now < new Date(SCHEDULE[i])) el.classList.add('locked');
             }
         }
 
         function handleStageClick(no) {
             const now = new Date();
-            const openTime = new Date(SCHEDULE[no] || "2026-12-31");
+            const openTime = new Date(SCHEDULE[no]);
             if (now < openTime) return showNoticeCountdown(openTime);
             window.location.href = no + ".html";
         }
 
         function showNoticeCountdown(endTime) {
             document.getElementById('countdown-overlay').style.display = 'flex';
+            clearInterval(noticeInterval);
             noticeInterval = setInterval(() => {
                 const dist = endTime - new Date();
                 if (dist < 0) return location.reload();
@@ -203,9 +260,9 @@
 
         function closeNotice() { document.getElementById('countdown-overlay').style.display = 'none'; clearInterval(noticeInterval); }
 
-        function formatTime(seconds) {
-            if (!seconds) return "00:00";
-            const m = Math.floor(seconds / 60); const s = seconds % 60;
+        function formatTime(sec) {
+            if (!sec) return "00:00";
+            const m = Math.floor(sec / 60), s = sec % 60;
             return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
         }
 
@@ -216,7 +273,7 @@
                 const listUI = document.getElementById('leaderboard-list-ui');
                 if (!data) return listUI.innerHTML = '<tr><td colspan="4">Chưa có dữ liệu</td></tr>';
                 let all = []; for (let id in data) all.push(data[id]);
-                all.sort((a, b) => { if (b.score !== a.score) return b.score - a.score; return (a.duration || 999) - (b.duration || 999); });
+                all.sort((a, b) => (b.score !== a.score) ? b.score - a.score : (a.duration || 999) - (b.duration || 999));
                 const top10 = []; const seen = new Set();
                 for (let s of all) {
                     let key = ((s.fullName || s.name) + (s.className || s.class)).toLowerCase();
@@ -224,29 +281,15 @@
                     if (top10.length >= 10) break;
                 }
                 listUI.innerHTML = top10.map((s, i) => `
-                    <tr>
-                        <td>${i+1}</td>
-                        <td style="text-align:left;"><b>${s.fullName || s.name}</b><br><small>${s.className || s.class}</small></td>
-                        <td style="color:var(--primary); font-weight:bold;">${s.score}</td>
-                        <td style="color:#2ecc71;">${formatTime(s.duration)}</td>
-                    </tr>
+                    <tr><td>${i+1}</td><td style="text-align:left;"><b>${s.fullName || s.name}</b><br><small>${s.className || s.class}</small></td><td style="color:var(--p); font-weight:bold;">${s.score}</td><td style="color:#2ecc71;">${formatTime(s.duration)}</td></tr>
                 `).join('');
                 if (top10.length > 0) document.getElementById('high-score').innerText = top10[0].score;
             });
         }
 
         function shareGame() {
-            const shareData = {
-                title: 'Hành trình xuyên Việt cùng Robot',
-                text: 'Mời bạn cùng thám hiểm Việt Nam và học Toán cùng mình nhé!',
-                url: window.location.href
-            };
-            if (navigator.share) {
-                navigator.share(shareData).catch((err) => console.log('Error sharing', err));
-            } else {
-                navigator.clipboard.writeText(window.location.href);
-                alert('Đã sao chép link thám hiểm! Hãy gửi cho bạn bè nhé.');
-            }
+            const data = { title: 'Thám hiểm Việt Nam cùng Robot', text: 'Thách đấu bạn giải toán thám hiểm!', url: window.location.href };
+            if (navigator.share) navigator.share(data); else { navigator.clipboard.writeText(window.location.href); alert('Đã sao chép link!'); }
         }
     </script>
 </body>
