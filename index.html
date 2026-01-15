@@ -8,62 +8,92 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <style>
-        :root { --p: #FF9800; --dg: #2e7d32; --gold: #ffd700; --bg: #0f172a; --road: #ffffff; --sea: #00f2ff; --text-sec: #94a3b8; }
+        :root { --p: #FF9800; --dg: #2e7d32; --gold: #ffd700; --bg: #0f172a; --road: #ccff00; --sea: #00f2ff; --text-sec: #94a3b8; }
         body { margin: 0; padding: 0; font-family: 'Lexend', sans-serif; background-color: var(--bg); color: white; display: flex; flex-direction: column; min-height: 100vh; overflow-x: hidden; }
         
-        /* BANNER */
         .welcome-banner { background: linear-gradient(90deg, #0f172a, #1e293b, #0f172a); padding: 15px 20px; border-bottom: 2px solid var(--p); text-align: center; }
         .welcome-text { font-family: 'Bungee'; font-size: clamp(1rem, 4vw, 1.8rem); color: white; text-shadow: 2px 2px 0px var(--p); margin: 0; }
-
-        /* HEADER */
         .game-header { background: #1e293b; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; }
 
-        /* CONTENT */
-        .game-content-wrapper { display: flex; flex-direction: column; gap: 15px; padding: 15px; flex: 1; margin-bottom: 125px; }
+        .game-content-wrapper { display: flex; flex-direction: column; gap: 15px; padding: 15px; flex: 1; margin-bottom: 140px; }
         @media (min-width: 900px) { .game-content-wrapper { flex-direction: row; } }
 
-        /* MAP & PATHS */
         .map-container { flex: 7; position: relative; background: #1e293b; border-radius: 15px; padding: 10px; box-shadow: inset 0 0 20px rgba(0,0,0,0.5); }
         .map-relative-box { position: relative; width: 100%; border-radius: 10px; overflow: hidden; }
         .map-image { width: 100%; height: auto; display: block; }
-        #path-svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; }
-        .road-line { stroke: var(--road); stroke-width: 3; stroke-dasharray: 6,4; fill: none; opacity: 0.8; filter: drop-shadow(0 0 3px #fff); }
-        .sea-line { stroke: var(--sea); stroke-width: 4; stroke-dasharray: 8,4; fill: none; opacity: 1; filter: drop-shadow(0 0 5px var(--sea)); }
 
-        /* STATIONS */
-        .station { position: absolute; width: 5.8%; aspect-ratio: 1/1; background: white; border: 2px solid var(--dg); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; color: var(--dg); font-size: clamp(8px, 1.6vw, 16px); z-index: 10; cursor: pointer; transition: 0.2s; }
+        /* ĐỊA DANH SIÊU NỔI BẬT */
+        .landmark { position: absolute; color: #fff; font-size: clamp(8px, 1.3vw, 13px); font-weight: 700; z-index: 8; white-space: nowrap; background: linear-gradient(135deg, #1e3a8a, #1e293b); padding: 3px 8px; border-radius: 6px; border: 1.5px solid var(--gold); box-shadow: 0 0 8px rgba(255, 215, 0, 0.4); pointer-events: none; }
+        #lm-lungcu { top: 1.2%; left: 38%; }
+        #lm-hanoi { top: 16%; left: 35%; }
+        #lm-hue { top: 44%; left: 63%; }
+        #lm-tphcm { top: 81%; left: 55%; }
+        #lm-camau { top: 93%; left: 32%; }
+
+        #path-svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; }
+        .road-line { stroke: var(--road); stroke-width: 3.5; stroke-dasharray: 7,5; fill: none; opacity: 0.9; filter: drop-shadow(0 0 4px var(--road)); }
+        .sea-line { stroke: var(--sea); stroke-width: 4.5; stroke-dasharray: 10,5; fill: none; opacity: 1; filter: drop-shadow(0 0 6px var(--sea)); }
+
+        .station { position: absolute; width: 5.8%; aspect-ratio: 1/1; background: white; border: 2.5px solid var(--dg); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; color: var(--dg); font-size: clamp(8px, 1.6vw, 16px); z-index: 10; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
         .station.locked { background: #334155 !important; border-color: #475569 !important; color: #94a3b8 !important; opacity: 0.6; filter: grayscale(1); }
         .station.locked::after { content: '🔒'; position: absolute; font-size: 10px; bottom: -12px; left: 50%; transform: translateX(-50%); }
 
-        /* LEADERBOARD */
         .leaderboard-sidebar { flex: 3; background: #1e293b; border: 2px solid var(--p); border-radius: 15px; padding: 15px; height: fit-content; }
         .leaderboard-title { color: var(--gold); text-align: center; font-family: 'Bungee'; font-size: 0.8rem; margin-bottom: 10px; }
         table { width: 100%; border-collapse: collapse; font-size: 0.75rem; }
         th { background: var(--p); color: #000; padding: 8px; }
         td { padding: 8px 4px; border-bottom: 1px solid #334155; text-align: center; }
 
-        /* FOOTER & COPYRIGHT */
-        .game-footer { background: #0f172a; padding: 12px 5px; border-top: 2px solid var(--p); position: fixed; bottom: 0; width: 100%; z-index: 10000; }
-        .footer-buttons { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; max-width: 950px; margin: 0 auto 12px; }
-        .btn-nav { flex: 1; min-width: 85px; background: #1e293b; border: 1.5px solid var(--p); color: var(--p); padding: 10px; border-radius: 8px; font-weight: 700; text-decoration: none; text-align: center; font-size: 0.7rem; cursor: pointer; transition: 0.2s; font-family: 'Lexend'; }
+        /* FOOTER CỐ ĐỊNH 1 HÀNG */
+        .game-footer { background: #0f172a; padding: 10px 0; border-top: 2px solid var(--p); position: fixed; bottom: 0; width: 100%; z-index: 10000; box-shadow: 0 -5px 20px rgba(0,0,0,0.8); }
+        .footer-buttons { 
+            display: flex; 
+            flex-direction: row; /* Ép nằm ngang */
+            flex-wrap: nowrap;   /* Không cho xuống dòng */
+            justify-content: space-evenly; 
+            align-items: center;
+            gap: 5px; 
+            max-width: 100%; 
+            margin: 0 auto 10px; 
+            padding: 0 5px;
+            overflow-x: auto; /* Cuộn ngang nếu màn hình quá bé */
+            -webkit-overflow-scrolling: touch;
+        }
+        .footer-buttons::-webkit-scrollbar { display: none; } /* Ẩn thanh cuộn để đẹp hơn */
+
+        .btn-nav { 
+            flex: 1; 
+            min-width: 75px; /* Giảm độ rộng tối thiểu để vừa màn hình điện thoại */
+            background: #1e293b; 
+            border: 1.5px solid var(--p); 
+            color: var(--p); 
+            padding: 8px 2px; 
+            border-radius: 8px; 
+            font-weight: 700; 
+            text-decoration: none; 
+            text-align: center; 
+            font-size: 0.65rem; /* Chữ nhỏ hơn một chút cho mobile */
+            cursor: pointer; 
+            transition: 0.2s; 
+            font-family: 'Lexend';
+            white-space: nowrap; /* Không cho chữ trong nút xuống dòng */
+        }
         .btn-nav:hover { background: var(--p); color: white; }
         .btn-share { color: var(--sea); border-color: var(--sea); }
         
-        .copyright-box { border-top: 1px solid #334155; padding-top: 8px; text-align: center; }
-        .copyright-text { font-size: 0.65rem; color: var(--text-sec); letter-spacing: 0.5px; font-weight: 300; margin: 0; }
-        .copyright-text b { color: var(--p); font-weight: 600; }
+        .copyright-box { border-top: 1px solid #1e293b; padding-top: 8px; text-align: center; }
+        .copyright-text { font-size: 0.6rem; color: #cbd5e1; letter-spacing: 0.5px; margin: 0; text-transform: uppercase; }
+        .copyright-text b { color: var(--p); }
 
-        /* OVERLAYS */
-        #countdown-overlay, #auth-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.95); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 30000; text-align: center; padding: 20px; backdrop-filter: blur(5px); }
-        .notice-box, .auth-card { background: #1e293b; padding: 30px; border-radius: 20px; border: 2px solid var(--p); max-width: 350px; width: 90%; }
-        .timer-box { font-size: 1.5rem; font-family: 'Bungee'; color: #2ecc71; margin: 15px 0; }
-        .auth-card input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: white; box-sizing: border-box; }
+        #countdown-overlay, #auth-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.98); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 30000; text-align: center; padding: 20px; backdrop-filter: blur(10px); }
+        .notice-box, .auth-card { background: #1e293b; padding: 30px; border-radius: 20px; border: 2.5px solid var(--p); max-width: 350px; width: 90%; }
+        .timer-box { font-size: 1.8rem; font-family: 'Bungee'; color: #00ff00; margin: 15px 0; }
+        .auth-card input { width: 100%; padding: 14px; margin: 10px 0; border-radius: 10px; border: 1.5px solid #334155; background: #0f172a; color: white; box-sizing: border-box; font-family: 'Lexend'; }
 
-        /* STATION COORDINATES */
         #st-19 { top: 1.5%; left: 40%; } #st-20 { top: 8%; left: 45%; } #st-21 { top: 10%; left: 23%; }
         #st-22 { top: 12%; left: 40%; } #st-23 { top: 17%; left: 54%; } #st-24 { top: 27%; left: 44%; }
         #st-25 { top: 38%; left: 52%; } #st-26 { top: 46%; left: 63%; } #st-27 { top: 54%; left: 70%; }
-        #st-28 { top: 62%; left: 73%; } #st-29 { top: 70%; left: 74%; } #st-30 { top: 78%; left: 61%; }
+        #st-28 { top: 62%; left: 73%; } #st-29 { top: 70%; left: 74%; } #st-30 { top: 75%; left: 68%; }
         #st-31 { top: 79%; left: 50%; } #st-32 { top: 80%; left: 35%; } #st-33 { top: 89%; left: 35%; }
         #st-34 { top: 90%; left: 80%; } #st-35 { top: 46%; left: 85%; }
     </style>
@@ -72,10 +102,10 @@
 
     <div id="auth-overlay">
         <div class="auth-card">
-            <h2 style="font-family:'Bungee'; color:var(--gold);">HỒ SƠ THÁM HIỂM</h2>
+            <h2 style="font-family:'Bungee'; color:var(--gold); margin-bottom: 5px;">HỒ SƠ THÁM HIỂM</h2>
             <input type="text" id="input-name" placeholder="Họ và Tên đầy đủ">
             <input type="text" id="input-class" placeholder="Lớp (Ví dụ: 5/4)">
-            <button onclick="saveAuthData()" style="background:var(--p); color:white; padding:12px; width:100%; border-radius:10px; border:none; font-weight:700; cursor:pointer; margin-top:10px;">BẮT ĐẦU</button>
+            <button onclick="saveAuthData()" style="background:var(--p); color:white; padding:15px; width:100%; border-radius:12px; border:none; font-weight:700; cursor:pointer; margin-top:10px; font-family:'Lexend'; font-size: 1.1rem;">BẮT ĐẦU</button>
         </div>
     </div>
 
@@ -83,23 +113,23 @@
         <div class="notice-box">
             <h2 id="notice-title" style="font-family:'Bungee'; color:var(--gold);">CHẶNG CHƯA MỞ</h2>
             <div class="timer-box" id="timer-display">00:00:00</div>
-            <button class="btn-nav" onclick="closeNotice()" style="width:100%">ĐÃ HIỂU</button>
+            <button class="btn-nav" onclick="closeNotice()" style="width:100%; border-color: #94a3b8; color: #fff;">ĐÃ HIỂU</button>
         </div>
     </div>
 
     <div class="welcome-banner"><h1 class="welcome-text">THÁM HIỂM VIỆT NAM CÙNG ROBOT</h1></div>
 
     <header class="game-header">
-        <div style="display:flex; align-items:center; gap:10px;">
-            <div style="width:34px; height:34px; border-radius:50%; background:var(--gold); display:flex; align-items:center; justify-content:center; color:#000; font-weight:bold;">R</div>
+        <div style="display:flex; align-items:center; gap:12px;">
+            <div style="width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg, var(--gold), #f59e0b); display:flex; align-items:center; justify-content:center; color:#000; font-weight:800;">R</div>
             <div>
-                <span id="user-display" style="font-size:0.85rem; font-weight:bold; color:var(--gold);">Khách</span>
-                <span id="class-display" style="font-size:0.7rem; color:var(--text-sec); display:block;">Cần đăng ký</span>
+                <span id="user-display" style="font-size:0.95rem; font-weight:bold; color:var(--gold);">Khách</span>
+                <span id="class-display" style="font-size:0.75rem; color:var(--text-sec); display:block;">Cần đăng ký</span>
             </div>
         </div>
         <div style="text-align:right;">
-            <span style="font-size:0.6rem; color:var(--text-sec); display:block;">KỶ LỤC TUẦN</span>
-            <span id="high-score" style="font-size:1rem; color:var(--p); font-weight:bold;">0</span>
+            <span style="font-size:0.65rem; color:var(--text-sec); display:block;">KỶ LỤC TUẦN</span>
+            <span id="high-score" style="font-size:1.2rem; color:var(--p); font-weight:bold;">0</span>
         </div>
     </header>
 
@@ -107,6 +137,13 @@
         <div class="map-container">
             <div class="map-relative-box" id="map-box">
                 <img src="Bandogame.jpg" alt="Bản đồ" class="map-image" id="map-img">
+                
+                <div class="landmark" id="lm-lungcu">Lũng Cú</div>
+                <div class="landmark" id="lm-hanoi">Thủ đô Hà Nội</div>
+                <div class="landmark" id="lm-hue">Cố đô Huế</div>
+                <div class="landmark" id="lm-tphcm">TP. Hồ Chí Minh</div>
+                <div class="landmark" id="lm-camau">Mũi Cà Mau</div>
+
                 <svg id="path-svg"></svg>
                 <script>
                     for(let i=19; i<=35; i++) {
@@ -135,7 +172,7 @@
             <button id="btn-auth-action" class="btn-nav" onclick="handleAuthAction()"></button>
         </div>
         <div class="copyright-box">
-            <p class="copyright-text">© 2026 <b>EduRobot.id.vn</b> - Thiết kế bởi <b>Lê Thành Long</b></p>
+            <p class="copyright-text">© 2026 <b>EDUROBOT.ID.VN</b> - THIẾT KẾ BỞI <b>LÊ THÀNH LONG</b></p>
         </div>
     </footer>
 
@@ -144,29 +181,15 @@
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // ==========================================
-        // KHU VỰC TÙY CHỈNH LỊCH MỞ VÒNG (14:00 THỨ 6)
-        // ==========================================
         const SCHEDULE = {
-            19: "2026-01-14T14:00:00", 
-            20: "2026-01-23T14:00:00", 
-            21: "2026-01-30T14:00:00", 
-            22: "2026-02-06T14:00:00", 
-            23: "2026-02-13T14:00:00", 
-            24: "2026-02-20T14:00:00", 
-            25: "2026-02-27T14:00:00", 
-            26: "2026-03-06T14:00:00", 
-            27: "2026-03-13T14:00:00", 
-            28: "2026-03-20T14:00:00", 
-            29: "2026-03-27T14:00:00", 
-            30: "2026-04-03T14:00:00", 
-            31: "2026-04-10T14:00:00", 
-            32: "2026-04-17T14:00:00", 
-            33: "2026-05-08T14:00:00", 
-            34: "2026-05-15T14:00:00", 
-            35: "2026-05-23T14:00:00"
+            19: "2026-01-16T14:00:00", 20: "2026-01-23T14:00:00", 21: "2026-01-30T14:00:00", 
+            22: "2026-02-06T14:00:00", 23: "2026-02-13T14:00:00", 24: "2026-02-20T14:00:00", 
+            25: "2026-02-27T14:00:00", 26: "2026-03-06T14:00:00", 27: "2026-03-13T14:00:00", 
+            28: "2026-03-20T14:00:00", 29: "2026-03-27T14:00:00", 30: "2026-04-03T14:00:00", 
+            31: "2026-04-10T14:00:00", 32: "2026-04-17T14:00:00", 33: "2026-04-24T14:00:00", 
+            34: "2026-05-01T14:00:00", 35: "2026-05-08T14:00:00"
         };
-        const WEEK_NUMBER = 19; // Tuần hiển thị Top 10
+        const WEEK_NUMBER = 19; 
 
         let currentName = localStorage.getItem('studentName');
         let currentClass = localStorage.getItem('studentClass');
@@ -211,11 +234,12 @@
                 document.getElementById('class-display').innerText = "Lớp: " + currentClass;
                 authBtn.innerHTML = "⚙️ ĐĂNG XUẤT";
                 authBtn.style.color = "#ff5252";
+                authBtn.style.borderColor = "#ff5252";
             } else { authBtn.innerHTML = "👤 NHẬP TÊN"; }
         }
 
         function handleAuthAction() {
-            if (currentName) { if(confirm("Xóa hồ sơ hiện tại?")) { localStorage.clear(); location.reload(); } }
+            if (currentName) { if(confirm("Xóa hồ sơ thám hiểm?")) { localStorage.clear(); location.reload(); } }
             else { document.getElementById('auth-overlay').style.display = 'flex'; }
         }
 
