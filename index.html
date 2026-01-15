@@ -43,11 +43,13 @@
         .btn-nav { flex: 1; background: #333; border: 1px solid var(--primary); color: var(--primary); padding: 10px 2px; border-radius: 8px; font-weight: bold; text-decoration: none; text-align: center; font-size: clamp(0.6rem, 2.5vw, 0.85rem); cursor: pointer; }
         .copyright-text { text-align: center; font-size: 0.6rem; color: #777; margin-top: 5px; }
 
-        /* TỌA ĐỘ TRẠM */
+        /* TỌA ĐỘ TRẠM PHỤC HỒI 19-35 */
         #st-19 { top: 1.5%; left: 40%; } #st-20 { top: 8%; left: 45%; } #st-21 { top: 10%; left: 23%; }
         #st-22 { top: 12%; left: 40%; } #st-23 { top: 17%; left: 54%; } #st-24 { top: 27%; left: 44%; }
         #st-25 { top: 38%; left: 52%; } #st-26 { top: 46%; left: 63%; } #st-27 { top: 54%; left: 70%; }
         #st-28 { top: 62%; left: 73%; } #st-29 { top: 70%; left: 74%; } #st-30 { top: 78%; left: 61%; }
+        #st-31 { top: 79%; left: 50%; } #st-32 { top: 80%; left: 35%; } #st-33 { top: 89%; left: 35%; }
+        #st-34 { top: 90%; left: 80%; } #st-35 { top: 46%; left: 85%; }
     </style>
 </head>
 <body>
@@ -90,7 +92,8 @@
             <div class="map-relative-box">
                 <img src="Bandogame.jpg" alt="Bản đồ" class="map-image">
                 <script>
-                    for(let i=19; i<=30; i++) {
+                    // Phục hồi vòng lặp từ 19 đến 35
+                    for(let i=19; i<=35; i++) {
                         document.write(`<div class="station" id="st-${i}" onclick="handleStageClick(${i})">${i}</div>`);
                     }
                 </script>
@@ -127,14 +130,17 @@
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // CHỈNH SỐ TUẦN HIỂN THỊ TẠI ĐÂY
+        // CHỈNH SỐ TUẦN HIỂN THỊ TRÊN TOP 10 TẠI ĐÂY
         const WEEK_NUMBER = 19; 
 
+        // LỊCH MỞ CỬA CÁC TRẠM
         const SCHEDULE = { 
             19: "2026-01-13T00:00:00", 
             20: "2026-01-23T14:00:00", 
             21: "2026-01-28T07:00:00",
-            22: "2026-02-05T07:00:00"
+            22: "2026-02-05T07:00:00",
+            23: "2026-02-12T07:00:00"
+            // Thêm các trạm tiếp theo tại đây
         };
 
         let currentName = localStorage.getItem('studentName');
@@ -161,7 +167,7 @@
 
         function handleAuthAction() {
             if (currentName) {
-                if(confirm("Đăng xuất hồ sơ thám hiểm?")) {
+                if(confirm("Xóa hồ sơ thám hiểm hiện tại?")) {
                     localStorage.clear();
                     location.reload();
                 }
@@ -179,7 +185,7 @@
 
         function updateStationStyles() {
             const now = new Date();
-            for (let i = 19; i <= 30; i++) {
+            for (let i = 19; i <= 35; i++) {
                 const el = document.getElementById(`st-${i}`);
                 if (!el) continue;
                 const openTime = new Date(SCHEDULE[i] || "2026-12-31");
@@ -210,14 +216,15 @@
         function closeNotice() { document.getElementById('countdown-overlay').style.display = 'none'; clearInterval(noticeInterval); }
 
         function formatTime(seconds) {
-            const s = seconds || 0;
-            const m = Math.floor(s / 60);
-            const rs = s % 60;
-            return `${m.toString().padStart(2, '0')}:${rs.toString().padStart(2, '0')}`;
+            if (!seconds) return "00:00";
+            const m = Math.floor(seconds / 60);
+            const s = seconds % 60;
+            return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
         }
 
         function loadLeaderboard() {
             document.getElementById('lb-title').innerText = `🏆 TOP 10 CAO THỦ - TUẦN ${WEEK_NUMBER}`;
+            // Đảm bảo path này khớp với path lưu điểm của trang tuần
             db.ref(`scores/Tuan_${WEEK_NUMBER}`).on('value', (snap) => {
                 const data = snap.val();
                 const listUI = document.getElementById('leaderboard-list-ui');
@@ -234,7 +241,7 @@
 
                 const top10 = []; const seen = new Set();
                 for (let s of all) {
-                    let key = (s.fullName + s.className).toLowerCase();
+                    let key = ((s.fullName || s.name) + (s.className || s.class)).toLowerCase();
                     if (!seen.has(key)) { top10.push(s); seen.add(key); }
                     if (top10.length >= 10) break;
                 }
@@ -242,7 +249,7 @@
                 listUI.innerHTML = top10.map((s, i) => `
                     <tr>
                         <td>${i+1}</td>
-                        <td style="text-align:left;"><b>${s.fullName}</b><br><small>${s.className}</small></td>
+                        <td style="text-align:left;"><b>${s.fullName || s.name}</b><br><small>${s.className || s.class}</small></td>
                         <td style="color:var(--primary); font-weight:bold;">${s.score}</td>
                         <td style="color:#2ecc71;">${formatTime(s.duration)}</td>
                     </tr>
