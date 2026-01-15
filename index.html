@@ -11,47 +11,34 @@
         :root { --primary: #FF9800; --dark-green: #2e7d32; --gold: #ffd700; --bg-dark: #1a1a1a; }
         body { margin: 0; padding: 0; font-family: 'Lexend', sans-serif; background-color: var(--bg-dark); color: white; display: flex; flex-direction: column; min-height: 100vh; overflow-x: hidden; }
         
-        /* BANNER */
         .welcome-banner { background: linear-gradient(90deg, #1a1a1a, #333, #1a1a1a); padding: 15px 20px; display: flex; justify-content: center; align-items: center; gap: 15px; border-bottom: 2px solid var(--primary); }
         .welcome-text { font-family: 'Bungee'; font-size: clamp(1rem, 4vw, 1.8rem); color: white; text-shadow: 2px 2px 0px var(--primary); text-align: center; }
 
-        /* HEADER */
         .game-header { background: #222; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; }
 
-        /* NỘI DUNG CHÍNH */
         .game-content-wrapper { display: flex; flex-direction: column; gap: 15px; padding: 15px; flex: 1; margin-bottom: 80px; }
         @media (min-width: 900px) { .game-content-wrapper { flex-direction: row; } }
 
-        /* BẢN ĐỒ */
         .map-container { flex: 7; position: relative; background: #2c2c2c; border-radius: 15px; padding: 10px; box-shadow: inset 0 0 20px rgba(0,0,0,0.5); height: fit-content; }
         .map-relative-box { position: relative; width: 100%; }
         .map-image { width: 100%; height: auto; display: block; border-radius: 10px; }
 
-        /* TRẠM */
         .station { position: absolute; width: 5.8%; aspect-ratio: 1/1; background: white; border: 2px solid var(--dark-green); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; color: var(--dark-green); font-size: clamp(8px, 1.6vw, 16px); z-index: 10; cursor: pointer; transition: 0.2s; }
         .station.locked { background: #333 !important; border-color: #555 !important; color: #777 !important; opacity: 0.6; filter: grayscale(1); }
         .station.locked::after { content: '🔒'; position: absolute; font-size: 10px; bottom: -12px; left: 50%; transform: translateX(-50%); }
 
-        /* BẢNG VÀNG SIDEBAR */
         .leaderboard-sidebar { flex: 3; background: #222; border: 2px solid var(--primary); border-radius: 15px; padding: 15px; height: fit-content; }
-        .leaderboard-title { color: var(--gold); text-align: center; font-family: 'Bungee'; font-size: 0.9rem; margin-bottom: 10px; }
-        table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
-        th { background: var(--primary); color: #000; padding: 8px; }
-        td { padding: 8px; border-bottom: 1px solid #333; text-align: center; }
+        .leaderboard-title { color: var(--gold); text-align: center; font-family: 'Bungee'; font-size: 0.8rem; margin-bottom: 10px; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.75rem; }
+        th { background: var(--primary); color: #000; padding: 8px; font-size: 0.7rem; }
+        td { padding: 8px 4px; border-bottom: 1px solid #333; text-align: center; }
 
-        /* THÔNG BÁO */
-        #countdown-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 20000; text-align: center; padding: 20px; backdrop-filter: blur(5px); }
-        .notice-box { background: #2c2c2c; padding: 30px; border-radius: 20px; border: 2px solid var(--primary); max-width: 400px; width: 90%; }
-        .timer-box { font-size: 1.5rem; font-family: 'Bungee'; color: #00FF00; margin: 20px 0; }
-        .btn-notice { background: var(--primary); color: white; border: none; padding: 12px 30px; border-radius: 10px; cursor: pointer; font-weight: bold; }
+        #countdown-overlay, #auth-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 30000; text-align: center; padding: 20px; backdrop-filter: blur(5px); }
+        .notice-box, .auth-card { background: #2c2c2c; padding: 30px; border-radius: 20px; border: 2px solid var(--primary); max-width: 350px; width: 90%; }
+        .timer-box { font-size: 1.2rem; font-family: 'Bungee'; color: #00FF00; margin: 15px 0; }
+        .auth-card input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #444; background: #111; color: white; box-sizing: border-box; }
 
-        /* FORM NHẬP THÔNG TIN */
-        #auth-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 30000; display: none; flex-direction: column; justify-content: center; align-items: center; }
-        .auth-card { background: #222; padding: 30px; border-radius: 20px; border: 2px solid var(--primary); width: 85%; max-width: 350px; text-align: center; }
-        .auth-card input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #444; background: #111; color: white; font-family: 'Lexend'; box-sizing: border-box; }
-
-        /* THANH NÚT CUỐI TRANG */
-        .game-footer { background: #222; padding: 10px 5px; border-top: 3px solid var(--primary); position: fixed; bottom: 0; width: 100%; z-index: 10000; box-sizing: border-box; }
+        .game-footer { background: #222; padding: 10px 5px; border-top: 3px solid var(--primary); position: fixed; bottom: 0; width: 100%; z-index: 10000; }
         .footer-buttons { display: flex; justify-content: center; gap: 8px; max-width: 900px; margin: 0 auto; }
         .btn-nav { flex: 1; background: #333; border: 1px solid var(--primary); color: var(--primary); padding: 10px 2px; border-radius: 8px; font-weight: bold; text-decoration: none; text-align: center; font-size: clamp(0.6rem, 2.5vw, 0.85rem); cursor: pointer; }
         .copyright-text { text-align: center; font-size: 0.6rem; color: #777; margin-top: 5px; }
@@ -61,8 +48,6 @@
         #st-22 { top: 12%; left: 40%; } #st-23 { top: 17%; left: 54%; } #st-24 { top: 27%; left: 44%; }
         #st-25 { top: 38%; left: 52%; } #st-26 { top: 46%; left: 63%; } #st-27 { top: 54%; left: 70%; }
         #st-28 { top: 62%; left: 73%; } #st-29 { top: 70%; left: 74%; } #st-30 { top: 78%; left: 61%; }
-        #st-31 { top: 79%; left: 50%; } #st-32 { top: 80%; left: 35%; } #st-33 { top: 89%; left: 35%; }
-        #st-34 { top: 90%; left: 80%; } #st-35 { top: 46%; left: 85%; }
     </style>
 </head>
 <body>
@@ -79,9 +64,8 @@
     <div id="countdown-overlay">
         <div class="notice-box">
             <h2 id="notice-title" style="font-family:'Bungee'; color:var(--gold);">CHẶNG CHƯA MỞ</h2>
-            <p id="notice-desc">Robot đang chuẩn bị dữ liệu thám hiểm!</p>
-            <div class="timer-box" id="timer-display">00 ngày 00:00:00</div>
-            <button class="btn-notice" onclick="closeNotice()">ĐÃ HIỂU</button>
+            <div class="timer-box" id="timer-display">00:00:00</div>
+            <button class="btn-nav" onclick="closeNotice()" style="width:100%">ĐÃ HIỂU</button>
         </div>
     </div>
 
@@ -96,8 +80,8 @@
             </div>
         </div>
         <div style="text-align:right;">
-            <span style="font-size:0.7rem; color:#ccc; display:block;">KỶ LỤC LỚP</span>
-            <span id="high-score" style="font-size:0.9rem; color:var(--primary); font-weight:bold;">0</span>
+            <span style="font-size:0.6rem; color:#ccc;">KỶ LỤC TUẦN</span>
+            <span id="high-score" style="font-size:1rem; color:var(--primary); font-weight:bold; display:block;">0</span>
         </div>
     </header>
 
@@ -106,7 +90,7 @@
             <div class="map-relative-box">
                 <img src="Bandogame.jpg" alt="Bản đồ" class="map-image">
                 <script>
-                    for(let i=19; i<=35; i++) {
+                    for(let i=19; i<=30; i++) {
                         document.write(`<div class="station" id="st-${i}" onclick="handleStageClick(${i})">${i}</div>`);
                     }
                 </script>
@@ -117,10 +101,11 @@
             <h3 id="lb-title" class="leaderboard-title">🏆 TOP 10 CAO THỦ</h3>
             <table>
                 <thead>
-                    <tr style="background:var(--primary); color:black;">
+                    <tr>
                         <th>#</th>
-                        <th>Học sinh - Lớp</th>
+                        <th>Thí sinh</th>
                         <th>Điểm</th>
+                        <th>Thời gian</th>
                     </tr>
                 </thead>
                 <tbody id="leaderboard-list-ui"></tbody>
@@ -142,13 +127,14 @@
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // CHỈNH SỐ TUẦN Ở ĐÂY ĐỂ HIỂN THỊ TRÊN BẢNG XẾP HẠNG
+        // CHỈNH SỐ TUẦN HIỂN THỊ TẠI ĐÂY
         const WEEK_NUMBER = 19; 
 
         const SCHEDULE = { 
             19: "2026-01-13T00:00:00", 
             20: "2026-01-23T14:00:00", 
-            21: "2026-01-30T14:00:00" 
+            21: "2026-01-28T07:00:00",
+            22: "2026-02-05T07:00:00"
         };
 
         let currentName = localStorage.getItem('studentName');
@@ -156,113 +142,109 @@
         let noticeInterval;
 
         window.onload = function() {
-            // Cập nhật tiêu đề bảng xếp hạng có số tuần
-            document.getElementById('lb-title').innerText = `🏆 TOP 10 CAO THỦ - TUẦN ${WEEK_NUMBER}`;
-            
             updateUI();
             updateStationStyles(); 
             loadLeaderboard();
-            if (!currentName || !currentClass) showAuthForm();
+            if (!currentName) document.getElementById('auth-overlay').style.display = 'flex';
         };
 
         function updateUI() {
             const authBtn = document.getElementById('btn-auth-action');
-            if(currentName && currentClass) {
+            if(currentName) {
                 document.getElementById('user-display').innerText = currentName;
                 document.getElementById('class-display').innerText = "Lớp: " + currentClass;
                 authBtn.innerHTML = "⚙️ ĐĂNG XUẤT";
-                authBtn.style.color = "#ff5252";
-                authBtn.style.borderColor = "#ff5252";
             } else {
-                document.getElementById('user-display').innerText = "Khách";
-                document.getElementById('class-display').innerText = "Cần nhập hồ sơ";
                 authBtn.innerHTML = "👤 NHẬP TÊN";
-                authBtn.style.color = "white";
-                authBtn.style.borderColor = "white";
             }
         }
 
         function handleAuthAction() {
             if (currentName) {
-                if(confirm("Em muốn đăng xuất và xóa hồ sơ không?")) {
+                if(confirm("Đăng xuất hồ sơ thám hiểm?")) {
                     localStorage.clear();
                     location.reload();
                 }
-            } else { showAuthForm(); }
+            } else { document.getElementById('auth-overlay').style.display = 'flex'; }
         }
 
-        function showAuthForm() { document.getElementById('auth-overlay').style.display = 'flex'; }
-        
         function saveAuthData() {
-            const name = document.getElementById('input-name').value.trim();
-            const cls = document.getElementById('input-class').value.trim();
-            if(name.length < 4 || cls.length < 2) { alert("Nhập đủ tên và lớp nhé!"); return; }
-            localStorage.setItem('studentName', name); 
-            localStorage.setItem('studentClass', cls);
+            const n = document.getElementById('input-name').value.trim();
+            const c = document.getElementById('input-class').value.trim();
+            if(n.length < 4 || c.length < 2) return alert("Nhập đủ tên và lớp!");
+            localStorage.setItem('studentName', n);
+            localStorage.setItem('studentClass', c);
             location.reload();
         }
 
         function updateStationStyles() {
             const now = new Date();
-            for (let i = 19; i <= 35; i++) {
+            for (let i = 19; i <= 30; i++) {
                 const el = document.getElementById(`st-${i}`);
                 if (!el) continue;
-                if (i === 19) continue;
                 const openTime = new Date(SCHEDULE[i] || "2026-12-31");
-                if (!currentName || now < openTime) el.classList.add('locked');
-                else el.classList.remove('locked');
+                if (now < openTime) el.classList.add('locked');
             }
         }
 
-        function handleStageClick(weekNo) {
-            if (weekNo === 19) { window.location.href = "19.html"; return; }
+        function handleStageClick(no) {
             const now = new Date();
-            const openTime = new Date(SCHEDULE[weekNo] || "2026-12-31");
-            if (!currentName) { alert("Hãy nhập hồ sơ trước!"); showAuthForm(); return; }
-            if (now >= openTime) { window.location.href = weekNo + ".html"; }
-            else { showNoticeCountdown(openTime); }
+            const openTime = new Date(SCHEDULE[no] || "2026-12-31");
+            if (now < openTime) return showNoticeCountdown(openTime);
+            window.location.href = no + ".html";
         }
 
         function showNoticeCountdown(endTime) {
             document.getElementById('countdown-overlay').style.display = 'flex';
-            if(noticeInterval) clearInterval(noticeInterval);
             noticeInterval = setInterval(() => {
-                const distance = endTime - new Date();
-                if (distance < 0) { location.reload(); return; }
-                const d = Math.floor(distance / 86400000);
-                const h = Math.floor((distance % 86400000) / 3600000);
-                const m = Math.floor((distance % 3600000) / 60000);
-                const s = Math.floor((distance % 60000) / 1000);
-                document.getElementById('timer-display').innerText = `${d} ngày ${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+                const dist = endTime - new Date();
+                if (dist < 0) return location.reload();
+                const d = Math.floor(dist / 86400000);
+                const h = Math.floor((dist % 86400000) / 3600000);
+                const m = Math.floor((dist % 3600000) / 60000);
+                const s = Math.floor((dist % 60000) / 1000);
+                document.getElementById('timer-display').innerText = `${d}n ${h}:${m}:${s}`;
             }, 1000);
         }
 
         function closeNotice() { document.getElementById('countdown-overlay').style.display = 'none'; clearInterval(noticeInterval); }
 
+        function formatTime(seconds) {
+            const s = seconds || 0;
+            const m = Math.floor(s / 60);
+            const rs = s % 60;
+            return `${m.toString().padStart(2, '0')}:${rs.toString().padStart(2, '0')}`;
+        }
+
         function loadLeaderboard() {
-            // CHỈ lấy dữ liệu của TUẦN HIỆN TẠI để tăng tốc độ tải
+            document.getElementById('lb-title').innerText = `🏆 TOP 10 CAO THỦ - TUẦN ${WEEK_NUMBER}`;
             db.ref(`scores/Tuan_${WEEK_NUMBER}`).on('value', (snap) => {
                 const data = snap.val();
                 const listUI = document.getElementById('leaderboard-list-ui');
-                if (!data) {
-                    listUI.innerHTML = '<tr><td colspan="3" style="padding:15px; color:#888;">Chưa có dữ liệu tuần này</td></tr>';
-                    return;
-                }
+                if (!data) return listUI.innerHTML = '<tr><td colspan="4">Chưa có dữ liệu</td></tr>';
+                
                 let all = [];
                 for (let id in data) all.push(data[id]);
-                all.sort((a, b) => b.score - a.score);
+                
+                // SẮP XẾP: Điểm cao -> Thời gian thấp
+                all.sort((a, b) => {
+                    if (b.score !== a.score) return b.score - a.score;
+                    return (a.duration || 999) - (b.duration || 999);
+                });
+
                 const top10 = []; const seen = new Set();
                 for (let s of all) {
-                    let name = s.fullName || s.name;
-                    let key = name + s.className;
+                    let key = (s.fullName + s.className).toLowerCase();
                     if (!seen.has(key)) { top10.push(s); seen.add(key); }
                     if (top10.length >= 10) break;
                 }
+
                 listUI.innerHTML = top10.map((s, i) => `
-                    <tr style="border-bottom:1px solid #333;">
+                    <tr>
                         <td>${i+1}</td>
-                        <td style="text-align:left; padding:10px;"><b>${s.fullName || s.name}</b><br><small>Lớp: ${s.className}</small></td>
-                        <td>${s.score}</td>
+                        <td style="text-align:left;"><b>${s.fullName}</b><br><small>${s.className}</small></td>
+                        <td style="color:var(--primary); font-weight:bold;">${s.score}</td>
+                        <td style="color:#2ecc71;">${formatTime(s.duration)}</td>
                     </tr>
                 `).join('');
                 if (top10.length > 0) document.getElementById('high-score').innerText = top10[0].score;
