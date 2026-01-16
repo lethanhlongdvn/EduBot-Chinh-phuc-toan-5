@@ -198,13 +198,32 @@
             });
         }
 
-        function exportExcel(week) {
-            const table = document.querySelector(`#tbody-${week}`).parentElement;
-            const ws = XLSX.utils.table_to_sheet(table);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Tuần " + week);
-            XLSX.writeFile(wb, `BangVang_Tuan_${week}.xlsx`);
-        }
+       function exportExcel(week) {
+    const table = document.querySelector(`#tbody-${week}`).parentElement;
+    const rows = table.querySelectorAll('tr');
+    const data = [];
+
+    rows.forEach((row, rowIndex) => {
+        const cols = row.querySelectorAll('th, td');
+        const rowData = [];
+        cols.forEach((col, colIndex) => {
+            let value = col.innerText.replace('⏱ ', '').replace('/100', '');
+            
+            // Nếu là cột "Lớp" (cột thứ 3 - index 2), ép kiểu String để tránh lỗi ngày tháng
+            if (colIndex === 2 && rowIndex > 0) {
+                rowData.push({ v: value, t: 's' }); // 's' nghĩa là string
+            } else {
+                rowData.push(value);
+            }
+        });
+        data.push(rowData);
+    });
+
+    const ws = XLSX.utils.aoa_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Tuần " + week);
+    XLSX.writeFile(wb, `BangVang_Tuan_${week}.xlsx`);
+}
 
         db.ref('scores').on('value', (snap) => {
             const allData = snap.val();
