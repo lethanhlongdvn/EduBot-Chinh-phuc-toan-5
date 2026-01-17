@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TUẦN 23: THÁM HIỂM ĐẠI DƯƠNG</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Lexend:wght@400;600;700&display=swap"
+        rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <style>
+        :root {
+            --primary: #00a8ff;
+            --dark: #192a56;
+            --light: #dff9fb;
+            --accent: #fbc531;
+            --correct: #4cd137;
+            --wrong: #e84118;
+        }
+
+        body {
+            font-family: 'Lexend', sans-serif;
+            background: linear-gradient(180deg, #487eb0 0%, #273c75 100%);
+            color: white;
+            margin: 0;
+            padding: 5px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            user-select: none;
+            padding-bottom: 40px;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            margin-bottom: 50px;
+        }
+
+        .header {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 15px;
+            border: 2px solid var(--primary);
+            text-align: center;
+            margin-bottom: 15px;
+            backdrop-filter: blur(5px);
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.2rem;
+            color: var(--accent);
+            text-transform: uppercase;
+            font-family: 'Bungee';
+            letter-spacing: 1px;
+            text-shadow: 2px 2px 0 #000;
+        }
+
+        .info-bar {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            color: #fff;
+            font-weight: 600;
+            padding: 5px 10px;
+            margin-top: 5px;
+        }
+
+        .ocean-stage {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            min-height: 300px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .bubble-decoration {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: floatUp 10s infinite linear;
+            z-index: -1;
+        }
+
+        @keyframes floatUp {
+            0% {
+                bottom: -50px;
+                opacity: 0;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+
+            100% {
+                bottom: 100%;
+                opacity: 0;
+            }
+        }
+
+        .question-box {
+            background: #fff;
+            color: #2c3e50;
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 0 #bdc3c7;
+            line-height: 1.4;
+        }
+
+        .stage-label {
+            color: var(--accent);
+            font-family: 'Bungee';
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .opt-btn {
+            background: #34495e;
+            border: 2px solid #2c3e50;
+            padding: 15px;
+            border-radius: 10px;
+            color: white;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            min-height: 60px;
+        }
+
+        .opt-btn:active {
+            transform: scale(0.95);
+        }
+
+        .opt-btn.correct {
+            background: var(--correct);
+            border-color: #44bd32;
+            box-shadow: 0 0 15px var(--correct);
+        }
+
+        .opt-btn.wrong {
+            background: var(--wrong);
+            border-color: #c23616;
+            opacity: 0.5;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .input-ans {
+            width: 80%;
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid var(--accent);
+            background: #fff;
+            color: #333;
+            font-size: 1.2rem;
+            text-align: center;
+            outline: none;
+        }
+
+        .btn-submit {
+            width: 80%;
+            padding: 15px;
+            background: var(--accent);
+            border: none;
+            border-radius: 10px;
+            color: #000;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            box-shadow: 0 4px 0 #e1b12c;
+        }
+
+        .btn-submit:active {
+            transform: translateY(4px);
+            box-shadow: none;
+        }
+
+        .oxygen-tank {
+            width: 100%;
+            height: 10px;
+            background: #333;
+            border-radius: 5px;
+            margin-top: 20px;
+            overflow: hidden;
+            border: 1px solid #555;
+        }
+
+        .oxygen-level {
+            height: 100%;
+            background: linear-gradient(90deg, #ff9f43, #ee5253);
+            width: 0%;
+            transition: width 0.5s;
+        }
+
+        #result-screen {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .treasure-chest {
+            font-size: 5rem;
+            margin-bottom: 10px;
+            animation: bounce 2s infinite;
+        }
+
+        .final-score {
+            font-size: 3rem;
+            font-weight: bold;
+            color: var(--accent);
+            margin: 10px 0;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .game-footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: #0c2461;
+            padding: 8px 0;
+            text-align: center;
+            font-size: 0.65rem;
+            color: #a4b0be;
+            border-top: 1px solid #1e3799;
+            z-index: 999;
+        }
+
+        sup {
+            font-size: 0.7em;
+            vertical-align: super;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container" id="game-ui">
+        <div class="header">
+            <h1>TUẦN 23: THÁM HIỂM ĐẠI DƯƠNG</h1>
+            <div class="info-bar">
+                <span>⚓ <b id="user-name">---</b></span>
+                <span>🏆 <b id="current-score" style="color:var(--accent)">0</b>/100</span>
+                <span>⏱ <b id="timer">00:00</b></span>
+            </div>
+        </div>
+
+        <div class="ocean-stage">
+            <div class="bubble-decoration" style="width:20px; height:20px; left:10%; animation-duration:8s;"></div>
+            <div class="bubble-decoration" style="width:10px; height:10px; left:80%; animation-duration:12s;"></div>
+            <div class="bubble-decoration" style="width:30px; height:30px; left:40%; animation-duration:15s;"></div>
+
+            <div class="stage-label" id="stage-label">VÒNG 1: KHỞI ĐỘNG</div>
+            <div class="question-box" id="q-content">Đang tải dữ liệu...</div>
+
+            <div id="interaction-area"></div>
+
+            <div class="oxygen-tank">
+                <div class="oxygen-level" id="progress-bar"></div>
+            </div>
+            <div style="text-align:right; font-size:0.7rem; color:#aaa; margin-top:5px">Tiến độ vòng chơi</div>
+        </div>
+    </div>
+
+    <div id="result-screen" class="hidden">
+        <div class="treasure-chest">🎁</div>
+        <h2 style="color:var(--accent); font-family:'Bungee';">CHUYẾN ĐI THÀNH CÔNG!</h2>
+        <div class="final-score" id="final-score">0</div>
+        <p>Thời gian: <span id="final-time-text">--:--</span></p>
+        <p id="save-msg" style="color:#2ecc71; font-weight:bold; margin-top:10px;">Đang lưu kết quả...</p>
+        <p id="redirect-msg" style="color:#bdc3c7; font-size:0.9rem;">Tự động về trang chủ...</p>
+        <button class="btn-submit" onclick="location.reload()"
+            style="width:auto; padding: 10px 30px; margin-top:20px;">Chơi lại ngay</button>
+    </div>
+
+    <div class="game-footer">© 2026 EduRobot.id.vn - Lê Thành Long</div>
+
+    <script>
+        const firebaseConfig = { databaseURL: "https://gamhoctap-default-rtdb.asia-southeast1.firebasedatabase.app" };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        const savedName = localStorage.getItem('studentName');
+        const savedClass = localStorage.getItem('studentClass');
+        if (!savedName || !savedClass) { alert("Vui lòng đăng nhập!"); window.location.href = "index.html"; }
+        document.getElementById('user-name').innerText = savedName;
+
+        window.addEventListener('beforeunload', function (e) {
+            if (!document.getElementById('result-screen').classList.contains('hidden')) return;
+            e.preventDefault(); e.returnValue = '';
+        });
+
+        const rawR1 = [
+            { q: "Xăng-ti-mét khối là thể tích của hình lập phương có cạnh dài bao nhiêu?", a: ["1 cm", "1 dm", "1 m", "10 cm"], c: "1 cm" },
+            { q: "Đề-xi-mét khối là thể tích của hình lập phương có cạnh dài 1 dm, đúng hay sai?", a: ["Đúng", "Sai"], c: "Đúng" },
+            { q: "Đơn vị mét khối được viết tắt là gì?", a: ["m³", "dm³", "cm³", "m2"], c: "m³" },
+            { q: "Viết số đo: Tám trăm năm mươi xăng-ti-mét khối.", a: ["850 cm³", "805 cm³", "850 dm³", "85 cm³"], c: "850 cm³" },
+            { q: "Đọc số đo thể tích sau: 4,2 dm³", a: ["Bốn phẩy hai đề-xi-mét khối", "Bốn hai đề-xi-mét khối", "Bốn phẩy hai mét khối", "Bốn phẩy hai xăng-ti-mét khối"], c: "Bốn phẩy hai đề-xi-mét khối" },
+            { q: "Viết số đo: Không phẩy chín mét khối.", a: ["0,9 m³", "0,09 m³", "90 m³", "0,9 dm³"], c: "0,9 m³" },
+            { q: "Đọc số đo thể tích sau: 3/4 m³", a: ["Ba phần tư mét khối", "Ba phần tư đề-xi-mét khối", "Ba bốn mét khối", "Ba phần bốn đề-xi-mét"], c: "Ba phần tư mét khối" },
+            { q: "1 hình lập phương cạnh 1 cm có thể tích 1 cm³, vậy 10 hình như thế có thể tích là bao nhiêu?", a: ["10 cm³", "100 cm³", "1 cm³", "10 dm³"], c: "10 cm³" },
+            { q: "1 dm³ bằng bao nhiêu cm³?", a: ["1.000", "100", "10", "10.000"], c: "1.000" },
+            { q: "1 m³ bằng bao nhiêu dm³?", a: ["1.000", "100", "1.000.000", "10"], c: "1.000" },
+            { q: "1 cm³ bằng một phần bao nhiêu của dm³?", a: ["1/1.000", "1/100", "1/10", "1/10.000"], c: "1/1.000" },
+            { q: "Đơn vị mét khối thường dùng để đo thể tích của vật lớn như bể bơi, đúng hay sai?", a: ["Đúng", "Sai"], c: "Đúng" },
+            { q: "Viết số đo: Mười hai phẩy năm đề-xi-mét khối.", a: ["12,5 dm³", "125 dm³", "1,25 dm³", "12,5 cm³"], c: "12,5 dm³" },
+            { q: "1 m³ bằng bao nhiêu xăng-ti-mét khối?", a: ["1.000.000", "1.000", "10.000", "100.000"], c: "1.000.000" },
+            { q: "Đọc số đo: 204 cm³", a: ["Hai trăm linh bốn xăng-ti-mét khối", "Hai trăm bốn xăng-ti-mét khối", "Hai không bốn xăng-ti-mét khối", "Hai trăm linh tư mét khối"], c: "Hai trăm linh bốn xăng-ti-mét khối" },
+            { q: "Số đo 0,001 m³ viết dưới dạng phân số thập phân là:", a: ["1/1.000 m³", "1/100 m³", "1/10 m³", "10/100 m³"], c: "1/1.000 m³" },
+            { q: "Hình lập phương cạnh 1 m gồm bao nhiêu hình lập phương cạnh 1 dm?", a: ["1.000", "100", "10", "10.000"], c: "1.000" },
+            { q: "Đơn vị đo thể tích nào lớn hơn: m³ hay dm³?", a: ["m³", "dm³"], c: "m³" },
+            { q: "Viết số: Hai trăm ba mươi mét khối.", a: ["230 m³", "203 m³", "23 m³", "2300 m³"], c: "230 m³" },
+            { q: "Số đo 1.000 cm³ có thể thay thế bằng đơn vị nào gọn hơn?", a: ["1 dm³", "1 m³", "10 dm³", "100 cm³"], c: "1 dm³" }
+        ];
+
+        // V2: Input (nhiều đáp án)
+        const rawR2 = [
+            { q: "8 dm³ = ... cm³", c: ["8000", "8.000"] },
+            { q: "15.000 cm³ = ... dm³", c: ["15"] },
+            { q: "4,5 m³ = ... dm³", c: ["4500", "4.500"] },
+            { q: "250 dm³ = ... m³", c: ["0,25", "0.25"] },
+            { q: "0,7 dm³ = ... cm³", c: ["700"] },
+            { q: "6.000.000 cm³ = ... m³", c: ["6"] },
+            { q: "1/2 m³ = ... dm³", c: ["500"] },
+            { q: "3 dm³ 50 cm³ = ... cm³", c: ["3050", "3.050"] },
+            { q: "1,2 m³ = ... cm³", c: ["1200000", "1.200.000"] },
+            { q: "800 cm³ = ... dm³", c: ["0,8", "0.8"] },
+            { q: "0,05 m³ = ... dm³", c: ["50"] },
+            { q: "2.400 dm³ = ... m³", c: ["2,4", "2.4"] },
+            { q: "1/4 dm³ = ... cm³", c: ["250"] },
+            { q: "So sánh: 500 cm³ ... 0,5 dm³", c: ["=", "bằng", "bằng nhau"] },
+            { q: "7,9 m³ = ... dm³", c: ["7900", "7.900"] },
+            { q: "0,857 m³ đọc là: (ghi chữ thường)", c: ["không phẩy tám trăm năm mươi bảy mét khối", "không phẩy tám trăm năm mươi bảy"] },
+            { q: "2 m³ 5 dm³ = ... dm³", c: ["2005", "2.005"] },
+            { q: "150 cm³ = ... dm³", c: ["0,15", "0.15"] },
+            { q: "4/5 m³ = ... dm³", c: ["800"] },
+            { q: "1,9 dm³ = ... cm³", c: ["1900", "1.900"] }
+        ];
+
+        const rawR3 = [
+            { q: "Tính: 15 cm³ + 25 cm³ (Chỉ ghi số)", c: ["40"] },
+            { q: "Tính: 100 dm³ – 45 dm³ (Chỉ ghi số)", c: ["55"] },
+            { q: "Hình gồm 12 hình lập phương 1 cm³. Thể tích là ... cm³", c: ["12"] },
+            { q: "Tính: 12 m³ x 3 (Chỉ ghi số)", c: ["36"] },
+            { q: "Tính: 500 m³ : 5 (Chỉ ghi số)", c: ["100"] },
+            { q: "So sánh 1 dm³ và 900 cm³. Vật nào lớn hơn? (Ghi: 1 dm3 hoặc 900 cm3)", c: ["1 dm3", "1dm3", "vật 1 dm3"] },
+            { q: "Bể cá chứa 2,5 m³ nước. Đổi sang dm³:", c: ["2500", "2.500"] },
+            { q: "Tính: 2,5 dm³ + 3,5 dm³ (Chỉ ghi số)", c: ["6", "6,0"] },
+            { q: "Tính: 8 m³ – 2.000 dm³ = ... m³", c: ["6"] },
+            { q: "Thùng xe 25 m³, hàng chiếm 60%. Phần trống là ... m³", c: ["10"] },
+            { q: "180 cm³ = ... dm³", c: ["0,18"] },
+            { q: "2 lớp hình lập phương 1 cm³, mỗi lớp 5 hình. V = ... cm³", c: ["10"] },
+            { q: "Bể bơi 15 m³. Đọc số đo này:", c: ["mười lăm mét khối", "15 mét khối"] },
+            { q: "0,5 dm³ = ... cm³", c: ["500"] },
+            { q: "Hai hình có cùng số lượng khối lập phương 1 cm³ thì thể tích thế nào?", c: ["bằng nhau", "như nhau"] },
+            { q: "1 m³ băng = ... dm³", c: ["1000", "1.000"] },
+            { q: "Tính: 0,5 m³ x 4 = ... m³", c: ["2"] },
+            { q: "2 lít = ... dm³", c: ["2"] },
+            { q: "Trong 3 hộp: 20cm³, 22cm³, 0,025dm³. Hộp nào lớn nhất? (Ghi số đo)", c: ["0,025dm3", "0,025 dm3", "hộp màu vàng"] },
+            { q: "10 m³ = ... dm³", c: ["10000", "10.000"] }
+        ];
+
+        let gameData = [];
+        let currentIndex = 0;
+        let score = 0;
+        let seconds = 0;
+        let timerInterval;
+        let stage2Mistakes = 0;
+
+        function shuffle(arr) { return arr.sort(() => Math.random() - 0.5); }
+
+        function initGame() {
+            // V1: 5 MC (6pts/q)
+            const r1 = shuffle([...rawR1]).slice(0, 5).map(i => ({ ...i, stage: 1, type: 'mc', points: 6 }));
+
+            // V2: 10 Input (4pts/q) - Converted to input logic
+            const r2 = shuffle([...rawR2]).slice(0, 10).map(i => ({ ...i, stage: 2, type: 'input', points: 4 }));
+
+            // V3: 5 Input (6pts/q)
+            const r3 = shuffle([...rawR3]).slice(0, 5).map(i => ({ ...i, stage: 3, type: 'input', points: 6 }));
+
+            gameData = [...r1, ...r2, ...r3];
+            currentIndex = 0;
+            score = 0;
+            stage2Mistakes = 0;
+            startTimer();
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            if (currentIndex >= gameData.length) { finishGame(); return; }
+
+            const q = gameData[currentIndex];
+            document.getElementById('q-content').innerHTML = q.q.replace(/m3/g, "m³").replace(/dm3/g, "dm³").replace(/cm3/g, "cm³");
+            document.getElementById('stage-label').innerText = `VÒNG ${q.stage}: CÂU ${currentIndex + 1}/${gameData.length} (Lỗi V2: ${(q.stage === 2 ? stage2Mistakes : 0)}/3)`;
+
+            const pct = ((currentIndex) / gameData.length) * 100;
+            document.getElementById('progress-bar').style.width = pct + "%";
+
+            const area = document.getElementById('interaction-area');
+            area.innerHTML = '';
+
+            if (q.type === 'mc') {
+                let html = `<div class="options-grid">`;
+                shuffle([...q.a]).forEach(opt => {
+                    html += `<div class="opt-btn" onclick="checkMC(this, '${opt}', '${q.c}')">${opt}</div>`;
+                });
+                html += `</div>`;
+                area.innerHTML = html;
+            } else {
+                area.innerHTML = `
+                <div class="input-group">
+                    <input type="text" class="input-ans" id="user-input" placeholder="Nhập đáp án..." autocomplete="off">
+                    <button class="btn-submit" onclick="checkInput()">NẠP DỮ LIỆU</button>
+                    <p style="font-size:0.8rem; color:#fff"><i>(Có thể viết không dấu, số thập phân dùng dấu phẩy hoặc chấm)</i></p>
+                </div>
+            `;
+                // Enter key check
+                document.getElementById('user-input').addEventListener("keypress", function (event) {
+                    if (event.key === "Enter") checkInput();
+                });
+            }
+        }
+
+        function checkMC(btn, choice, correct) {
+            document.querySelectorAll('.opt-btn').forEach(b => b.onclick = null);
+
+            if (choice === correct) {
+                playSound('correct');
+                btn.classList.add('correct');
+                score += gameData[currentIndex].points;
+            } else {
+                playSound('wrong');
+                btn.classList.add('wrong');
+                document.querySelectorAll('.opt-btn').forEach(b => {
+                    if (b.innerText === correct) b.classList.add('correct');
+                });
+            }
+            updateScore();
+            setTimeout(nextQ, 1500);
+        }
+
+        function checkInput() {
+            const input = document.getElementById('user-input');
+            const btn = document.querySelector('.btn-submit');
+            const val = input.value.trim().toLowerCase();
+            const correctArr = gameData[currentIndex].c.map(s => s.toLowerCase());
+
+            if (!val) return; // Prevent empty submit
+            input.disabled = true; btn.disabled = true;
+
+            if (correctArr.includes(val)) {
+                playSound('correct');
+                input.style.borderColor = "var(--correct)";
+                input.style.backgroundColor = "#dff9fb";
+                score += gameData[currentIndex].points;
+            } else {
+                playSound('wrong');
+                input.style.borderColor = "var(--wrong)";
+                input.value += ` ❌ (Đúng: ${correctArr[0]})`;
+
+                // Mistake handling V2
+                if (gameData[currentIndex].stage === 2) {
+                    stage2Mistakes++;
+                    if (stage2Mistakes >= 3) {
+                        alert("Bạn đã sai 3 lần ở Vòng 2! Chuyển ngay sang Vòng 3.");
+                        while (currentIndex < gameData.length && gameData[currentIndex].stage === 2) {
+                            currentIndex++;
+                        }
+                        setTimeout(renderQuestion, 500);
+                        return;
+                    }
+                }
+            }
+            updateScore();
+            setTimeout(nextQ, 2000);
+        }
+
+        function updateScore() {
+            const el = document.getElementById('current-score');
+            el.innerText = score + "/100";
+            el.style.transform = "scale(1.5)";
+            setTimeout(() => el.style.transform = "scale(1)", 200);
+        }
+
+        function nextQ() {
+            if (gameData[currentIndex] && gameData[currentIndex].stage === 2 && stage2Mistakes >= 3) return;
+            currentIndex++;
+            renderQuestion();
+        }
+
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const t = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain); gain.connect(audioCtx.destination);
+
+            if (type === 'correct') {
+                osc.type = 'triangle'; osc.frequency.setValueAtTime(440, t); osc.frequency.exponentialRampToValueAtTime(880, t + 0.1);
+                gain.gain.setValueAtTime(0.3, t); gain.gain.exponentialRampToValueAtTime(0.01, t + 0.5);
+                osc.start(t); osc.stop(t + 0.5);
+            } else {
+                osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, t); osc.frequency.linearRampToValueAtTime(100, t + 0.2);
+                gain.gain.setValueAtTime(0.3, t); gain.gain.exponentialRampToValueAtTime(0.01, t + 0.4);
+                osc.start(t); osc.stop(t + 0.4);
+            }
+        }
+
+        function finishGame() {
+            clearInterval(timerInterval);
+            document.querySelector('.ocean-stage').classList.add('hidden');
+            document.getElementById('result-screen').classList.remove('hidden');
+            document.getElementById('final-score').innerText = score;
+            document.getElementById('final-time-text').innerText = document.getElementById('timer').innerText;
+
+            const ref = db.ref('scores/Tuan_23');
+            ref.once('value', (snap) => {
+                let attempt = 1; const data = snap.val();
+                if (data) { for (let id in data) { if ((data[id].fullName || "").toLowerCase() === savedName.toLowerCase()) attempt++; } }
+                ref.push({ fullName: savedName, className: savedClass, score: score, duration: seconds, attempt: attempt, date: new Date().toLocaleString('vi-VN') }, () => {
+                    document.getElementById('save-msg').innerText = "Đã lưu kết quả thành công!";
+                    let c = 5;
+                    const rEl = document.getElementById('redirect-msg');
+                    setInterval(() => {
+                        c--; rEl.innerText = `Tự động về trang chủ sau ${c}s...`;
+                        if (c <= 0) window.location.href = "index.html";
+                    }, 1000);
+                });
+            });
+        }
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                seconds++;
+                const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+                const s = (seconds % 60).toString().padStart(2, '0');
+                document.getElementById('timer').innerText = `${m}:${s}`;
+            }, 1000);
+        }
+
+        initGame();
+    </script>
+</body>
+
+</html>
