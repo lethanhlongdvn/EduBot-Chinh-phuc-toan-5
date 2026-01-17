@@ -2,274 +2,346 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Siêu cấp Casio - Tuần 21</title>
-    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;600;700&family=Montserrat:wght@700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TUẦN 21: XÂY THÁP TRI THỨC</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Lexend:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-
     <style>
-        :root { 
-            --primary: #34495e; --casio-body: #2c3e50; --screen-bg: #a3cb38; 
-            --btn-gray: #ecf0f1; --btn-dark: #7f8c8d; --btn-orange: #f39c12; --danger: #e74c3c; 
+        :root { --p: #FF9800; --s: #2196F3; --bg: #0f172a; --card: #1e293b; --success: #2ecc71; --danger: #e74c3c; --gold: #ffd700; --brick: #e67e22; }
+        body { font-family: 'Lexend', sans-serif; background: var(--bg); color: white; margin: 0; padding: 5px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; user-select: none; padding-bottom: 40px; }
+        .container { max-width: 900px; width: 100%; margin-bottom: 50px; }
+        
+        /* HEADER */
+        .header { background: var(--card); padding: 8px; border-radius: 12px; border-bottom: 3px solid var(--p); text-align: center; margin-bottom: 10px; box-shadow: 0 3px 10px rgba(0,0,0,0.3); }
+        .header h1 { margin: 0; font-size: 1.1rem; color: var(--p); text-transform: uppercase; font-family: 'Bungee'; letter-spacing: 1px; }
+        .info-bar { display: flex; justify-content: space-between; font-size: 0.9rem; color: #94a3b8; font-weight: 600; padding: 5px 10px; }
+        
+        /* LAYOUT GAME: Chia 2 cột trên Desktop, 1 cột trên Mobile */
+        .game-layout { display: flex; gap: 15px; align-items: flex-end; justify-content: center; }
+        .question-area { flex: 2; background: var(--card); padding: 15px; border-radius: 15px; border: 1px solid #334155; min-height: 250px; position: relative; }
+        .tower-area { flex: 1; background: rgba(255,255,255,0.05); border-radius: 15px; padding: 10px; display: flex; flex-direction: column-reverse; align-items: center; min-height: 300px; border-bottom: 5px solid #555; position: relative; }
+        
+        @media (max-width: 600px) {
+            .game-layout { flex-direction: column-reverse; align-items: stretch; }
+            .tower-area { min-height: 150px; flex-direction: row; justify-content: center; align-items: flex-end; gap: 2px; overflow-x: auto; }
+            .tower-block { width: 15px !important; height: 40px !important; margin: 0 !important; }
+            .tower-roof { width: 30px !important; }
         }
 
-        body { 
-            font-family: 'Lexend', sans-serif; margin: 0; padding: 20px;
-            display: flex; flex-direction: column; align-items: center;
-            background: #1a252f; color: white; min-height: 100vh;
+        /* VISUAL THÁP */
+        .tower-base { width: 100%; height: 10px; background: #555; border-radius: 2px; margin-top: 5px; }
+        .tower-block { 
+            width: 80%; height: 25px; 
+            background: var(--brick); 
+            margin-bottom: 2px; 
+            border-radius: 4px; 
+            border: 2px solid #d35400;
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            opacity: 0; transform: translateY(50px) scale(0.5);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.6rem; font-weight: bold; color: rgba(0,0,0,0.3);
         }
+        .tower-block.built { opacity: 1; transform: translateY(0) scale(1); }
+        .tower-block.stage-1 { background: #7f8c8d; border-color: #2c3e50; } /* Móng màu xám */
+        .tower-block.stage-2 { background: #e67e22; border-color: #d35400; } /* Thân màu cam */
+        .tower-block.stage-3 { background: #f1c40f; border-color: #f39c12; box-shadow: 0 0 10px var(--gold); } /* Đỉnh vàng */
+        
+        /* CÂU HỎI */
+        .stage-badge { position: absolute; top: -10px; left: 10px; background: var(--p); color: white; padding: 3px 10px; border-radius: 10px; font-size: 0.7rem; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
+        .q-text { font-size: 1.1rem; margin: 20px 0; line-height: 1.5; font-weight: 600; text-align: justify; }
+        
+        /* NÚT BẤM */
+        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .opt-btn { background: #334155; border: 2px solid #475569; padding: 15px; border-radius: 10px; color: white; cursor: pointer; transition: 0.2s; font-size: 1rem; }
+        .opt-btn:hover { background: #475569; }
+        .opt-btn.correct { background: var(--success); border-color: var(--success); color: #000; font-weight: bold; animation: pulse 0.5s; }
+        .opt-btn.wrong { background: var(--danger); border-color: var(--danger); opacity: 0.5; }
 
-        .casio-case {
-            max-width: 650px; width: 100%; background: var(--casio-body);
-            padding: 30px; border-radius: 20px 20px 60px 60px;
-            box-shadow: 0 25px 0 #141a21, 0 40px 60px rgba(0,0,0,0.6);
-            border: 5px solid #141a21; margin-bottom: 20px;
-        }
+        /* INPUT VÒNG 3 */
+        .input-group { display: flex; gap: 10px; flex-direction: column; }
+        .input-ans { padding: 15px; border-radius: 10px; border: 2px solid var(--p); background: #0f172a; color: white; font-size: 1.1rem; outline: none; text-align: center; }
+        .btn-submit { padding: 15px; background: var(--p); border: none; border-radius: 10px; color: white; font-weight: bold; cursor: pointer; font-size: 1rem; text-transform: uppercase; }
 
-        .screen {
-            background: var(--screen-bg); border-radius: 12px; padding: 20px;
-            margin-bottom: 30px; border: 8px solid #57606f;
-            box-shadow: inset 0 0 20px rgba(0,0,0,0.3);
-            min-height: 150px; color: #1e272e;
-        }
+        /* RESULT */
+        #result-screen { text-align: center; padding: 40px 20px; }
+        .score-box { font-size: 3rem; font-weight: bold; color: var(--gold); text-shadow: 0 0 20px rgba(255, 215, 0, 0.5); margin: 20px 0; }
 
-        .screen-header { 
-            display: flex; justify-content: space-between; 
-            font-family: 'Montserrat', sans-serif; font-size: 0.75rem;
-            border-bottom: 1px solid rgba(0,0,0,0.1); padding-bottom: 5px; margin-bottom: 10px;
-        }
-
-        .screen-content { font-size: 1.15rem; font-weight: 600; line-height: 1.5; }
-
-        .score-info { display: flex; justify-content: space-between; margin-bottom: 15px; font-weight: bold; color: #bdc3c7; width: 100%; max-width: 650px;}
-
-        .match-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .match-column { display: flex; flex-direction: column; gap: 10px; }
-        .match-item {
-            background: var(--btn-gray); color: #2d3436; padding: 15px;
-            border-radius: 10px; cursor: pointer; text-align: center;
-            font-weight: 600; font-size: 0.95rem; border-bottom: 5px solid #bdc3c7;
-            transition: all 0.2s; min-height: 60px; display: flex; align-items: center; justify-content: center;
-        }
-        .match-item:hover { background: #fff; transform: translateY(-2px); }
-        .match-item.active { background: var(--btn-orange); color: white; border-bottom-color: #d35400; }
-        .match-item.matched { opacity: 0; pointer-events: none; visibility: hidden; }
-
-        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .btn-opt {
-            background: var(--btn-gray); color: #2d3436; border: none; padding: 20px;
-            border-radius: 12px; font-family: 'Lexend'; font-weight: bold; font-size: 1.05rem;
-            cursor: pointer; border-bottom: 5px solid #bdc3c7; transition: 0.2s;
-        }
-        .btn-opt:hover { background: white; }
-
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
         .hidden { display: none !important; }
-        .footer-edu { text-align: center; width: 100%; padding: 20px 0; color: #7f8c8d; font-size: 0.9rem; letter-spacing: 1px; }
-        .btn-action { background: var(--btn-orange); color: white; padding: 15px 30px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 1.1rem; }
+        .game-footer { position: fixed; bottom: 0; width: 100%; background: #0f172a; padding: 8px 0; text-align: center; font-size: 0.65rem; color: #64748b; border-top: 1px solid #334155; z-index: 999; }
     </style>
 </head>
 <body>
 
-<div class="score-info">
-    <span id="stage-title">VÒNG 1: KHÁM PHÁ</span>
-    <span id="score-text">ĐIỂM: 0/100</span>
-</div>
-
-<div class="casio-case">
-    <div class="screen">
-        <div class="screen-header">
-            <span>CASIO fx-580VN X</span>
-            <span id="hearts-count">❤️ MẠNG: 3/3</span>
-        </div>
-        <div class="screen-content" id="main-display">
-            Đang tải dữ liệu thám hiểm...
+<div class="container" id="game-ui">
+    <div class="header">
+        <h1>TUẦN 21: XÂY THÁP TRI THỨC</h1>
+        <div class="info-bar">
+            <span>👤 <b id="user-name">---</b></span>
+            <span>⭐ <b id="current-score" style="color:var(--gold)">0</b>/100</span>
+            <span>⏱ <b id="timer">00:00</b></span>
         </div>
     </div>
 
-    <div id="play-area"></div>
-
-    <div id="result-screen" class="hidden">
-        <div style="text-align: center;">
-            <h2 id="status-msg">KẾT QUẢ BÀI THI</h2>
-            <div style="font-size: 4rem; color: var(--btn-orange); margin: 10px 0;" id="score-val">0/100</div>
-            <p id="sub-msg" style="color: #bdc3c7;"></p>
-            <p id="save-status" style="color: #a3cb38; font-weight: bold;"></p>
-            <button class="btn-action" onclick="location.href='index.html'">QUAY LẠI BẢN ĐỒ</button>
+    <div class="game-layout">
+        <div class="question-area" id="q-area">
+            <div class="stage-badge" id="stage-badge">VÒNG 1: MÓNG VỮNG CHẮC</div>
+            <div id="q-content">
+                </div>
         </div>
+
+        <div class="tower-area" id="tower-visual">
+            <div class="tower-base"></div>
+            </div>
     </div>
 </div>
 
-<div class="footer-edu">
-    © 2026 EduRobot.id.vn - Lê Thành Long
+<div id="result-screen" class="hidden">
+    <h2 style="color:var(--gold); font-family:'Bungee';">CÔNG TRÌNH HOÀN THÀNH</h2>
+    <div class="score-box" id="final-score">0</div>
+    <p>Thời gian: <span id="final-time-text">--:--</span></p>
+    <p style="color:#aaa" id="redirect-msg">Đang lưu điểm...</p>
+    <button class="btn-submit" onclick="location.reload()" style="margin-top:20px; width:auto; padding: 10px 30px;">Làm lại đề mới</button>
+</div>
+
+<div class="game-footer">
+    @ 2026 EduRobot.id.vn - Lê Thành Long
 </div>
 
 <script>
-    // 1. CẤU HÌNH FIREBASE
+    // --- CẤU HÌNH & DỮ LIỆU ---
     const firebaseConfig = { databaseURL: "https://gamhoctap-default-rtdb.asia-southeast1.firebasedatabase.app" };
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // 2. KIỂM TRA HỒ SƠ (BẢO MẬT)
     const savedName = localStorage.getItem('studentName');
     const savedClass = localStorage.getItem('studentClass');
+    if(!savedName || !savedClass) { alert("Vui lòng đăng nhập!"); window.location.href="index.html"; }
+    document.getElementById('user-name').innerText = savedName;
+    window.onbeforeunload = () => "Đang làm bài...";
 
-    if (!savedName || !savedClass) {
-        alert("Em cần nhập tên ở trang chủ trước!");
-        window.location.href = "index.html";
+    // DATA VÒNG 1 (Mỗi câu 8 điểm)
+    const poolR1 = [
+        { q: "Tỉ số phần trăm của 12 và 40 là:", a: ["30%", "40%", "28%", "32%"], correct: "30%" },
+        { q: "Tỉ số phần trăm của 15 và 20 là:", a: ["75%", "80%", "65%", "70%"], correct: "75%" },
+        { q: "Tỉ số phần trăm của 1,2 và 4 là:", a: ["30%", "0,3%", "3%", "300%"], correct: "30%" },
+        { q: "Tỉ số phần trăm của 0,6 và 2,4 là:", a: ["25%", "2,5%", "40%", "4%"], correct: "25%" },
+        { q: "Lớp có 40 học sinh, 18 bạn nữ. Số bạn nữ chiếm bao nhiêu phần trăm?", a: ["45%", "40%", "55%", "18%"], correct: "45%" },
+        { q: "Hộp 50 viên bi, có 15 bi đỏ. Tỉ số phần trăm bi đỏ là:", a: ["30%", "15%", "35%", "50%"], correct: "30%" },
+        { q: "Cửa hàng có 200kg gạo, đã bán 120kg. Tỉ số phần trăm gạo đã bán là:", a: ["60%", "40%", "120%", "20%"], correct: "60%" },
+        { q: "Trong 80kg nước biển có 2,8kg muối. Tỉ số phần trăm muối là:", a: ["3,5%", "35%", "2,8%", "4%"], correct: "3,5%" },
+        { q: "Vườn có 25 cây cam và 75 cây bưởi (Tổng 100 cây). Tỉ số phần trăm cây cam so với cả vườn là:", a: ["25%", "75%", "33,3%", "50%"], correct: "25%" },
+        { q: "Trong 40kg nước biển có 2kg muối. Tỉ số phần trăm muối là:", a: ["5%", "2%", "4%", "20%"], correct: "5%" }
+    ];
+
+    // DATA VÒNG 2 (Mỗi câu 6 điểm - Điền khuyết chọn 1 trong 4)
+    const poolR2 = [
+        { q: "Một chiếc áo giá 150.000đ, giảm giá 15%. Giá bán mới là ... đồng.", a: ["127.500", "135.000", "120.000", "22.500"], correct: "127.500" },
+        { q: "Vốn 500.000đ, lãi 20%. Giá bán là ... đồng.", a: ["600.000", "550.000", "100.000", "400.000"], correct: "600.000" },
+        { q: "Quyển sách giá 80.000đ, tăng giá 10%. Giá mới là ... đồng.", a: ["88.000", "72.000", "8.000", "90.000"], correct: "88.000" },
+        { q: "Năm ngoái thu 500 tấn lúa, năm nay tăng 12%. Sản lượng năm nay là ... tấn.", a: ["560", "60", "512", "550"], correct: "560" },
+        { q: "Bình 400g dung dịch 5% muối (có 20g muối). Đổ thêm 100g nước lọc. Tỉ lệ muối mới là ... %.", a: ["4%", "5%", "3%", "1%"], correct: "4%" },
+        { q: "Công ty 200 người (40% nam). Tuyển thêm 50 nữ. Tỉ lệ nam lúc này là ... %.", a: ["32%", "40%", "30%", "25%"], correct: "32%" },
+        { q: "Mảnh đất 20m x 15m. Dành 20% làm nhà, 15% làm sân. Diện tích còn lại là ... m².", a: ["195", "105", "300", "65"], correct: "195" },
+        { q: "Lương tháng 1 tăng 10%, tháng 2 giảm 10%. So với ban đầu lương tháng 2 ...", a: ["giảm 1%", "giữ nguyên", "tăng 1%", "giảm 10%"], correct: "giảm 1%" }
+    ];
+
+    // DATA VÒNG 3 (Mỗi câu 10 điểm - Nhập số)
+    const poolR3 = [
+        { q: "Một lớp học có 40 học sinh, trong đó 60% là nữ. Hỏi lớp đó có bao nhiêu học sinh nam?", ans: ["16"] },
+        { q: "Một người gửi tiết kiệm 10.000.000 đồng với lãi suất 0,5% một tháng. Hỏi sau một tháng người đó nhận được bao nhiêu tiền lãi? (Chỉ ghi số)", ans: ["50000", "50.000"] },
+        { q: "Giá xăng tăng từ 20.000đ lên 25.000đ. Hỏi giá xăng đã tăng bao nhiêu phần trăm? (Chỉ ghi số)", ans: ["25"] },
+        { q: "Tìm một số biết 25% của nó là 40.", ans: ["160"] },
+        { q: "Tìm một số biết 15% của nó là 45.", ans: ["300"] }
+    ];
+
+    // --- LOGIC GAME ---
+    let gameData = [];
+    let currentQIdx = 0;
+    let score = 0;
+    let seconds = 0;
+    let timerInterval;
+
+    function shuffle(arr) { return arr.sort(() => Math.random() - 0.5); }
+
+    function initGame() {
+        // Lấy đề ngẫu nhiên: 5 câu R1, 5 câu R2, 3 câu R3
+        const r1 = shuffle([...poolR1]).slice(0, 5).map(i => ({...i, stage: 1, points: 8}));
+        const r2 = shuffle([...poolR2]).slice(0, 5).map(i => ({...i, stage: 2, points: 6}));
+        const r3 = shuffle([...poolR3]).slice(0, 3).map(i => ({...i, stage: 3, points: 10}));
+        
+        gameData = [...r1, ...r2, ...r3];
+        currentQIdx = 0;
+        score = 0;
+        
+        // Tạo visual tháp rỗng (13 tầng)
+        const tower = document.getElementById('tower-visual');
+        tower.innerHTML = '<div class="tower-base"></div>';
+        for(let i=0; i<13; i++) {
+            const block = document.createElement('div');
+            block.className = 'tower-block';
+            block.id = `block-${i}`;
+            // Gán class màu sắc dựa trên tầng
+            if(i < 5) block.classList.add('stage-1');
+            else if (i < 10) block.classList.add('stage-2');
+            else block.classList.add('stage-3');
+            tower.appendChild(block);
+        }
+        
+        renderQuestion();
+        startTimer();
     }
 
-    const Q_POOL1 = [
-        {q: "Muốn tìm 60% của 300, em tính?", a: "300 × 60 ÷ 100"},
-        {q: "Để bắt đầu sử dụng máy tính, nhấn?", a: "Phím ON/C"},
-        {q: "Muốn xóa số vừa nhập để nhập lại?", a: "Phím CE"},
-        {q: "Phím biểu diễn ký hiệu phần trăm là?", a: "Phím %"},
-        {q: "5% của 780.000 có kết quả là?", a: "39.000"},
-        {q: "10% của số 60 có giá trị là?", a: "Số 6"},
-        {q: "Tỉ số phần trăm của 3 và 40 là?", a: "7,5"},
-        {q: "Máy tính giúp tính toán thế nào?", a: "Nhanh và Chính xác"}
-    ];
+    function renderQuestion() {
+        if(currentQIdx >= gameData.length) { finishGame(); return; }
 
-    const Q_POOL2 = [
-        {q: "70% của 120 m² là:", opts: ["84 m²", "70 m²", "94 m²", "80 m²"], c: 0, h: "120 × 70 ÷ 100"},
-        {q: "24,5% của 2 kg là:", opts: ["0,5 kg", "0,49 kg", "4,9 kg", "0,24 kg"], c: 1, h: "2 × 24,5 ÷ 100"},
-        {q: "Ba lô 250.000đ giảm giá 15%. Số tiền giảm là:", opts: ["25.000đ", "30.000đ", "37.500đ", "40.000đ"], c: 2, h: "250.000 × 15 ÷ 100"},
-        {q: "May 850 bộ đồ, đã xong 70%. Số bộ đã xong:", opts: ["595 bộ", "600 bộ", "500 bộ", "700 bộ"], c: 0, h: "850 × 70 ÷ 100"}
-    ];
+        const q = gameData[currentQIdx];
+        const badge = document.getElementById('stage-badge');
+        const content = document.getElementById('q-content');
 
-    const Q_POOL3 = [
-        {q: "Thịt bò có 18% đạm. 250g thịt có bao nhiêu đạm?", opts: ["45 g", "18 g", "50 g", "35 g"], c: 0, h: "250 × 18 ÷ 100"},
-        {q: "Đội 300 người, 40% mặc áo đỏ. Số người áo đỏ:", opts: ["100", "120", "150", "200"], c: 1, h: "300 × 40 ÷ 100"}
-    ];
+        // Cập nhật Badge
+        if(q.stage === 1) badge.innerText = "VÒNG 1: XÂY MÓNG (5 câu - 8đ/câu)";
+        else if(q.stage === 2) badge.innerText = "VÒNG 2: DỰNG THÁP (5 câu - 6đ/câu)";
+        else badge.innerText = "VÒNG 3: VỀ ĐÍCH (3 câu - 10đ/câu)";
 
-    let game1, game2, game3;
-    let score = 0, currentStage = 1, qIdx = 0, lives = 3, startTime;
-    let selQ = null, selA = null;
+        // Render nội dung
+        let html = `<div class="q-text">Câu ${currentQIdx + 1}: ${q.q}</div>`;
 
-    function shuffle(arr) { return arr.sort(() => 0.5 - Math.random()); }
-
-    function initStage1() {
-        startTime = Date.now();
-        game1 = shuffle([...Q_POOL1]).slice(0, 4);
-        game2 = shuffle([...Q_POOL2]).slice(0, 4);
-        game3 = shuffle([...Q_POOL3]).slice(0, 2);
-
-        document.getElementById('main-display').innerText = "VÒNG 1: Ghép 4 cặp câu hỏi và đáp án đúng. Chú ý: Sai 3 lần sẽ bị khóa bàn phím!";
-        
-        let qs = game1.map((item, idx) => ({txt: item.q, id: idx}));
-        let as = game1.map((item, idx) => ({txt: item.a, id: idx}));
-        
-        qs = shuffle(qs); as = shuffle(as);
-
-        let html = `<div class="match-grid"><div class="match-column">`;
-        qs.forEach(item => html += `<div class="match-item" id="q-${item.id}" onclick="match('q', ${item.id})">${item.txt}</div>`);
-        html += `</div><div class="match-column">`;
-        as.forEach(item => html += `<div class="match-item" id="a-${item.id}" onclick="match('a', ${item.id})">${item.txt}</div>`);
-        html += `</div></div>`;
-        
-        document.getElementById('play-area').innerHTML = html;
-    }
-
-    function match(type, id) {
-        if(type === 'q') {
-            if(selQ !== null) document.getElementById(`q-${selQ}`).classList.remove('active');
-            selQ = id; document.getElementById(`q-${id}`).classList.add('active');
+        if(q.stage === 1 || q.stage === 2) {
+            // Trắc nghiệm
+            html += `<div class="options-grid">`;
+            // Trộn đáp án hiển thị
+            const opts = shuffle([...q.a]);
+            opts.forEach(opt => {
+                html += `<div class="opt-btn" onclick="checkAnswer(this, '${opt}', '${q.correct}')">${opt}</div>`;
+            });
+            html += `</div>`;
         } else {
-            if(selA !== null) document.getElementById(`a-${selA}`).classList.remove('active');
-            selA = id; document.getElementById(`a-${id}`).classList.add('active');
+            // Nhập liệu
+            html += `
+                <div class="input-group">
+                    <input type="text" class="input-ans" id="user-input" placeholder="Nhập số/đáp án...">
+                    <button class="btn-submit" onclick="checkInputAnswer('${q.ans.join('|')}')">Xác nhận</button>
+                    <p style="font-size:0.8rem; color:#aaa; text-align:center"><i>*Nhập số gọn (Ví dụ: 25000 hoặc 25.000)</i></p>
+                </div>
+            `;
         }
+        content.innerHTML = html;
+    }
 
-        if(selQ !== null && selA !== null) {
-            if(selQ === selA) {
-                score += 10; updateScore();
-                document.getElementById(`q-${selQ}`).classList.add('matched');
-                document.getElementById(`a-${selA}`).classList.add('matched');
-                if(document.querySelectorAll('.match-item:not(.matched)').length === 0) setTimeout(startStage2, 800);
-            } else {
-                lives--; document.getElementById('hearts-count').innerText = "❤️ MẠNG: " + lives + "/3";
-                if(lives <= 0) startStage2();
-                else { 
-                    document.getElementById(`q-${selQ}`).classList.remove('active'); 
-                    document.getElementById(`a-${selA}`).classList.remove('active'); 
-                }
-            }
-            selQ = null; selA = null;
+    function checkAnswer(btn, choice, correct) {
+        // Chặn click
+        const allBtns = document.querySelectorAll('.opt-btn');
+        allBtns.forEach(b => b.onclick = null);
+
+        if(choice === correct) {
+            playSound('correct');
+            btn.classList.add('correct');
+            addScore(gameData[currentQIdx].points);
+            buildTowerStep();
+        } else {
+            playSound('wrong');
+            btn.classList.add('wrong');
+            // Hiện đáp án đúng
+            allBtns.forEach(b => {
+                if(b.innerText === correct) b.classList.add('correct');
+            });
         }
+        setTimeout(nextQ, 1500);
     }
 
-    function startStage2() {
-        currentStage = 2; qIdx = 0;
-        document.getElementById('stage-title').innerText = "VÒNG 2: LUYỆN TẬP";
-        document.getElementById('hearts-count').classList.add('hidden');
-        renderQ();
-    }
-
-    function renderQ() {
-        let data = (currentStage === 2) ? game2 : game3;
-        let item = data[qIdx];
-        document.getElementById('main-display').innerHTML = `<div style="opacity:0.6; font-size:0.8rem">Câu hỏi ${qIdx+1}:</div>${item.q}`;
-        let html = `<div class="options-grid">`;
-        item.opts.forEach((opt, i) => html += `<button class="btn-opt" onclick="check(${i})">${opt}</button>`);
-        document.getElementById('play-area').innerHTML = html + `</div>`;
-    }
-
-    function check(idx) {
-        let data = (currentStage === 2) ? game2 : game3;
-        if(idx === data[qIdx].c) score += 10;
-        else alert("Gợi ý: " + data[qIdx].h);
+    function checkInputAnswer(correctStr) {
+        const input = document.getElementById('user-input');
+        const userVal = input.value.trim();
+        const correctArr = correctStr.split('|');
+        const btn = document.querySelector('.btn-submit');
         
-        updateScore();
-        qIdx++;
-        if(qIdx < data.length) renderQ();
-        else if(currentStage === 2) { 
-            currentStage = 3; qIdx = 0; 
-            document.getElementById('stage-title').innerText = "VÒNG 3: NÂNG CAO"; 
-            renderQ(); 
-        } else finish();
+        // Disable
+        input.disabled = true;
+        btn.disabled = true;
+
+        // So sánh (chấp nhận nhiều định dạng trong correctArr)
+        const isCorrect = correctArr.includes(userVal);
+        
+        if(isCorrect) {
+            playSound('correct');
+            input.style.borderColor = "var(--success)";
+            input.style.color = "var(--success)";
+            addScore(gameData[currentQIdx].points);
+            buildTowerStep();
+        } else {
+            playSound('wrong');
+            input.style.borderColor = "var(--danger)";
+            input.value += ` (Sai. Đ/a: ${correctArr[0]})`;
+        }
+        setTimeout(nextQ, 2000);
     }
 
-    function updateScore() { document.getElementById('score-text').innerText = "ĐIỂM: " + score + "/100"; }
+    function addScore(pts) {
+        score += pts;
+        const scoreEl = document.getElementById('current-score');
+        scoreEl.innerText = score;
+        // Hiệu ứng nhảy số
+        scoreEl.style.transform = "scale(1.5)";
+        setTimeout(() => scoreEl.style.transform = "scale(1)", 300);
+    }
 
-    function finish() {
-        document.getElementById('play-area').classList.add('hidden');
+    function buildTowerStep() {
+        const block = document.getElementById(`block-${currentQIdx}`);
+        if(block) {
+            block.classList.add('built');
+            block.innerText = `+${gameData[currentQIdx].points}`;
+        }
+    }
+
+    function nextQ() {
+        currentQIdx++;
+        renderQuestion();
+    }
+
+    // --- AUDIO & UTILS ---
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function playSound(type) {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const t = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        osc.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        if (type === 'correct') {
+            osc.type = 'sine'; osc.frequency.setValueAtTime(800, t); gainNode.gain.setValueAtTime(0.3, t);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, t + 0.6); osc.start(t); osc.stop(t + 0.6);
+        } else {
+            osc.type = 'triangle'; osc.frequency.setValueAtTime(200, t); osc.frequency.linearRampToValueAtTime(100, t + 0.3);
+            gainNode.gain.setValueAtTime(0.3, t); gainNode.gain.exponentialRampToValueAtTime(0.01, t + 0.3); osc.start(t); osc.stop(t + 0.3);
+        }
+    }
+
+    function finishGame() {
+        clearInterval(timerInterval);
+        window.onbeforeunload = null;
+        document.getElementById('game-ui').classList.add('hidden');
         document.getElementById('result-screen').classList.remove('hidden');
-        
-        let finalScore = (score > 100) ? 100 : score;
-        document.getElementById('score-val').innerText = finalScore + "/100";
-        
-        const duration = Math.floor((Date.now() - startTime) / 1000);
+        document.getElementById('final-score').innerText = score;
+        document.getElementById('final-time-text').innerText = document.getElementById('timer').innerText;
+
         const ref = db.ref('scores/Tuan_21');
-
-        // KIỂM TRA SỐ LẦN THI VÀ LƯU ĐIỂM
         ref.once('value', (snap) => {
-            let attemptCount = 1;
-            const data = snap.val();
-            if (data) {
-                for (let id in data) {
-                    const oldName = (data[id].fullName || data[id].name || "").toLowerCase();
-                    const oldClass = (data[id].className || "");
-                    if (oldName === savedName.toLowerCase() && oldClass === savedClass) {
-                        attemptCount++;
-                    }
-                }
-            }
-
-            ref.push({
-                fullName: savedName,
-                className: savedClass,
-                score: finalScore,
-                duration: duration,
-                attempt: attemptCount,
-                date: new Date().toLocaleString('vi-VN'),
-                timestamp: firebase.database.ServerValue.TIMESTAMP
-            }, () => {
-                document.getElementById('save-status').innerText = `✅ Đã lưu điểm lần ${attemptCount} thành công!`;
-                setTimeout(() => { window.location.href = "index.html"; }, 3000);
+            let attempt = 1; const data = snap.val();
+            if(data) { for(let id in data) { if(data[id].fullName === savedName && data[id].className === savedClass) attempt++; } }
+            ref.push({ fullName: savedName, className: savedClass, score: score, duration: seconds, attempt: attempt, date: new Date().toLocaleString('vi-VN') }, () => {
+                let timeLeft = 5; const msg = document.getElementById('redirect-msg');
+                setInterval(() => { timeLeft--; msg.innerText = `Đã lưu điểm! Về trang chủ sau ${timeLeft}s...`; if(timeLeft <= 0) location.href = 'index.html'; }, 1000);
             });
         });
     }
 
-    window.onload = initStage1;
+    function startTimer() {
+        timerInterval = setInterval(() => { seconds++; const m = Math.floor(seconds / 60).toString().padStart(2,'0'); const s = (seconds % 60).toString().padStart(2,'0'); document.getElementById('timer').innerText = `${m}:${s}`; }, 1000);
+    }
+
+    initGame();
 </script>
 </body>
 </html>
