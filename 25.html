@@ -299,13 +299,33 @@
                 padding: 12px;
                 min-height: 50px;
             }
-        }
+
+            #start-screen {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: #0984e3;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                z-index: 9999;
+            }
     </style>
 </head>
 
 <body>
+    <div id="start-screen">
+        <h1 style="color: var(--accent); font-size: 2rem; font-family: 'Bungee'; text-align: center;">TUẦN 25: DIỆN TÍCH
+            HÌNH HỘP CHỮ NHẬT VÀ LẬP PHƯƠNG</h1>
+        <p id="welcome-msg" style="margin-bottom: 20px; font-weight: bold; color: white;"></p>
+        <button class="opt-btn" onclick="startGame()"
+            style="width: auto; padding: 15px 40px; background: var(--accent); color: #000;">BẮT ĐẦU THÁM HIỂM</button>
+    </div>
 
-    <div class="container" id="game-ui">
+    <div class="container hidden" id="game-ui">
         <div class="header">
             <h1>TUẦN 25 - TOÁN LỚP 5</h1>
             <p style="margin: 5px 0; color: var(--light); font-weight: bold; font-size: 0.9rem;">CHỦ ĐỀ: DIỆN TÍCH HÌNH
@@ -313,6 +333,8 @@
             </p>
             <div class="info-bar">
                 <span>👤 <b id="user-name">---</b></span>
+                <span>🏫 <b id="user-class">---</b></span>
+                <span>🏢 <b id="user-school">---</b></span>
                 <span>⭐ <b id="current-score" style="color:var(--accent)">0</b>/100</span>
                 <span>⏳ <b id="timer">00:00</b></span>
             </div>
@@ -355,16 +377,40 @@
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // User Data
         const savedName = localStorage.getItem('studentName') || "Người chơi";
-        const savedClass = localStorage.getItem('studentClass') || "5A";
-        const savedSchool = localStorage.getItem('studentSchool') || "Tiểu học";
-        document.getElementById('user-name').innerText = savedName;
+        const savedClass = localStorage.getItem('studentClass') || "---";
+        const savedSchool = localStorage.getItem('studentSchool') || "---";
+
+        let isPlaying = false;
+        let startTime;
+
+        window.onload = () => {
+            if (!localStorage.getItem('studentName') || !localStorage.getItem('studentClass')) {
+                document.getElementById('welcome-msg').innerHTML = "<b style='color:red'>⚠️ Em cần đăng ký ở bản đồ trước!</b>";
+                document.querySelector('#start-screen .opt-btn').onclick = () => window.location.href = "index.html";
+            } else {
+                document.getElementById('welcome-msg').innerText = `Thí sinh: ${savedName} - Lớp ${savedClass}`;
+                document.getElementById('user-name').innerText = savedName;
+                document.getElementById('user-class').innerText = savedClass;
+                document.getElementById('user-school').innerText = savedSchool;
+            }
+        };
+
+        function startGame() {
+            isPlaying = true;
+            startTime = Date.now();
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('game-ui').classList.remove('hidden');
+            initGame(); // Renamed from initStage1 to initGame as per original function name
+            startTimer();
+        }
 
         // Prevent accidental exit
         window.addEventListener('beforeunload', function (e) {
-            if (!document.getElementById('result-screen').classList.contains('hidden')) return;
-            e.preventDefault(); e.returnValue = '';
+            if (isPlaying && document.getElementById('result-screen').classList.contains('hidden')) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
         });
 
         // Question Data
@@ -446,7 +492,7 @@
 
             gameQueue = [...r1, ...r2, ...r3];
             renderQuestion();
-            startTimer();
+            // startTimer(); // Timer is now started by startGame()
         }
 
         function renderQuestion() {
