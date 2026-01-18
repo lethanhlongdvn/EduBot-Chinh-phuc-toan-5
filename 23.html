@@ -320,6 +320,7 @@
 
         const savedName = localStorage.getItem('studentName');
         const savedClass = localStorage.getItem('studentClass');
+        const savedSchool = localStorage.getItem('studentSchool');
         if (!savedName || !savedClass) { alert("Vui lòng đăng nhập!"); window.location.href = "index.html"; }
         document.getElementById('user-name').innerText = savedName;
 
@@ -557,7 +558,15 @@
             ref.once('value', (snap) => {
                 let attempt = 1; const data = snap.val();
                 if (data) { for (let id in data) { if ((data[id].fullName || "").toLowerCase() === savedName.toLowerCase()) attempt++; } }
-                ref.push({ fullName: savedName, className: savedClass, score: score, duration: seconds, attempt: attempt, date: new Date().toLocaleString('vi-VN') }, () => {
+                ref.push({
+                    fullName: savedName,
+                    className: savedClass,
+                    schoolName: savedSchool || '---',
+                    score: score,
+                    duration: seconds,
+                    attempt: attempt,
+                    date: new Date().toLocaleString('vi-VN')
+                }, () => {
                     document.getElementById('save-msg').innerText = "Đã lưu kết quả thành công!";
                     let c = 5;
                     const rEl = document.getElementById('redirect-msg');
