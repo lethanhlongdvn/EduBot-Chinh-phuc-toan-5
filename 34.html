@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ÔN TẬP TUẦN 34 - CHINH PHỤC ĐỈNH CAO</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Lexend:wght@400;600;700&display=swap"
+        rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <style>
+        :root {
+            --primary: #0984e3;
+            /* Deep Azure */
+            --dark: #2d3436;
+            --light: #f1f2f6;
+            --accent: #55efc4;
+            /* Mountain Spring Green */
+            --correct: #00b894;
+            --wrong: #d63031;
+            --bg: #dfe6e9;
+            --silver: #b2bec3;
+        }
+
+        body {
+            font-family: 'Lexend', sans-serif;
+            background: linear-gradient(135deg, #0984e3 0%, #2d3436 100%);
+            color: white;
+            margin: 0;
+            padding: 5px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            user-select: none;
+            padding-bottom: 40px;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            margin-bottom: 50px;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 20px;
+            border: 3px solid var(--accent);
+            text-align: center;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.4rem;
+            color: var(--accent);
+            text-transform: uppercase;
+            font-family: 'Bungee';
+            letter-spacing: 1px;
+            text-shadow: 2px 2px 0 #000;
+        }
+
+        .info-bar {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.95rem;
+            color: #fff;
+            font-weight: 600;
+            padding: 10px 15px;
+            margin-top: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        .game-stage {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 25px;
+            padding: 25px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+            min-height: 350px;
+            position: relative;
+            color: var(--dark);
+        }
+
+        .stage-label {
+            background: var(--primary);
+            color: white;
+            padding: 5px 20px;
+            border-radius: 20px;
+            font-family: 'Bungee';
+            display: inline-block;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 0 #0652dd;
+        }
+
+        .question-box {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 25px;
+            line-height: 1.5;
+            min-height: 80px;
+            border-left: 5px solid var(--primary);
+            padding-left: 15px;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .opt-btn {
+            background: #f1f2f6;
+            border: 2px solid #b2bec3;
+            padding: 18px;
+            border-radius: 15px;
+            color: var(--dark);
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            font-size: 1.05rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            min-height: 70px;
+            box-shadow: 0 5px 0 #636e72;
+        }
+
+        .opt-btn:hover {
+            transform: translateY(-2px);
+            background: #fff;
+        }
+
+        .opt-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 #636e72;
+        }
+
+        .opt-btn.correct {
+            background: var(--correct);
+            border-color: #009432;
+            color: white;
+            box-shadow: 0 5px 0 #006266;
+        }
+
+        .opt-btn.wrong {
+            background: var(--wrong);
+            border-color: #c0392b;
+            color: white;
+            box-shadow: 0 5px 0 #922b21;
+        }
+
+        .progress-container {
+            width: 100%;
+            height: 12px;
+            background: #dfe6e9;
+            border-radius: 6px;
+            margin-top: 30px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        #result-screen {
+            text-align: center;
+            padding: 50px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 30px;
+            border: 2px solid var(--accent);
+            color: white;
+        }
+
+        .trophy {
+            font-size: 6rem;
+            margin-bottom: 20px;
+            filter: drop-shadow(0 0 20px var(--accent));
+            animation: pulse 2.5s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+
+            50% {
+                transform: scale(1.1);
+                opacity: 0.8;
+            }
+        }
+
+        .final-score {
+            font-size: 4rem;
+            font-weight: bold;
+            color: var(--accent);
+            text-shadow: 3px 3px 0 #000;
+            margin: 20px 0;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .btn-restart {
+            padding: 15px 40px;
+            background: var(--accent);
+            border: none;
+            border-radius: 50px;
+            color: #2d3436;
+            font-weight: 800;
+            font-family: 'Bungee';
+            cursor: pointer;
+            font-size: 1.2rem;
+            box-shadow: 0 6px 0 #00b894;
+            margin-top: 30px;
+        }
+
+        .game-footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 8px 0;
+            text-align: center;
+            font-size: 0.7rem;
+            color: #ccc;
+            z-index: 1000;
+        }
+
+        #start-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--dark);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .btn-start {
+            background: var(--primary);
+            color: white;
+            padding: 18px 45px;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            font-family: 'Bungee';
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 0 #0652dd;
+            text-transform: uppercase;
+            margin-top: 20px;
+            border: 2px solid var(--accent);
+        }
+
+        .btn-start:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 9px 0 #0652dd;
+            filter: brightness(1.2);
+        }
+
+        @media (max-width: 600px) {
+            .options-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 1.1rem;
+            }
+
+            .question-box {
+                font-size: 1rem;
+            }
+
+            .opt-btn {
+                font-size: 0.95rem;
+                padding: 12px;
+                min-height: 50px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="start-screen">
+        <h1
+            style="color: var(--accent); font-size: 2.2rem; font-family: 'Bungee'; text-align: center; text-shadow: 2px 2px 0 #000;">
+            TUẦN 34: CHINH PHỤC ĐỈNH CAO</h1>
+        <p id="welcome-msg" style="margin-bottom: 20px; font-weight: bold; color: white;"></p>
+        <button class="btn-start" onclick="startGame()">BẮT ĐẦU LEO NÚI</button>
+    </div>
+
+    <div class="container hidden" id="game-ui">
+        <div class="header">
+            <h1>ÔN TẬP TUẦN 34 - TOÁN LỚP 5</h1>
+            <p style="margin: 5px 0; color: var(--accent); font-weight: bold; font-size: 0.85rem;">ÔN TẬP TỔNG HỢP -
+                GIAI ĐOẠN 1</p>
+            <div class="info-bar">
+                <span>👤 <b id="user-name">---</b></span>
+                <span>🏫 <b id="user-class">---</b></span>
+                <span>⭐ <b id="current-score" style="color:var(--accent)">0</b>/100</span>
+                <span>⏳ <b id="timer">00:00</b></span>
+            </div>
+        </div>
+
+        <div class="game-stage">
+            <div id="stage-info">
+                <div class="stage-label" id="stage-label">VÒNG 1: KHÁM PHÁ</div>
+                <div class="question-box" id="q-content">Đang chuẩn bị câu hỏi...</div>
+            </div>
+
+            <div id="interaction-area" class="options-grid"></div>
+
+            <div class="progress-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+            <div style="text-align:right; font-size:0.75rem; color:#636e72; margin-top:8px; font-weight: 600;">Tiến độ:
+                <span id="progress-text">0/13</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="result-screen" class="container hidden">
+        <div class="trophy">🏔️</div>
+        <h2>ĐÃ CHẠM ĐỈNH CAO!</h2>
+        <div class="final-score" id="final-score">0</div>
+        <p style="font-size: 1.2rem;">Thời gian thám hiểm: <b id="final-time-text"
+                style="color: var(--accent);">--:--</b></p>
+        <p id="save-msg" style="color:var(--accent); font-weight:bold; margin-top:20px;">Đang kết nối hệ thống...</p>
+        <p id="redirect-msg" style="color:#aaa; font-size:0.9rem;">Sẽ quay lại bản đồ trong giây lát...</p>
+        <button class="btn-restart" onclick="location.reload()">CHƠI LẠI</button>
+    </div>
+
+    <div class="game-footer">© 2026 EduBot - Chinh phục Toán 5 - Thiết kế bởi Lê Thành Long</div>
+
+    <script>
+        const firebaseConfig = { databaseURL: "https://gamhoctap-default-rtdb.asia-southeast1.firebasedatabase.app" };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        const savedName = localStorage.getItem('studentName') || "Người chơi";
+        const savedClass = localStorage.getItem('studentClass') || "---";
+        const savedSchool = localStorage.getItem('studentSchool') || "---";
+
+        let isPlaying = false;
+        let startTime;
+
+        window.onload = () => {
+            if (!localStorage.getItem('studentName') || !localStorage.getItem('studentClass')) {
+                document.getElementById('welcome-msg').innerHTML = "<b style='color:red'>⚠️ Em cần đăng ký ở bản đồ trước!</b>";
+                document.querySelector('#start-screen .btn-start').onclick = () => window.location.href = "index.html";
+            } else {
+                document.getElementById('welcome-msg').innerText = `Thí sinh: ${savedName} - Lớp ${savedClass}`;
+                document.getElementById('user-name').innerText = savedName;
+                document.getElementById('user-class').innerText = savedClass;
+            }
+        };
+
+        function startGame() {
+            isPlaying = true;
+            startTime = Date.now();
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('game-ui').classList.remove('hidden');
+            initGame();
+            startTimer();
+        }
+
+        const questions = {
+            r1: [
+                { q: "Trong số 3 461 285, chữ số 2 thuộc hàng nào?", a: ["Hàng triệu", "Hàng chục nghìn", "Hàng trăm", "Hàng đơn vị"], c: "Hàng trăm" },
+                { q: "Số 'Ba triệu, bốn trăm sáu mươi nghìn, một trăm hai mươi tám' viết là:", a: ["3 460 028", "346 128", "3 460 128", "3 046 128"], c: "3 460 128" },
+                { q: "Số nào bé nhất: 67 245; 67 425; 67 524; 65 742?", a: ["67 245", "67 425", "65 742", "67 524"], c: "65 742" },
+                { q: "Phân số nào sau đây bằng phân số 2/3?", a: ["4/8", "6/18", "16/24", "8/9"], c: "16/24" },
+                { q: "Hình vuông chia 8 phần, tô màu 5 phần. Phân số chỉ phần tô màu là:", a: ["8/5", "5/8", "3/8", "1/2"], c: "5/8" },
+                { q: "Số 'Sáu mươi đơn vị, 5 phần mười, 7 phần trăm, 2 phần nghìn' viết là:", a: ["6,572", "60,572", "60,0572", "65,72"], c: "60,572" },
+                { q: "Đổi 5 m 8 dm sang mét (số thập phân):", a: ["5,08 m", "5,8 m", "58 m", "0,58 m"], c: "5,8 m" },
+                { q: "Số thập phân lớn nhất: 70,571; 70,517; 71,057; 70,715?", a: ["70,571", "70,715", "71,057", "70,517"], c: "71,057" },
+                { q: "Đổi 425 g sang đơn vị ki-lô-gam:", a: ["4,25 kg", "42,5 kg", "0,425 kg", "0,0425 kg"], c: "0,425 kg" },
+                { q: "Chữ số 7 trong số 71,057 có giá trị là gì (chọn ý đúng nhất)?", a: ["7 đơn vị", "7 phần mười", "7 chục", "Cả chục và phần nghìn"], c: "Cả chục và phần nghìn" },
+                { q: "Phân số thập phân 317/100 viết dưới dạng hỗn số là:", a: ["1 217/100", "2 117/100", "3 17/100", "31 7/100"], c: "3 17/100" },
+                { q: "85 ml = ... l. Số thập phân thích hợp là:", a: ["0,85", "0,085", "8,5", "0,0085"], c: "0,085" },
+                { q: "RB Vàng (1,02m), Đỏ (0,89m), Xanh (98cm). Bạn nào cao nhất?", a: ["Rô-bốt Vàng", "Rô-bốt Đỏ", "Rô-bốt Xanh", "Ba bạn bằng nhau"], c: "Rô-bốt Vàng" },
+                { q: "Giá trị của biểu thức 175 - (59,3 + 35,7) là:", a: ["90", "80", "115,7", "100"], c: "80" },
+                { q: "Số thập phân 0,75 tương ứng với phân số nào?", a: ["1/4", "1/2", "3/4", "2/3"], c: "3/4" },
+                { q: "Làm tròn số 105 362 480 đến hàng nghìn:", a: ["105 363 000", "105 362 000", "105 360 000", "105 400 000"], c: "105 362 000" },
+                { q: "Phân số nào sau đây tối giản?", a: ["15/21", "20/35", "3/4", "72/120"], c: "3/4" },
+                { q: "Số thập phân gồm 4 trăm, 5 đơn vị và 6 phần mười là:", a: ["45,6", "405,06", "405,6", "450,6"], c: "405,6" },
+                { q: "Hiệu của hai số 981 759 và 645 267 là:", a: ["336 482", "336 492", "336 592", "346 492"], c: "336 492" },
+                { q: "Số tự nhiên bé nhất là:", a: ["0", "1", "Không có", "10"], c: "0" }
+            ],
+            r2: [
+                { q: "Kết quả của phép tính 148,32 + 270,84 là:", a: ["418,16", "419,16", "419,26", "420,16"], c: "419,16" },
+                { q: "Tính nhanh: 137 x 25 + 137 x 75 = ?", a: ["13 775", "1 370", "13 700", "137 000"], c: "13 700" },
+                { q: "Thùng 20 hộp, 12 hộp không đường. Tỉ số % sữa CÓ đường là:", a: ["60%", "40%", "12%", "8%"], c: "40%" },
+                { q: "Gửi 10tr lãi 0,5%/tháng. Sau 1 tháng lãi bao nhiêu?", a: ["5 000đ", "500 000đ", "50 000đ", "10 050 000đ"], c: "50 000đ" },
+                { q: "Kết quả của phép chia 2 625 : 15 là:", a: ["15", "175", "185", "275"], c: "175" },
+                { q: "14 giờ 36 phút + 5 giờ 15 phút = ?", a: ["19 giờ 41 phút", "19 giờ 51 phút", "20 giờ 1 phút", "19 giờ 36 phút"], c: "19 giờ 51 phút" },
+                { q: "Đi 1,49 km trong 3 phút. Vận tốc xấp xỉ là:", a: ["0,5 km/p", "0,496 km/p", "1 km/p", "10 m/s"], c: "0,496 km/p" },
+                { q: "Số 0,652 viết dưới dạng tỉ số phần trăm là:", a: ["6,52%", "65,2%", "0,0652%", "652%"], c: "65,2%" },
+                { q: "Kết quả phép tính 34,6 x 5,7 là:", a: ["197,22", "196,22", "34,657", "200"], c: "197,22" },
+                { q: "38,5 phút : 5 = ?", a: ["7,5 phút", "7,7 phút", "7,9 phút", "8,7 phút"], c: "7,7" }, // Wait, user said B which is 7.7.
+                { q: "Đổi 2 kg 45 g sang kg (số thập phân):", a: ["2,45", "2,045", "20,45", "2,0045"], c: "2,045" },
+                { q: "Xe máy đi 24 km hết 15 phút. Vận tốc km/giờ là:", a: ["80 km/h", "96 km/h", "60 km/h", "120 km/h"], c: "96 km/h" },
+                { q: "Trong biểu thức (124,46 + 98,31) + 75,54, nên nhóm số nào?", a: ["124,46 + 75,54", "98,31 + 75,54", "Không nhóm được", "124 + 98"], c: "124,46 + 75,54" },
+                { q: "Mai (5 phần), Mi (2 phần). Mai hơn Mi 6 cái. Mi có mấy cái kẹo?", a: ["4 cái", "10 cái", "14 cái", "6 cái"], c: "4 cái" },
+                { q: "10 giờ 15 phút - 6 giờ 30 phút = ?", a: ["4 giờ 15 phút", "3 giờ 45 phút", "3 giờ 15 phút", "4 giờ 45 phút"], c: "3 giờ 45 phút" },
+                { q: "Tính 5% của 780 000, ta làm thế nào?", a: ["780 000 : 5", "780 000 x 5 : 100", "780 000 : 100", "780 000 x 5"], c: "780 000 x 5 : 100" },
+                { q: "Mua 3 vở giá 7600đ, 5 vở giá 6000đ. Trung bình giá 1 quyển là:", a: ["6 800đ", "6 600đ", "7 000đ", "6 500đ"], c: "6 600đ" },
+                { q: "Kết quả 0,5 : 100 là:", a: ["0,05", "0,005", "50", "0,5"], c: "0,005" },
+                { q: "15% của 1000 chiếc áo là bao nhiêu chiếc?", a: ["150 chiếc", "15 chiếc", "500 chiếc", "850 chiếc"], c: "150 chiếc" },
+                { q: "Kết quả của 2 tuần 5 ngày x 7 là:", a: ["14 tuần 35 ngày", "19 tuần", "17 tuần", "20 tuần"], c: "19 tuần" }
+            ],
+            r3: [
+                { q: "Tam giác đáy 14 cm, cao 10 cm. Diện tích là:", a: ["70 cm²", "140 cm²", "24 cm²", "35 cm²"], c: "70 cm²" },
+                { q: "Hình thang đáy 12 cm, 8 cm; cao 8 cm. Diện tích là:", a: ["160 cm²", "80 cm²", "40 cm²", "96 cm²"], c: "80 cm²" },
+                { q: "Hình tròn bán kính 5 cm. Chu vi hình tròn đó là:", a: ["15,7 cm", "31,4 cm", "78,5 cm", "25 cm"], c: "31,4 cm" },
+                { q: "Hình M (cạnh 5cm) và hình N (10x3x4cm). Hình nào có S toàn phần lớn hơn?", a: ["Hình M lớn hơn", "Hình N lớn hơn", "Hai hình bằng nhau", "Không rõ"], c: "Hình N lớn hơn" },
+                { q: "Thể tích khối lập phương cạnh 5 cm là:", a: ["25 cm³", "100 cm³", "125 cm³", "150 cm³"], c: "125 cm³" },
+                { q: "Báo săn chạy 120 km/h. Trong 24 phút nó đi được:", a: ["5 km", "48 km", "2880 km", "50 km"], c: "48 km" },
+                { q: "Bể cá chu vi đáy 320 cm, rộng = 3/5 dài. Chiều dài đáy bể là:", a: ["60 cm", "80 cm", "100 cm", "120 cm"], c: "100 cm" },
+                { q: "Bể cao 50 cm, nước đang 40 cm. Nước chiếm bao nhiêu % thể tích bể?", a: ["90%", "80%", "75%", "40%"], c: "80%" },
+                { q: "Taxi hết 2 giờ, thời gian taxi = 2/3 xe buýt. Xe buýt đi hết:", a: ["4/3 giờ", "3 giờ", "1,5 giờ", "2,5 giờ"], c: "3 giờ" },
+                { q: "Diện tích 10 000 km², dân số 800 000 người. Mật độ dân số là:", a: ["8 người/km²", "80 người/km²", "800 người/km²", "8000 người/km²"], c: "80 người/km²" },
+                { q: "Tăng mật độ từ 80 lên 90/km² trên 10 000 km². Dân số phải tăng:", a: ["10 000 người", "100 000 người", "1 000 người", "900 000 người"], c: "100 000 người" },
+                { q: "Dựa vào bảng huy chương, môn nào có nhiều HCV nhất?", a: ["Vật (17)", "Bơi (11)", "Lặn (10)", "Wushu (10)"], c: "Vật (17)" },
+                { q: "Tổng huy chương Wushu (10 Vàng, 3 Bạc, 7 Đồng) là:", a: ["10", "13", "20", "17"], c: "20" },
+                { q: "Khối đá 1m³ nặng 2,75 tấn. Khối 0,4m³ nặng bao nhiêu tấn?", a: ["11 tấn", "1,1 tấn", "110 kg", "1,1 kg"], c: "1,1 tấn" },
+                { q: "Đoàn tàu đi từ 6h10p đến 10h40p. Thời gian đi là:", a: ["4 giờ", "4 giờ 20 phút", "4 giờ 30 phút", "5 giờ"], c: "4 giờ 30 phút" },
+                { q: "Công thức tính thể tích hình hộp chữ nhật là:", a: ["V = a x b x c", "V = a x a x a", "V = (a+b) x 2 x c", "V = a x b"], c: "V = a x b x c" },
+                { q: "Hình khai triển của hình lập phương gồm bao nhiêu hình vuông?", a: ["4", "5", "6", "8"], c: "6" },
+                { q: "Đơn vị đo thể tích nào lớn nhất?", a: ["cm³", "dm³", "m³", "mm"], c: "m³" },
+                { q: "Bản đồ 1:1 000 000, 5 cm ứng với thực tế là:", a: ["5 km", "50 km", "500 km", "5000 m"], c: "50 km" },
+                { q: "Biểu đồ quạt tròn dùng để biểu thị đại lượng nào?", a: ["Tổng số lượng", "Tỉ số phần trăm", "Hiệu số", "Vận tốc"], c: "Tỉ số phần trăm" }
+            ]
+        };
+
+        let activeQueue = [];
+        let currentIndex = 0;
+        let score = 0;
+        let seconds = 0;
+        let timerItv;
+
+        function shuffle(arr) { return arr.sort(() => Math.random() - 0.5); }
+
+        function initGame() {
+            const r1 = shuffle([...questions.r1]).slice(0, 5).map(q => ({ ...q, pts: 7, label: "VÒNG 1: SỐ HỌC TỔNG HỢP" }));
+            const r2 = shuffle([...questions.r2]).slice(0, 5).map(q => ({ ...q, pts: 7, label: "VÒNG 2: PHÉP TÍNH & TỈ SỐ" }));
+            const r3 = shuffle([...questions.r3]).slice(0, 3).map(q => ({ ...q, pts: 10, label: "VÒNG 3: HÌNH HỌC & THỐNG KÊ" }));
+            activeQueue = [...r1, ...r2, ...r3];
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            if (currentIndex >= activeQueue.length) { finishGame(); return; }
+            const q = activeQueue[currentIndex];
+            document.getElementById('stage-label').innerText = q.label;
+            document.getElementById('q-content').innerText = q.q;
+            document.getElementById('progress-text').innerText = `${currentIndex + 1}/${activeQueue.length}`;
+            document.getElementById('progress-bar').style.width = `${(currentIndex / activeQueue.length) * 100}%`;
+
+            const area = document.getElementById('interaction-area');
+            area.innerHTML = '';
+            shuffle([...q.a]).forEach(opt => {
+                const btn = document.createElement('div');
+                btn.className = 'opt-btn';
+                btn.innerText = opt;
+                btn.onclick = () => checkAnswer(btn, opt, q.c, q.pts);
+                area.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(btn, choice, correct, pts) {
+            document.querySelectorAll('.opt-btn').forEach(b => b.onclick = null);
+            if (choice === correct) {
+                btn.classList.add('correct');
+                score += pts;
+                playSound('correct');
+            } else {
+                btn.classList.add('wrong');
+                playSound('wrong');
+            }
+            document.getElementById('current-score').innerText = score;
+            setTimeout(() => { currentIndex++; renderQuestion(); }, 1500);
+        }
+
+        function startTimer() {
+            timerItv = setInterval(() => {
+                seconds++;
+                const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+                const s = (seconds % 60).toString().padStart(2, '0');
+                document.getElementById('timer').innerText = `${m}:${s}`;
+            }, 1000);
+        }
+
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const t = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const g = audioCtx.createGain();
+            osc.connect(g); g.connect(audioCtx.destination);
+            if (type === 'correct') {
+                osc.type = 'sine'; osc.frequency.setValueAtTime(523, t); osc.frequency.exponentialRampToValueAtTime(880, t + 0.1);
+                g.gain.setValueAtTime(0.3, t); g.gain.exponentialRampToValueAtTime(0.01, t + 0.3);
+                osc.start(t); osc.stop(t + 0.3);
+            } else {
+                osc.type = 'square'; osc.frequency.setValueAtTime(110, t); osc.frequency.linearRampToValueAtTime(80, t + 0.2);
+                g.gain.setValueAtTime(0.3, t); g.gain.exponentialRampToValueAtTime(0.01, t + 0.3);
+                osc.start(t); osc.stop(t + 0.3);
+            }
+        }
+
+        function finishGame() {
+            clearInterval(timerItv);
+            document.getElementById('game-ui').classList.add('hidden');
+            document.getElementById('result-screen').classList.remove('hidden');
+            document.getElementById('final-score').innerText = score;
+            document.getElementById('final-time-text').innerText = document.getElementById('timer').innerText;
+
+            db.ref('scores/Tuan_34').push({
+                fullName: savedName, className: savedClass, schoolName: savedSchool,
+                score: score, duration: seconds, date: new Date().toLocaleString('vi-VN')
+            }, () => {
+                document.getElementById('save-msg').innerText = "Thành tích đã được ghi lại thành công!";
+                let count = 5;
+                const rd = document.getElementById('redirect-msg');
+                const itv2 = setInterval(() => {
+                    count--;
+                    rd.innerText = `Sẽ quay lại bản đồ trong ${count}s...`;
+                    if (count <= 0) { clearInterval(itv2); window.location.href = "index.html"; }
+                }, 1000);
+            });
+        }
+    </script>
+</body>
+
+</html>
