@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>KỲ THI TỔNG KẾT - CHINH PHỤC TOÁN 5</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Lexend:wght@400;600;700&display=swap"
+        rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <style>
+        :root {
+            --primary: #1e3799;
+            /* Navy Blue */
+            --gold: #f6b93b;
+            /* Royal Gold */
+            --marble: #f5f6fa;
+            --correct: #079992;
+            --wrong: #b71540;
+            --accent: #38ada9;
+        }
+
+        body {
+            font-family: 'Lexend', sans-serif;
+            background: linear-gradient(135deg, #0a3d62 0%, #3c6382 100%);
+            color: #2f3542;
+            margin: 0;
+            padding: 5px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            user-select: none;
+            padding-bottom: 40px;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            margin-bottom: 50px;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px;
+            border-radius: 20px;
+            border: 4px solid var(--gold);
+            text-align: center;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.4rem;
+            color: var(--primary);
+            text-transform: uppercase;
+            font-family: 'Bungee';
+            letter-spacing: 1px;
+        }
+
+        .info-bar {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            color: var(--primary);
+            font-weight: 700;
+            padding: 10px 15px;
+            margin-top: 10px;
+            background: rgba(246, 185, 59, 0.1);
+            border-radius: 10px;
+        }
+
+        .game-stage {
+            background: white;
+            border-radius: 25px;
+            padding: 25px;
+            box-shadow: 0 15px 45px rgba(0, 0, 0, 0.4);
+            min-height: 400px;
+            position: relative;
+            border: 2px solid #ddd;
+        }
+
+        .stage-label {
+            background: var(--primary);
+            color: white;
+            padding: 5px 20px;
+            border-radius: 20px;
+            font-family: 'Bungee';
+            display: inline-block;
+            margin-bottom: 15px;
+            font-size: 0.85rem;
+            box-shadow: 0 4px 0 #0652dd;
+        }
+
+        .question-box {
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin-bottom: 25px;
+            line-height: 1.6;
+            min-height: 80px;
+            color: var(--primary);
+            border-bottom: 2px dashed #eee;
+            padding-bottom: 15px;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .opt-btn {
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+            padding: 18px;
+            border-radius: 15px;
+            color: #2f3542;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            font-size: 1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            min-height: 70px;
+            box-shadow: 0 5px 0 #ced4da;
+        }
+
+        .opt-btn:hover {
+            transform: translateY(-2px);
+            background: var(--marble);
+            border-color: var(--primary);
+        }
+
+        .opt-btn.correct {
+            background: var(--correct);
+            border-color: #06807a;
+            color: white;
+            box-shadow: 0 5px 0 #06807a;
+        }
+
+        .opt-btn.wrong {
+            background: var(--wrong);
+            border-color: #921235;
+            color: white;
+            box-shadow: 0 5px 0 #921235;
+        }
+
+        .input-area {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .ans-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2rem;
+            border: 3px solid var(--primary);
+            border-radius: 15px;
+            outline: none;
+            box-sizing: border-box;
+            font-family: 'Lexend';
+            text-align: center;
+            background: #fff;
+        }
+
+        .btn-submit {
+            padding: 15px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            font-family: 'Bungee';
+            cursor: pointer;
+            box-shadow: 0 6px 0 #000;
+        }
+
+        .progress-container {
+            width: 100%;
+            height: 12px;
+            background: #eee;
+            border-radius: 6px;
+            margin-top: 30px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--gold));
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        #result-screen {
+            text-align: center;
+            padding: 50px 20px;
+            background: white;
+            border-radius: 30px;
+            border: 5px solid var(--gold);
+            color: var(--primary);
+        }
+
+        .trophy {
+            font-size: 6rem;
+            margin-bottom: 20px;
+            filter: drop-shadow(0 0 20px var(--gold));
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-15px);
+            }
+        }
+
+        .final-score {
+            font-size: 5rem;
+            font-weight: bold;
+            color: var(--primary);
+            text-shadow: 2px 2px 0 var(--gold);
+            margin: 20px 0;
+            font-family: 'Bungee';
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .game-footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 8px 0;
+            text-align: center;
+            font-size: 0.7rem;
+            color: var(--gold);
+            z-index: 1000;
+        }
+
+        #start-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--primary);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .btn-start {
+            background: var(--gold);
+            color: var(--primary);
+            padding: 18px 45px;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            font-family: 'Bungee';
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 0 #b38900;
+            text-transform: uppercase;
+            margin-top: 20px;
+        }
+
+        .btn-start:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 9px 0 #b38900;
+            filter: brightness(1.1);
+        }
+
+        @media (max-width: 600px) {
+            .options-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 1.1rem;
+            }
+
+            .question-box {
+                font-size: 1rem;
+            }
+
+            .opt-btn {
+                font-size: 0.95rem;
+                padding: 12px;
+                min-height: 50px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="start-screen">
+        <div class="trophy">🎓</div>
+        <h1 style="color: white; font-size: 2rem; font-family: 'Bungee'; text-align: center; margin: 0 15px;">KỲ THI
+            TỔNG KẾT CUỐI KỲ II</h1>
+        <p style="color: var(--gold); font-weight: bold; margin-top: 10px;">THÀNH QUẢ 35 TUẦN CHINH PHỤC</p>
+        <p id="welcome-msg" style="margin-bottom: 20px; font-weight: bold; color: white;"></p>
+        <button class="btn-start" onclick="startGame()">BẮT ĐẦU DỰ THI</button>
+    </div>
+
+    <div class="container hidden" id="game-ui">
+        <div class="header">
+            <h1>ĐỀ THI TOÁN LỚP 5 - TỔNG HỢP</h1>
+            <div class="info-bar">
+                <span>👤 <b id="user-name">---</b></span>
+                <span>⭐ <b id="current-score">0</b>/100</span>
+                <span>⏳ <b id="timer">00:00</b></span>
+            </div>
+        </div>
+
+        <div class="game-stage">
+            <div id="stage-info">
+                <div class="stage-label" id="stage-label">PHẦN I: TRẮC NGHIỆM</div>
+                <div class="question-box" id="q-content">Đang chuẩn bị đề thi...</div>
+            </div>
+
+            <div id="interaction-area"></div>
+
+            <div class="progress-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+            <div style="text-align:right; font-size:0.75rem; color:#636e72; margin-top:8px; font-weight: 600;">Câu:
+                <span id="progress-text">0/11</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="result-screen" class="container hidden">
+        <div class="trophy">🏆</div>
+        <h2>KẾT QUẢ CUỐI CÙNG</h2>
+        <div class="final-score" id="final-score">0</div>
+        <p style="font-size: 1.1rem; font-weight: bold;">Chúc mừng bạn đã hoàn thành chương trình Toán lớp 5!</p>
+        <p id="save-msg" style="color:var(--primary); font-weight:bold; margin-top:20px;">Đang lưu kết quả vào học bạ
+            số...</p>
+
+        <div style="display: flex; gap: 20px; justify-content: center; margin-top: 30px; flex-wrap: wrap;">
+            <button class="btn-start" onclick="location.reload()">LÀM ĐỀ KHÁC</button>
+            <button class="btn-start"
+                style="background: var(--marble); color: var(--primary); box-shadow: 0 6px 0 #ccc;"
+                onclick="window.location.href='index.html'">VỀ TRANG CHỦ</button>
+        </div>
+    </div>
+
+    <div class="game-footer">© 2026 EduBot - Hệ thống Đánh giá Năng lực Toán học - Thiết kế bởi Lê Thành Long</div>
+
+    <script>
+        const firebaseConfig = { databaseURL: "https://gamhoctap-default-rtdb.asia-southeast1.firebasedatabase.app" };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        const savedName = localStorage.getItem('studentName') || "Thí sinh";
+        const savedClass = localStorage.getItem('studentClass') || "---";
+
+        let score = 0;
+        let currentIndex = 0;
+        let timer = 0;
+        let timerItv;
+        let testQuestions = [];
+
+        window.onload = () => {
+            if (!localStorage.getItem('studentName')) {
+                document.getElementById('welcome-msg').innerHTML = "<b style='color:red'>⚠️ Em cần đăng ký ở trang chủ trước!</b>";
+                document.querySelector('#start-screen .btn-start').onclick = () => window.location.href = "index.html";
+            } else {
+                document.getElementById('welcome-msg').innerText = `${savedName} - Lớp ${savedClass}`;
+                document.getElementById('user-name').innerText = savedName;
+            }
+        };
+
+        const pools = [
+            // Q1: Rounding
+            [
+                { q: "Số 124,568 làm tròn đến số tự nhiên gần nhất là:", a: ["124", "125", "123", "126"], c: "125" },
+                { q: "Số 87,49 làm tròn đến số tự nhiên gần nhất là:", a: ["87", "88", "90", "86"], c: "87" },
+                { q: "Số 99,51 làm tròn đến số tự nhiên gần nhất là:", a: ["99", "100", "101", "90"], c: "100" },
+                { q: "Số 15,25 làm tròn đến số tự nhiên gần nhất là:", a: ["15", "16", "14", "15,2"], c: "16" },
+                { q: "Số 235,412 làm tròn đến số tự nhiên gần nhất là:", a: ["235", "236", "234", "240"], c: "235" },
+                { q: "Số 0,89 làm tròn đến số tự nhiên gần nhất là:", a: ["0", "1", "2", "0,8"], c: "1" },
+                { q: "Số 456,32 làm tròn đến số tự nhiên gần nhất là:", a: ["456", "457", "450", "460"], c: "456" },
+                { q: "Số 12,50 làm tròn đến số tự nhiên gần nhất là:", a: ["12", "13", "14", "12,5"], c: "13" },
+                { q: "Số 55,44 làm tròn đến số tự nhiên gần nhất là:", a: ["55", "56", "60", "50"], c: "55" },
+                { q: "Số 200,5 làm tròn đến số tự nhiên gần nhất là:", a: ["200", "201", "202", "200,5"], c: "201" }
+            ],
+            // Q2: Fraction to Mixed
+            [
+                { q: "Hỗn số tương ứng với phân số 4567/1000 là:", a: ["45 67/100", "4 567/1000", "456 7/10", "4567/1"], c: "4 567/1000" },
+                { q: "Hỗn số tương ứng với phân số 1234/1000 là:", a: ["1 234/1000", "12 34/100", "1 23/40", "123 4/10"], c: "1 234/1000" },
+                { q: "Hỗn số tương ứng với phân số 567/100 là:", a: ["5 67/100", "56 7/10", "5 6/7", "567/1"], c: "5 67/100" },
+                { q: "Hỗn số tương ứng với phân số 8901/1000 là:", a: ["8 901/1000", "89 1/100", "8 91/100", "890 1/10"], c: "8 901/1000" },
+                { q: "Hỗn số tương ứng với phân số 234/100 là:", a: ["2 34/100", "23 4/10", "2 3/4", "234"], c: "2 34/100" },
+                { q: "Hỗn số tương ứng với phân số 789/10 là:", a: ["7 89/100", "78 9/10", "7 8/9", "789"], c: "78 9/10" },
+                { q: "Hỗn số tương ứng với phân số 1102/100 là:", a: ["11 2/100", "110 2/10", "1 102/100", "11 1/2"], c: "11 2/100" },
+                { q: "Hỗn số tương ứng với phân số 6543/1000 là:", a: ["6 543/1000", "65 43/100", "6 54/3", "654 3/10"], c: "6 543/1000" },
+                { q: "Hỗn số tương ứng với phân số 999/100 là:", a: ["9 99/100", "99 9/10", "9 9/9", "0,999"], c: "9 99/100" },
+                { q: "Hỗn số tương ứng với phân số 432/100 là:", a: ["4 32/100", "43 2/10", "4 3/2", "4,32"], c: "4 32/100" }
+            ],
+            // Q3: Density
+            [
+                { q: "Có bao nhiêu số thập phân ở giữa 0,1 và 0,2?", a: ["0 số", "1 số (là 1,5)", "9 số", "Rất nhiều số"], c: "Rất nhiều số" },
+                { q: "Có bao nhiêu số thập phân ở giữa 1,5 và 1,6?", a: ["0", "1", "10", "Vô số số"], c: "Vô số số" },
+                { q: "Có bao nhiêu số thập phân ở giữa 0,01 và 0,02?", a: ["Nhiều số", "0 số", "9 số", "100 số"], c: "Nhiều số" },
+                { q: "Có bao nhiêu số thập phân ở giữa hai số tự nhiên 9 và 10?", a: ["0", "1", "9", "Rất nhiều số"], c: "Rất nhiều số" },
+                { q: "Giữa 0,5 và 0,6 có thể tìm được bao nhiêu số thập phân nữa?", a: ["0", "1", "Vô số", "9"], c: "Vô số" },
+                { q: "Giữa 2,1 và 2,2 có bao nhiêu số thập phân?", a: ["9", "10", "Nhiều vô kể", "0"], c: "Nhiều vô kể" },
+                { q: "Có bao nhiêu số thập phân nằm giữa 0,7 và 0,8?", a: ["1", "9", "Không đếm xuể", "0"], c: "Không đếm xuể" },
+                { q: "Giữa 11 và 12 có bao nhiêu số?", a: ["0", "Vô số số thập phân", "9 số", "1 số"], c: "Vô số số thập phân" },
+                { q: "Tìm số lượng số thập phân ở giữa 3,4 và 3,5:", a: ["Vô vàn số", "9 số", "0 số", "1 số"], c: "Vô vàn số" },
+                { q: "Có bao nhiêu số thập phân ở giữa 0,25 và 0,26?", a: ["0", "Vô số", "10", "100"], c: "Vô số" }
+            ],
+            // Q4: Percent Ratios
+            [
+                { q: "Tỉ số phần trăm của 45 và 180 là:", a: ["20%", "25%", "30%", "15%"], c: "25%" },
+                { q: "Tỉ số phần trăm của 30 và 120 là:", a: ["15%", "20%", "25%", "30%"], c: "25%" },
+                { q: "Tỉ số phần trăm của 25 và 100 là:", a: ["25%", "50%", "10%", "5%"], c: "25%" },
+                { q: "Tỉ số phần trăm của 60 và 240 là:", a: ["20%", "25%", "40%", "15%"], c: "25%" },
+                { q: "Tỉ số phần trăm của 15 và 60 là:", a: ["10%", "25%", "50%", "30%"], c: "25%" },
+                { q: "Tỉ số phần trăm của 40 và 100 là:", a: ["25%", "40%", "60%", "10%"], c: "40%" },
+                { q: "Tỉ số phần trăm của 12 và 60 là:", a: ["20%", "12%", "25%", "30%"], c: "20%" },
+                { q: "Tỉ số phần trăm của 80 và 200 là:", a: ["20%", "40%", "80%", "50%"], c: "40%" },
+                { q: "Tỉ số phần trăm của 18 và 90 là:", a: ["20%", "18%", "90%", "25%"], c: "20%" },
+                { q: "Tỉ số phần trăm của 50 và 200 là:", a: ["50%", "25%", "100%", "20%"], c: "25%" }
+            ],
+            // Q5: Practical Percent (All 45%)
+            [
+                { q: "Cửa hàng có 150m vải, đã bán được 67,5m. Vậy đã bán được bao nhiêu phần trăm?", a: ["40%", "45%", "50%", "55%"], c: "45%" },
+                { q: "Xưởng có 200m vải, đã may hết 90m. Xưởng đã dùng bao nhiêu % vải?", a: ["45%", "40%", "50%", "48%"], c: "45%" },
+                { q: "Một tấm vải dài 120m, cắt đi 54m. Số vải cắt đi chiếm bao nhiêu %?", a: ["45%", "40%", "50%", "35%"], c: "45%" },
+                { q: "Có 80m lụa, đã bán 36m. Tỉ số % lụa đã bán là:", a: ["40%", "45%", "50%", "30%"], c: "45%" },
+                { q: "Kho có 250m vải, xuất kho 112,5m. Đã xuất bao nhiêu %?", a: ["45%", "40%", "50%", "42%"], c: "45%" },
+                { q: "Cuộn dây 100m, đã cắt 45m. Đã dùng bao nhiêu % cuộn dây?", a: ["40%", "45%", "50%", "55%"], c: "45%" },
+                { q: "Cuộn 160m vải, đã bán 72m. Tỉ lệ % đã bán là:", a: ["45%", "40%", "50%", "44%"], c: "45%" },
+                { q: "Lô hàng 300m, đã giao 135m. Đã giao được bao nhiêu %?", a: ["45%", "40%", "50%", "47%"], c: "45%" },
+                { q: "Tại đại lý có 400m vải, bán 180m. Vậy bán được bao nhiêu %?", a: ["45%", "40%", "50%", "48%"], c: "45%" },
+                { q: "Một cây vải 500m, cắt bán 225m. Cây vải đã vơi đi bao nhiêu %?", a: ["45%", "40%", "50%", "46%"], c: "45%" }
+            ],
+            // Q6: Unit dm3 to m3
+            [
+                { q: "Đổi đơn vị: 348 dm³ = ... m³", a: ["3,48", "34,8", "0,348", "0,0348"], c: "0,348" },
+                { q: "Đổi đơn vị: 521 dm³ = ... m³", a: ["5,21", "0,521", "52,1", "5210"], c: "0,521" },
+                { q: "Đổi đơn vị: 1250 dm³ = ... m³", a: ["1,25", "12,5", "0,125", "125"], c: "1,25" },
+                { q: "Đổi đơn vị: 89 dm³ = ... m³", a: ["0,89", "0,089", "8,9", "890"], c: "0,089" },
+                { q: "Đổi đơn vị: 4700 dm³ = ... m³", a: ["47", "4,7", "0,47", "470"], c: "4,7" },
+                { q: "Đổi đơn vị: 25 dm³ = ... m³", a: ["0,25", "2,5", "0,025", "0,0025"], c: "0,025" },
+                { q: "Đổi đơn vị: 634 dm³ = ... m³", a: ["0,634", "6,34", "63,4", "0,0634"], c: "0,634" },
+                { q: "Đổi đơn vị: 901 dm³ = ... m³", a: ["9,01", "0,901", "90,1", "0,0901"], c: "0,901" },
+                { q: "Đổi đơn vị: 15,5 dm³ = ... m³", a: ["1,55", "0,155", "0,0155", "0,00155"], c: "0,0155" },
+                { q: "Đổi đơn vị: 777 dm³ = ... m³", a: ["0,777", "7,77", "77,7", "0,0777"], c: "0,777" }
+            ],
+            // Q7: Surface Area Cube
+            [
+                { q: "Hình lập phương cạnh 1,3 m. Diện tích xung quanh là:", a: ["1,69 m²", "6,76 m²", "10,14 m²", "5,2 m"], c: "6,76 m²" },
+                { q: "Hình lập phương cạnh 2 m. Diện tích xung quanh là:", a: ["4 m²", "8 m²", "16 m²", "24 m²"], c: "16 m²" },
+                { q: "Hình lập phương cạnh 1,5 m. Diện tích xung quanh là:", a: ["2,25 m²", "9 m²", "13,5 m²", "6 m"], c: "9 m²" },
+                { q: "Hình lập phương cạnh 0,8 m. Diện tích xung quanh là:", a: ["2,56 m²", "0,64 m²", "3,84 m²", "3,2 m"], c: "2,56 m²" },
+                { q: "Hình lập phương cạnh 1,1 m. Diện tích xung quanh là:", a: ["1,21 m²", "4,84 m²", "7,26 m²", "4,4 m"], c: "4,84 m²" },
+                { q: "Hình lập phương cạnh 3 m. Diện tích xung quanh là:", a: ["9 m²", "36 m²", "54 m²", "12 m"], c: "36 m²" },
+                { q: "Hình lập phương cạnh 0,5 m. Diện tích xung quanh là:", a: ["0,25 m²", "1 m²", "1,5 m²", "2 m"], c: "1 m²" },
+                { q: "Hình lập phương cạnh 1,2 m. Diện tích xung quanh là:", a: ["1,44 m²", "5,76 m²", "8,64 m²", "4,8 m"], c: "5,76 m²" },
+                { q: "Hình lập phương cạnh 2,5 m. Diện tích xung quanh là:", a: ["6,25 m²", "25 m²", "37,5 m²", "10 m"], c: "25 m²" },
+                { q: "Hình lập phương cạnh 0,6 m. Diện tích xung quanh là:", a: ["1,44 m²", "2,16 m²", "0,36 m²", "2,4 m"], c: "1,44 m²" }
+            ],
+            // Q8: Inverse Surface Area
+            [
+                { q: "Khối lập phương có diện tích xung quanh là 64 cm². Cạnh của nó là:", a: ["4 cm", "8 cm", "16 cm", "2 cm"], c: "4 cm" },
+                { q: "Khối lập phương có diện tích xung quanh là 36 cm². Cạnh của nó là:", a: ["3 cm", "6 cm", "9 cm", "2 cm"], c: "3 cm" },
+                { q: "Khối lập phương có diện tích xung quanh là 100 cm². Cạnh của nó là:", a: ["5 cm", "10 cm", "25 cm", "4 cm"], c: "5 cm" },
+                { q: "Khối lập phương có diện tích xung quanh là 144 cm². Cạnh của nó là:", a: ["12 cm", "6 cm", "36 cm", "8 cm"], c: "6 cm" },
+                { q: "Khối lập phương có diện tích xung quanh là 16 cm². Cạnh của nó là:", a: ["4 cm", "2 cm", "8 cm", "1 cm"], c: "2 cm" },
+                { q: "Khối lập phương có diện tích xung quanh là 400 cm². Cạnh của nó là:", a: ["20 cm", "10 cm", "100 cm", "5 cm"], c: "10 cm" },
+                { q: "Khối lập phương có diện tích xung quanh là 196 cm². Cạnh của nó là:", a: ["14 cm", "7 cm", "49 cm", "6 cm"], c: "7 cm" },
+                { q: "Khối lập phương có diện tích xung quanh là 324 cm². Cạnh của nó là:", a: ["18 cm", "9 cm", "81 cm", "12 cm"], c: "9 cm" },
+                { q: "Khối lập phương có diện tích xung quanh là 4 cm². Cạnh của nó là:", a: ["1 cm", "2 cm", "4 cm", "0,5 cm"], c: "1 cm" },
+                { q: "Khối lập phương có diện tích xung quanh là 256 cm². Cạnh của nó là:", a: ["16 cm", "8 cm", "64 cm", "10 cm"], c: "8 cm" }
+            ],
+            // Q9: Paint Area (Tự luận)
+            [
+                { q: "Người ta quét vôi xung quanh tường và trần một căn phòng hình hộp chữ nhật dài 8m, rộng 6m, cao 3,5m. Tính diện tích cần quét vôi (đơn vị m²).", c: "146" },
+                { q: "Phòng học dài 6m, rộng 4m, cao 3m. Tính diện tích quét vôi trần và 4 bức tường xung quanh (đơn vị m²).", c: "84" },
+                { q: "Phòng dài 7m, rộng 5m, cao 3,2m. Diện tích cần quét vôi trần và xung quanh tường là bao nhiêu m²?", c: "111,8" },
+                { q: "Căn phòng dài 9m, rộng 7m, cao 4m. Khi quét vôi xung quanh và trần nhà, diện tích tính bằng m² là:", c: "191" },
+                { q: "Tính diện tích cần sơn trần và 4 mặt tường của phòng dài 10m, rộng 8m, cao 3,8m. (Kết quả m²)", c: "216,8" },
+                { q: "Một phòng dài 5m, rộng 4m, cao 3,5m. Diện tích cần quét vôi (4 mặt + trần) bằng bao nhiêu m²?", c: "83" },
+                { q: "Phòng khách dài 8,5m, rộng 6m, cao 3m. Tính diện tích quét vôi trần và các bức tường chính (m²).", c: "138" },
+                { q: "Sảnh lớn dài 12m, rộng 10m, cao 4m. Diện tích toàn bộ trần và xung quanh tường m² là:", c: "296" },
+                { q: "Phòng họp dài 6,5m, rộng 4,5m, cao 3,2m. Diện tích cần quét vôi (trần và xung quanh) m² là:", c: "99,65" },
+                { q: "Nhà kho dài 7,5m, rộng 6m, cao 3,5m. Tính diện tích quét vôi trần và xung quanh (m²).", c: "139,5" }
+            ],
+            // Q10: Mixed Ops (Tự luận)
+            [
+                { q: "Đặt tính rồi tính:", sub: ["a) 31,47 + 6,25", "b) 76,3 - 37,2", "c) 4 giờ 14 phút x 4", "d) 7 giờ 18 phút : 3"], c: ["37,72", "39,1", "16 giờ 56 phút", "2 giờ 26 phút"] },
+                { q: "Đặt tính rồi tính:", sub: ["a) 52,18 + 9,34", "b) 85,4 - 42,7", "c) 2 giờ 15 phút x 3", "d) 5 giờ 20 phút : 4"], c: ["61,52", "42,7", "6 giờ 45 phút", "1 giờ 20 phút"] },
+                { q: "Đặt tính rồi tính:", sub: ["a) 12,56 + 8,44", "b) 100 - 35,6", "c) 3 giờ 12 phút x 5", "d) 9 giờ 30 phút : 3"], c: ["21", "64,4", "16 giờ", "3 giờ 10 phút"] },
+                { q: "Đặt tính rồi tính:", sub: ["a) 45,7 + 34,3", "b) 92,15 - 50,05", "c) 1 giờ 20 phút x 6", "d) 10 giờ 40 phút : 5"], c: ["80", "42,1", "8 giờ", "2 giờ 8 phút"] },
+                { q: "Đặt tính rồi tính:", sub: ["a) 7,85 + 2,15", "b) 54,2 - 18,9", "c) 5 giờ 10 phút x 2", "d) 8 giờ 24 phút : 4"], c: ["10", "35,3", "10 giờ 20 phút", "2 giờ 6 phút"] },
+                { q: "Đặt tính rồi tính:", sub: ["a) 123,4 + 56,6", "b) 210,5 - 85,3", "c) 4 giờ 45 phút x 2", "d) 12 giờ 30 phút : 6"], c: ["180", "125,2", "9 giờ 30 phút", "2 giờ 5 phút"] },
+                { q: "Đặt tính rồi tính:", sub: ["a) 36,9 + 4,1", "b) 77,7 - 22,2", "c) 2 giờ 30 phút x 4", "d) 6 giờ 15 phút : 5"], c: ["41", "55,5", "10 giờ", "1 giờ 15 phút"] },
+                { q: "Đặt tính rồi tính:", sub: ["a) 0,99 + 0,01", "b) 50 - 12,35", "c) 3 giờ 20 phút x 3", "d) 4 giờ 48 phút : 4"], c: ["1", "37,65", "10 giờ", "1 giờ 12 phút"] },
+                { q: "Đặt tính rồi tính:", sub: ["a) 8,88 + 1,12", "b) 99,9 - 0,9", "c) 1 giờ 15 phút x 8", "d) 15 giờ : 5"], c: ["10", "99", "10 giờ", "3 giờ"] },
+                { q: "Đặt tính rồi tính:", sub: ["a) 15,25 + 14,75", "b) 33,3 - 11,1", "c) 2 giờ 45 phút x 2", "d) 10 giờ 12 phút : 2"], c: ["30", "22,2", "5 giờ 30 phút", "5 giờ 6 phút"] }
+            ],
+            // Q11: Motion (Tự luận)
+            [
+                { q: "Xe khởi hành lúc 8h30, đến địa điểm B lúc 13h, trên đường nghỉ 30p. Biết vận tốc là 75km/h. Cần tìm quãng đường AB (km)?", c: "300" },
+                { q: "Một ô tô đi từ 7h đến 11h15, nghỉ dọc đường 15p. Vận tốc xe là 60km/h. Tính quãng đường xe đã đi (km).", c: "240" },
+                { q: "Người lái xe bắt đầu đi từ 6h và đến nơi lúc 10h40, có dừng lại nghỉ 40p. Tính quãng đường (km) nếu vận tốc là 80km/h.", c: "320" },
+                { q: "Xe khách đi từ 13h đến 17h, giữa đường nghỉ 1h. Biết vận tốc 50km/h. Hỏi quãng đường xe đi dài bao xa (km)?", c: "150" },
+                { q: "Tàu hỏa rời ga lúc 8h15 và đến ga B lúc 12h, nghỉ tại các trạm tổng 45p. Vận tốc tàu 80km/h. Tính quãng đường (km).", c: "240" },
+                { q: "Một vận động viên đi từ 7h30 đến 11h, nghỉ 30p. Vận tốc 45km/h. Tính độ dài quãng đường vận động viên đã vượt qua (km).", c: "135" },
+                { q: "Xe máy đi từ A lúc 14h và đến B lúc 18h30, nghỉ 30p. Vận tốc xe 55km/h. Quãng đường AB dài bao nhiêu km?", c: "220" },
+                { q: "Cano đi từ 6h30 đến 9h30, nghỉ 15p tại bến. Vận tốc cano 40km/h. Tính quãng đường cano đi được (km).", c: "110" },
+                { q: "Xe tải đi từ 5h đến 9h15, nghỉ 15p. Vận tốc xe là 64km/h. Tính quãng đường xe tải đi được (km).", c: "256" },
+                { q: "Xe ô tô khởi hành lúc 8h sáng, đến nơi lúc 12h30 trưa, nghỉ 30p. Vận tốc 70km/h. Tính quãng đường (km).", c: "280" }
+            ]
+        ];
+
+        function startGame() {
+            testQuestions = pools.map((pool, idx) => {
+                const variant = pool[Math.floor(Math.random() * pool.length)];
+                let pts = 0;
+                if (idx < 4) pts = 5;       // Q1, 2, 3, 4 -> 5pt
+                else if (idx === 4) pts = 10; // Q5 -> 10pt
+                else if (idx < 7) pts = 5;    // Q6, 7 -> 5pt
+                else if (idx === 7) pts = 10; // Q8 -> 10pt
+                else if (idx === 8) pts = 10; // Q9 -> 10pt
+                else pts = 20;               // Q10, 11 -> 20pt
+
+                return {
+                    ...variant,
+                    pts: pts,
+                    type: idx < 8 ? 'mc' : 'input'
+                };
+            });
+            score = 0;
+            currentIndex = 0;
+            timer = 0;
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('game-ui').classList.remove('hidden');
+            startTimer();
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            if (currentIndex >= testQuestions.length) { finishGame(); return; }
+            const q = testQuestions[currentIndex];
+            const area = document.getElementById('interaction-area');
+            area.innerHTML = '';
+
+            document.getElementById('q-content').innerText = q.q;
+            document.getElementById('progress-text').innerText = `${currentIndex + 1}/${testQuestions.length}`;
+            document.getElementById('progress-bar').style.width = `${((currentIndex) / testQuestions.length) * 100}%`;
+            document.getElementById('stage-label').innerText = currentIndex < 8 ? "PHẦN I: TRẮC NGHIỆM" : "PHẦN II: TỰ LUẬN";
+
+            if (q.type === 'mc') {
+                const grid = document.createElement('div');
+                grid.className = 'options-grid';
+                const opts = [...q.a].sort(() => Math.random() - 0.5);
+                opts.forEach(opt => {
+                    const btn = document.createElement('div');
+                    btn.className = 'opt-btn';
+                    btn.innerText = opt;
+                    btn.onclick = () => checkMc(btn, opt, q.c, q.pts);
+                    grid.appendChild(btn);
+                });
+                area.appendChild(grid);
+            } else if (q.sub) {
+                const inputDiv = document.createElement('div');
+                inputDiv.className = 'input-area';
+                let html = '';
+                q.sub.forEach((s, i) => {
+                    html += `<div style="margin-bottom:10px">
+                        <label style="display:block; font-weight:bold; margin-bottom:5px">${s}</label>
+                        <input type="text" id="user-ans-${i}" class="ans-input" placeholder="Nhập kết quả..." autocomplete="off">
+                    </div>`;
+                });
+                html += `<button class="btn-submit" onclick="submitInput()">NỘP BÀI CÁC CÂU TRÊN</button>`;
+                inputDiv.innerHTML = html;
+                area.appendChild(inputDiv);
+                document.getElementById('user-ans-0').focus();
+            } else {
+                const inputDiv = document.createElement('div');
+                inputDiv.className = 'input-area';
+                inputDiv.innerHTML = `
+                    <input type="text" id="user-ans" class="ans-input" placeholder="Nhập kết quả..." autocomplete="off">
+                    <button class="btn-submit" onclick="submitInput()">NỘP BÀI CÂU NÀY</button>
+                    <p style="font-size: 0.8rem; color: #636e72;">* Lưu ý: Viết chính xác đơn vị nếu đề bài yêu cầu.</p>
+                `;
+                area.appendChild(inputDiv);
+                document.getElementById('user-ans').focus();
+                document.getElementById('user-ans').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') submitInput();
+                });
+            }
+        }
+
+        function checkMc(btn, choice, correct, pts) {
+            document.querySelectorAll('.opt-btn').forEach(b => b.onclick = null);
+            if (choice === correct) {
+                btn.classList.add('correct');
+                score += pts;
+                playSound('correct');
+            } else {
+                btn.classList.add('wrong');
+                playSound('wrong');
+                // Show correct one
+                document.querySelectorAll('.opt-btn').forEach(b => {
+                    if (b.innerText === correct) b.classList.add('correct');
+                });
+            }
+            updateScoreDisplay();
+            setTimeout(() => { currentIndex++; renderQuestion(); }, 2000);
+        }
+
+        function submitInput() {
+            const q = testQuestions[currentIndex];
+            let isCorrect = true;
+            let earnedPts = 0;
+
+            if (q.sub) {
+                let allCorrect = true;
+                q.sub.forEach((_, i) => {
+                    const input = document.getElementById(`user-ans-${i}`);
+                    const userVal = input.value.trim().toLowerCase().replace(/\s+/g, ' ');
+                    const correctVal = q.c[i].toLowerCase().replace(/\s+/g, ' ');
+                    if (userVal !== correctVal) {
+                        allCorrect = false;
+                        input.style.borderColor = "var(--wrong)";
+                        input.value = `Sai! ĐA: ${q.c[i]}`;
+                    } else {
+                        input.style.borderColor = "var(--correct)";
+                        earnedPts += 5; // Question 10 specific: 5 pts per sub-item
+                    }
+                });
+                isCorrect = allCorrect;
+            } else {
+                const input = document.getElementById('user-ans');
+                const userVal = input.value.trim().toLowerCase().replace(/\s+/g, ' ');
+                const correctVal = q.c.toLowerCase().replace(/\s+/g, ' ');
+                isCorrect = userVal === correctVal;
+                if (!isCorrect) {
+                    input.style.borderColor = "var(--wrong)";
+                    input.value = `Sai! Đáp án: ${q.c}`;
+                } else {
+                    input.style.borderColor = "var(--correct)";
+                    earnedPts = q.pts;
+                }
+            }
+
+            score += earnedPts;
+            if (isCorrect || earnedPts > 0) {
+                playSound('correct');
+            } else {
+                playSound('wrong');
+            }
+
+            updateScoreDisplay();
+            setTimeout(() => { currentIndex++; renderQuestion(); }, (q.sub ? 3500 : 2500));
+        }
+
+        function updateScoreDisplay() {
+            document.getElementById('current-score').innerText = score;
+        }
+
+        function startTimer() {
+            timerItv = setInterval(() => {
+                timer++;
+                const m = Math.floor(timer / 60).toString().padStart(2, '0');
+                const s = (timer % 60).toString().padStart(2, '0');
+                document.getElementById('timer').innerText = `${m}:${s}`;
+            }, 1000);
+        }
+
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const t = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const g = audioCtx.createGain();
+            osc.connect(g); g.connect(audioCtx.destination);
+            if (type === 'correct') {
+                osc.type = 'sine'; osc.frequency.setValueAtTime(523, t); osc.frequency.exponentialRampToValueAtTime(880, t + 0.1);
+                g.gain.setValueAtTime(0.3, t); g.gain.exponentialRampToValueAtTime(0.01, t + 0.3);
+                osc.start(t); osc.stop(t + 0.3);
+            } else {
+                osc.type = 'square'; osc.frequency.setValueAtTime(110, t); osc.frequency.linearRampToValueAtTime(80, t + 0.2);
+                g.gain.setValueAtTime(0.3, t); g.gain.exponentialRampToValueAtTime(0.01, t + 0.3);
+                osc.start(t); osc.stop(t + 0.3);
+            }
+        }
+
+        function finishGame() {
+            clearInterval(timerItv);
+            document.getElementById('game-ui').classList.add('hidden');
+            document.getElementById('result-screen').classList.remove('hidden');
+            document.getElementById('final-score').innerText = score;
+
+            db.ref('scores/Tuan_35').push({
+                fullName: savedName, score: score, duration: timer, date: new Date().toLocaleString('vi-VN')
+            }, () => {
+                document.getElementById('save-msg').innerText = "Hồ sơ điện tử đã được cập nhật!";
+            });
+        }
+    </script>
+</body>
+
+</html>
