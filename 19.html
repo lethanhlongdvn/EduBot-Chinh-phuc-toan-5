@@ -266,9 +266,17 @@
         preload="auto"></audio>
 
     <div class="container hidden" id="game-ui">
-        <div class="status-bar">
-            <span id="stage-name">VÒNG 1</span>
-            <span id="score-display">ĐIỂM: 0/100</span>
+        <div class="status-bar" style="flex-direction: column; gap: 5px;">
+            <div style="display: flex; justify-content: space-between; width: 100%;">
+                <span id="stage-name">VÒNG 1</span>
+                <span id="score-display">ĐIỂM: 0/100</span>
+            </div>
+            <div
+                style="display: flex; justify-content: space-between; width: 100%; border-top: 1px solid rgba(255, 152, 0, 0.3); padding-top: 5px; font-size: 0.75rem;">
+                <span>👤 <b id="user-name">---</b></span>
+                <span>🏫 <b id="user-class">---</b></span>
+                <span>🏢 <b id="user-school">---</b></span>
+            </div>
         </div>
         <div class="screen">
             <div id="q-content" style="font-size: 1rem; font-weight: 600;">...</div>
@@ -301,6 +309,9 @@
                 document.querySelector('.action-btn').onclick = () => window.location.href = "index.html";
             } else {
                 document.getElementById('welcome-msg').innerText = `Thí sinh: ${savedName} - Lớp ${savedClass}`;
+                document.getElementById('user-name').innerText = savedName;
+                document.getElementById('user-class').innerText = savedClass;
+                document.getElementById('user-school').innerText = savedSchool || '---';
             }
         };
 
