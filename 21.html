@@ -487,10 +487,6 @@
             } else {
                 playSound('wrong');
                 btn.classList.add('wrong');
-                // Hiện đáp án đúng
-                allBtns.forEach(b => {
-                    if (b.innerText === correct) b.classList.add('correct');
-                });
             }
             setTimeout(nextQ, 1500);
         }
@@ -517,7 +513,7 @@
             } else {
                 playSound('wrong');
                 input.style.borderColor = "var(--danger)";
-                input.value += ` (Sai. Đ/a: ${correctArr[0]})`;
+                input.value += " (Sai)";
             }
             setTimeout(nextQ, 2000);
         }
