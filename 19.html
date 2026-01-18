@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -8,228 +9,446 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <style>
-        :root { --p: #FF9800; --s: #2196F3; --bg: #0f172a; --card: #1e293b; --success: #2ecc71; --danger: #e74c3c; }
-        body { font-family: 'Lexend', sans-serif; background: var(--bg); color: white; margin: 0; padding-bottom: 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; user-select: none; touch-action: manipulation; }
-        .container { max-width: 850px; width: 95%; padding: 10px; text-align: center; }
-        
-        .status-bar { display: flex; justify-content: space-between; margin-bottom: 10px; font-weight: bold; width: 100%; color: var(--p); font-size: 0.9rem; }
-        .screen { background: #f8f9fa; border-radius: 12px; padding: 15px; margin-bottom: 15px; color: #1e272e; border: 4px solid #bdc3c7; box-shadow: 0 8px 20px rgba(0,0,0,0.5); }
-        
+        :root {
+            --p: #FF9800;
+            --s: #2196F3;
+            --bg: #0f172a;
+            --card: #1e293b;
+            --success: #2ecc71;
+            --danger: #e74c3c;
+        }
+
+        body {
+            font-family: 'Lexend', sans-serif;
+            background: var(--bg);
+            color: white;
+            margin: 0;
+            padding-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            user-select: none;
+            touch-action: manipulation;
+        }
+
+        .container {
+            max-width: 850px;
+            width: 95%;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-weight: bold;
+            width: 100%;
+            color: var(--p);
+            font-size: 0.9rem;
+        }
+
+        .screen {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            color: #1e272e;
+            border: 4px solid #bdc3c7;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+        }
+
         /* VÒNG 1: GHÉP ĐÔI */
-        .matching-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
-        .match-card { background: var(--card); color: white; padding: 5px; border-radius: 6px; cursor: pointer; border: 2px solid transparent; font-size: 0.75rem; display: flex; align-items: center; justify-content: center; min-height: 55px; transition: 0.2s; }
-        .match-card.selected { border-color: var(--p); background: #334155; }
-        .match-card.matched { visibility: hidden; opacity: 0; pointer-events: none; }
+        .matching-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+        }
+
+        .match-card {
+            background: var(--card);
+            color: white;
+            padding: 5px;
+            border-radius: 6px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 55px;
+            transition: 0.2s;
+        }
+
+        .match-card.selected {
+            border-color: var(--p);
+            background: #334155;
+        }
+
+        .match-card.matched {
+            visibility: hidden;
+            opacity: 0;
+            pointer-events: none;
+        }
 
         /* VÒNG 2: CHẠM ĐỂ THẢ (Fix lỗi điện thoại) */
-        .v2-table { width: 100%; border-collapse: separate; border-spacing: 0 8px; }
-        .v2-td-q { width: 60%; padding: 10px; text-align: left; background: rgba(255,255,255,0.05); border-radius: 8px 0 0 8px; border: 1px solid #334155; font-size: 0.85rem; }
-        .v2-td-drop { width: 40%; padding: 8px; background: rgba(255,255,255,0.08); border-radius: 0 8px 8px 0; border: 1px solid #334155; border-left: none; }
-        .drop-zone { background: #0f172a; border: 2px dashed #475569; border-radius: 6px; min-height: 45px; display: flex; align-items: center; justify-content: center; color: #64748b; font-size: 0.75rem; cursor: pointer; transition: 0.3s; }
-        .drop-zone.waiting { border-color: var(--p); background: rgba(255,152,0,0.1); color: var(--p); }
-        .drop-zone.filled { background: var(--s); border-style: solid; color: white; font-weight: bold; font-size: 0.9rem; border-color: white; }
-        
-        .ans-pool { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 15px; padding: 12px; border: 2px solid var(--p); border-radius: 12px; background: rgba(255,152,0,0.05); }
-        .draggable-item { background: var(--p); color: white; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.85rem; transition: 0.2s; box-shadow: 0 4px 0 #e68a00; }
-        .draggable-item.active-select { outline: 3px solid white; transform: scale(1.1); box-shadow: 0 0 15px var(--p); }
+        .v2-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 8px;
+        }
+
+        .v2-td-q {
+            width: 60%;
+            padding: 10px;
+            text-align: left;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px 0 0 8px;
+            border: 1px solid #334155;
+            font-size: 0.85rem;
+        }
+
+        .v2-td-drop {
+            width: 40%;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 0 8px 8px 0;
+            border: 1px solid #334155;
+            border-left: none;
+        }
+
+        .drop-zone {
+            background: #0f172a;
+            border: 2px dashed #475569;
+            border-radius: 6px;
+            min-height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #64748b;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .drop-zone.waiting {
+            border-color: var(--p);
+            background: rgba(255, 152, 0, 0.1);
+            color: var(--p);
+        }
+
+        .drop-zone.filled {
+            background: var(--s);
+            border-style: solid;
+            color: white;
+            font-weight: bold;
+            font-size: 0.9rem;
+            border-color: white;
+        }
+
+        .ans-pool {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            margin-top: 15px;
+            padding: 12px;
+            border: 2px solid var(--p);
+            border-radius: 12px;
+            background: rgba(255, 152, 0, 0.05);
+        }
+
+        .draggable-item {
+            background: var(--p);
+            color: white;
+            padding: 10px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.85rem;
+            transition: 0.2s;
+            box-shadow: 0 4px 0 #e68a00;
+        }
+
+        .draggable-item.active-select {
+            outline: 3px solid white;
+            transform: scale(1.1);
+            box-shadow: 0 0 15px var(--p);
+        }
 
         /* VÒNG 3: TRẮC NGHIỆM */
-        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .opt-btn { background: #ecf0f1; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; border-bottom: 4px solid #bdc3c7; color: #2c3e50; font-family: 'Lexend'; font-size: 0.9rem; }
-        
-        .hidden { display: none !important; }
-        .action-btn { background: var(--p); color: white; padding: 12px 30px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 1rem; margin-top: 15px; }
-        #toast { position: fixed; top: -100px; left: 50%; transform: translateX(-50%); padding: 12px 30px; border-radius: 50px; font-weight: bold; z-index: 10000; transition: 0.5s; }
-        .show-toast { top: 30px !important; }
-        footer { padding: 15px; font-size: 0.7rem; color: #64748b; }
-        #start-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; }
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .opt-btn {
+            background: #ecf0f1;
+            border: none;
+            padding: 12px;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            border-bottom: 4px solid #bdc3c7;
+            color: #2c3e50;
+            font-family: 'Lexend';
+            font-size: 0.9rem;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .action-btn {
+            background: var(--p);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-top: 15px;
+        }
+
+        #toast {
+            position: fixed;
+            top: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-weight: bold;
+            z-index: 10000;
+            transition: 0.5s;
+        }
+
+        .show-toast {
+            top: 30px !important;
+        }
+
+        footer {
+            padding: 15px;
+            font-size: 0.7rem;
+            color: #64748b;
+        }
+
+        #start-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
     </style>
 </head>
+
 <body>
 
-<div id="start-screen">
-    <h1 style="color: var(--p); font-size: 2rem;">TUẦN 19: BẢN ĐỒ KHO BÁO</h1>
-    <p id="welcome-msg" style="margin-bottom: 20px; font-weight: bold;"></p>
-    <button class="action-btn" onclick="startGame()">BẮT ĐẦU THÁM HIỂM</button>
-</div>
-
-<div id="toast"></div>
-<audio id="sound-correct" src="https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3" preload="auto"></audio>
-<audio id="sound-wrong" src="https://assets.mixkit.co/active_storage/sfx/2003/2003-preview.mp3" preload="auto"></audio>
-
-<div class="container hidden" id="game-ui">
-    <div class="status-bar">
-        <span id="stage-name">VÒNG 1</span>
-        <span id="score-display">ĐIỂM: 0/100</span>
+    <div id="start-screen">
+        <h1 style="color: var(--p); font-size: 2rem;">TUẦN 19: BẢN ĐỒ KHO BÁO</h1>
+        <p id="welcome-msg" style="margin-bottom: 20px; font-weight: bold;"></p>
+        <button class="action-btn" onclick="startGame()">BẮT ĐẦU THÁM HIỂM</button>
     </div>
-    <div class="screen">
-        <div id="q-content" style="font-size: 1rem; font-weight: 600;">...</div>
+
+    <div id="toast"></div>
+    <audio id="sound-correct" src="https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3"
+        preload="auto"></audio>
+    <audio id="sound-wrong" src="https://assets.mixkit.co/active_storage/sfx/2003/2003-preview.mp3"
+        preload="auto"></audio>
+
+    <div class="container hidden" id="game-ui">
+        <div class="status-bar">
+            <span id="stage-name">VÒNG 1</span>
+            <span id="score-display">ĐIỂM: 0/100</span>
+        </div>
+        <div class="screen">
+            <div id="q-content" style="font-size: 1rem; font-weight: 600;">...</div>
+        </div>
+        <div id="play-area"></div>
+        <div id="result-screen" class="hidden">
+            <h2 id="title-finish">XUẤT SẮC HOÀN THÀNH!</h2>
+            <h1 id="final-score" style="font-size: 3.5rem; color: var(--p); margin: 5px 0;">0</h1>
+            <p id="save-status" style="color: var(--success); font-weight: bold;">Đang lưu kết quả...</p>
+        </div>
     </div>
-    <div id="play-area"></div>
-    <div id="result-screen" class="hidden">
-        <h2 id="title-finish">XUẤT SẮC HOÀN THÀNH!</h2>
-        <h1 id="final-score" style="font-size: 3.5rem; color: var(--p); margin: 5px 0;">0</h1>
-        <p id="save-status" style="color: var(--success); font-weight: bold;">Đang lưu kết quả...</p>
-    </div>
-</div>
 
-<footer>© 2026 EduRobot.id.vn - Lê Thành Long</footer>
+    <footer>© 2026 EduRobot.id.vn - Lê Thành Long</footer>
 
-<script>
-    const firebaseConfig = { databaseURL: "https://gamhoctap-default-rtdb.asia-southeast1.firebasedatabase.app" };
-    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+    <script>
+        const firebaseConfig = { databaseURL: "https://gamhoctap-default-rtdb.asia-southeast1.firebasedatabase.app" };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
 
-    const savedName = localStorage.getItem('studentName');
-    const savedClass = localStorage.getItem('studentClass');
-    let isPlaying = false, score = 0, startTime, stage = 1, lives = 3;
+        const savedName = localStorage.getItem('studentName');
+        const savedClass = localStorage.getItem('studentClass');
+        const savedSchool = localStorage.getItem('studentSchool');
+        let isPlaying = false, score = 0, startTime, stage = 1, lives = 3;
 
-    window.addEventListener('beforeunload', (e) => { if (isPlaying) { e.preventDefault(); e.returnValue = ''; } });
+        window.addEventListener('beforeunload', (e) => { if (isPlaying) { e.preventDefault(); e.returnValue = ''; } });
 
-    window.onload = () => {
-        if (!savedName) {
-            document.getElementById('welcome-msg').innerHTML = "<b style='color:red'>⚠️ Em cần đăng ký ở bản đồ trước!</b>";
-            document.querySelector('.action-btn').onclick = () => window.location.href = "index.html";
-        } else {
-            document.getElementById('welcome-msg').innerText = `Thí sinh: ${savedName} - Lớp ${savedClass}`;
-        }
-    };
-
-    const DATA = {
-        V1: [
-            {p: "Tỉ số của a và b", a: "a / b"}, {p: "Chanh 5 quả, Bưởi 4 quả, tỉ số của quả bưởi và quả chanh là", a: "4 / 5"},
-            {p: "Nam 17, Nữ 18, tỉ số Nữ và Nam là", a: "18 / 17"}, {p: "Gà 15 con, vịt 23 con. Tỉ số của gà và tổng số", a: "15 / 38"},
-            {p: "Tổng hai số là 90, Tỉ số 7/8. Số lớn là", a: "48"}, {p: "Gà trống 16, Mái 20. Tỉ số mái và trống", a: "5 / 4"},
-            {p: "Có 32 bi xanh, 8 bi đỏ. Tỉ số bi xanh và bi đỏ là", a: "4"}, {p: "Mẹ 35 tuổi, Con 7 tuổi. Tỉ số tuổi mẹ và tuổi con", a: "5"},
-            {p: "Lớp 30 bạn, 16 nữ. Tỉ số nữ và nam", a: "8 / 7"}, {p: "Quãng đường 50km, đi 20km. Tỉ số đã đi và chưa đi", a: "2 / 3"}
-        ],
-        V2: [
-            {q: "Bản đồ 1:1 000, 1cm bằng bao nhiêu m?", a: "10"},
-            {q: "Bản đồ 1:50.000, 6cm bằng bao nhiêu m?", a: "3000"},
-            {q: "Bản đồ 1:1.000.000, 350km bằng bao nhiêu cm?", a: "35"},
-            {q: "Bản đồ 1:10.000.000, 10cm bằng bao nhiêu km?", a: "1 000"},
-            {q: "Bản đồ 1:25.000, 1500m bằng bao nhiêu cm?", a: "6"}
-        ],
-        V3: [
-            {q: "Tỉ lệ bản đồ 1 : 1 000 000. 1cm ứng với bao nhiêu km?", opts: ["10 km", "100 km", "1 km", "1000 km"], c: 0},
-            {q: "Tỉ lệ 1 : 1 500 nghĩa là vật thực tế đã được?", opts: ["Phóng to 1 500 lần", "Thu nhỏ 1 500 lần", "Giữ nguyên", "Gấp 15 lần"], c: 1},
-            {q: "Số 0,75 viết dưới dạng tỉ số phần trăm là:", opts: ["0,75%", "7,5%", "75%", "750%"], c: 2},
-            {q: "30% của số 500 là bao nhiêu?", opts: ["15", "150", "1,5", "300"], c: 1},
-            {q: "Lớp 40 học sinh, có 15 bạn giỏi Toán. Tỉ số phần trăm số bạn giỏi Toán và cả lớp là:", opts: ["15%", "40%", "37,5%", "375%"], c: 2}
-        ]
-    };
-
-    function startGame() { isPlaying = true; startTime = Date.now(); document.getElementById('start-screen').classList.add('hidden'); document.getElementById('game-ui').classList.remove('hidden'); initStage1(); }
-
-    // --- VÒNG 1 ---
-    let firstCard = null;
-    function initStage1() {
-        stage = 1; lives = 3; document.getElementById('stage-name').innerText = "VÒNG 1: GHÉP ĐÔI (MẠNG: ❤️❤️❤️)";
-        document.getElementById('q-content').innerText = "Ghép 10 cặp thẻ tỉ số tương ứng.";
-        const area = document.getElementById('play-area');
-        let cards = []; DATA.V1.forEach((item, idx) => { cards.push({txt: item.p, pair: idx}); cards.push({txt: item.a, pair: idx}); });
-        cards = cards.sort(() => Math.random() - 0.5);
-        let html = '<div class="matching-grid">';
-        cards.forEach((c, i) => { html += `<div class="match-card" id="card-${i}" onclick="handleMatch(${i}, ${c.pair})">${c.txt}</div>`; });
-        area.innerHTML = html + '</div>';
-    }
-
-    function handleMatch(idx, pairId) {
-        const cardEl = document.getElementById(`card-${idx}`);
-        if(cardEl.classList.contains('matched') || cardEl.classList.contains('selected')) return;
-        cardEl.classList.add('selected');
-        if(!firstCard) { firstCard = {idx, pairId}; } 
-        else {
-            if(firstCard.pairId === pairId && firstCard.idx !== idx) {
-                setTimeout(() => { document.getElementById(`card-${firstCard.idx}`).classList.add('matched'); document.getElementById(`card-${idx}`).classList.add('matched'); score += 4; updateScore(); playSound(true); firstCard = null; if(document.querySelectorAll('.match-card:not(.matched)').length === 0) initStage2(); }, 300);
+        window.onload = () => {
+            if (!savedName) {
+                document.getElementById('welcome-msg').innerHTML = "<b style='color:red'>⚠️ Em cần đăng ký ở bản đồ trước!</b>";
+                document.querySelector('.action-btn').onclick = () => window.location.href = "index.html";
             } else {
-                playSound(false); lives--; updateLivesDisplay();
-                setTimeout(() => { document.getElementById(`card-${firstCard.idx}`).classList.remove('selected'); document.getElementById(`card-${idx}`).classList.remove('selected'); firstCard = null; if(lives <= 0) initStage2(); }, 500);
+                document.getElementById('welcome-msg').innerText = `Thí sinh: ${savedName} - Lớp ${savedClass}`;
+            }
+        };
+
+        const DATA = {
+            V1: [
+                { p: "Tỉ số của a và b", a: "a / b" }, { p: "Chanh 5 quả, Bưởi 4 quả, tỉ số của quả bưởi và quả chanh là", a: "4 / 5" },
+                { p: "Nam 17, Nữ 18, tỉ số Nữ và Nam là", a: "18 / 17" }, { p: "Gà 15 con, vịt 23 con. Tỉ số của gà và tổng số", a: "15 / 38" },
+                { p: "Tổng hai số là 90, Tỉ số 7/8. Số lớn là", a: "48" }, { p: "Gà trống 16, Mái 20. Tỉ số mái và trống", a: "5 / 4" },
+                { p: "Có 32 bi xanh, 8 bi đỏ. Tỉ số bi xanh và bi đỏ là", a: "4" }, { p: "Mẹ 35 tuổi, Con 7 tuổi. Tỉ số tuổi mẹ và tuổi con", a: "5" },
+                { p: "Lớp 30 bạn, 16 nữ. Tỉ số nữ và nam", a: "8 / 7" }, { p: "Quãng đường 50km, đi 20km. Tỉ số đã đi và chưa đi", a: "2 / 3" }
+            ],
+            V2: [
+                { q: "Bản đồ 1:1 000, 1cm bằng bao nhiêu m?", a: "10" },
+                { q: "Bản đồ 1:50.000, 6cm bằng bao nhiêu m?", a: "3000" },
+                { q: "Bản đồ 1:1.000.000, 350km bằng bao nhiêu cm?", a: "35" },
+                { q: "Bản đồ 1:10.000.000, 10cm bằng bao nhiêu km?", a: "1 000" },
+                { q: "Bản đồ 1:25.000, 1500m bằng bao nhiêu cm?", a: "6" }
+            ],
+            V3: [
+                { q: "Tỉ lệ bản đồ 1 : 1 000 000. 1cm ứng với bao nhiêu km?", opts: ["10 km", "100 km", "1 km", "1000 km"], c: 0 },
+                { q: "Tỉ lệ 1 : 1 500 nghĩa là vật thực tế đã được?", opts: ["Phóng to 1 500 lần", "Thu nhỏ 1 500 lần", "Giữ nguyên", "Gấp 15 lần"], c: 1 },
+                { q: "Số 0,75 viết dưới dạng tỉ số phần trăm là:", opts: ["0,75%", "7,5%", "75%", "750%"], c: 2 },
+                { q: "30% của số 500 là bao nhiêu?", opts: ["15", "150", "1,5", "300"], c: 1 },
+                { q: "Lớp 40 học sinh, có 15 bạn giỏi Toán. Tỉ số phần trăm số bạn giỏi Toán và cả lớp là:", opts: ["15%", "40%", "37,5%", "375%"], c: 2 }
+            ]
+        };
+
+        function startGame() { isPlaying = true; startTime = Date.now(); document.getElementById('start-screen').classList.add('hidden'); document.getElementById('game-ui').classList.remove('hidden'); initStage1(); }
+
+        // --- VÒNG 1 ---
+        let firstCard = null;
+        function initStage1() {
+            stage = 1; lives = 3; document.getElementById('stage-name').innerText = "VÒNG 1: GHÉP ĐÔI (MẠNG: ❤️❤️❤️)";
+            document.getElementById('q-content').innerText = "Ghép 10 cặp thẻ tỉ số tương ứng.";
+            const area = document.getElementById('play-area');
+            let cards = []; DATA.V1.forEach((item, idx) => { cards.push({ txt: item.p, pair: idx }); cards.push({ txt: item.a, pair: idx }); });
+            cards = cards.sort(() => Math.random() - 0.5);
+            let html = '<div class="matching-grid">';
+            cards.forEach((c, i) => { html += `<div class="match-card" id="card-${i}" onclick="handleMatch(${i}, ${c.pair})">${c.txt}</div>`; });
+            area.innerHTML = html + '</div>';
+        }
+
+        function handleMatch(idx, pairId) {
+            const cardEl = document.getElementById(`card-${idx}`);
+            if (cardEl.classList.contains('matched') || cardEl.classList.contains('selected')) return;
+            cardEl.classList.add('selected');
+            if (!firstCard) { firstCard = { idx, pairId }; }
+            else {
+                if (firstCard.pairId === pairId && firstCard.idx !== idx) {
+                    setTimeout(() => { document.getElementById(`card-${firstCard.idx}`).classList.add('matched'); document.getElementById(`card-${idx}`).classList.add('matched'); score += 4; updateScore(); playSound(true); firstCard = null; if (document.querySelectorAll('.match-card:not(.matched)').length === 0) initStage2(); }, 300);
+                } else {
+                    playSound(false); lives--; updateLivesDisplay();
+                    setTimeout(() => { document.getElementById(`card-${firstCard.idx}`).classList.remove('selected'); document.getElementById(`card-${idx}`).classList.remove('selected'); firstCard = null; if (lives <= 0) initStage2(); }, 500);
+                }
             }
         }
-    }
 
-    function updateLivesDisplay() { let hearts = "❤️".repeat(lives) + "🖤".repeat(3-lives); document.getElementById('stage-name').innerText = `VÒNG 1: GHÉP ĐÔI (MẠNG: ${hearts})`; }
+        function updateLivesDisplay() { let hearts = "❤️".repeat(lives) + "🖤".repeat(3 - lives); document.getElementById('stage-name').innerText = `VÒNG 1: GHÉP ĐÔI (MẠNG: ${hearts})`; }
 
-    // --- VÒNG 2: CHẠM ĐỂ CHỌN (FIX DRAG ON MOBILE) ---
-    let currentSelection = null;
-    function initStage2() {
-        stage = 2; currentSelection = null;
-        document.getElementById('stage-name').innerText = "VÒNG 2: SẮP XẾP TỈ LỆ";
-        document.getElementById('q-content').innerText = "Chọn đáp án rồi chạm vào ô tương ứng.";
-        const area = document.getElementById('play-area');
-        let questions = [...DATA.V2];
-        let pool = shuffle([...DATA.V2.map(i => i.a)]);
-        
-        let html = `<table class="v2-table">`;
-        questions.forEach((q, i) => {
-            html += `<tr class="v2-row">
+        // --- VÒNG 2: CHẠM ĐỂ CHỌN (FIX DRAG ON MOBILE) ---
+        let currentSelection = null;
+        function initStage2() {
+            stage = 2; currentSelection = null;
+            document.getElementById('stage-name').innerText = "VÒNG 2: SẮP XẾP TỈ LỆ";
+            document.getElementById('q-content').innerText = "Chọn đáp án rồi chạm vào ô tương ứng.";
+            const area = document.getElementById('play-area');
+            let questions = [...DATA.V2];
+            let pool = shuffle([...DATA.V2.map(i => i.a)]);
+
+            let html = `<table class="v2-table">`;
+            questions.forEach((q, i) => {
+                html += `<tr class="v2-row">
                 <td class="v2-td-q">${q.q}</td>
                 <td class="v2-td-drop">
                     <div class="drop-zone" onclick="handleDrop(${i})" id="drop-${i}">Chạm để thả</div>
                 </td>
             </tr>`;
-        });
-        html += `</table><div class="ans-pool">`;
-        pool.forEach((ans, i) => {
-            html += `<div class="draggable-item" onclick="handleSelect(event, '${ans}')" id="ans-${i}">${ans}</div>`;
-        });
-        area.innerHTML = html + `</div><button class="action-btn" onclick="checkStage2()">TIẾP TỤC</button>`;
-        window.stage2Correct = questions.map(i => i.a);
-    }
+            });
+            html += `</table><div class="ans-pool">`;
+            pool.forEach((ans, i) => {
+                html += `<div class="draggable-item" onclick="handleSelect(event, '${ans}')" id="ans-${i}">${ans}</div>`;
+            });
+            area.innerHTML = html + `</div><button class="action-btn" onclick="checkStage2()">TIẾP TỤC</button>`;
+            window.stage2Correct = questions.map(i => i.a);
+        }
 
-    function handleSelect(e, val) {
-        document.querySelectorAll('.draggable-item').forEach(el => el.classList.remove('active-select'));
-        e.target.classList.add('active-select');
-        currentSelection = { el: e.target, val: val };
-        document.querySelectorAll('.drop-zone:not(.filled)').forEach(z => z.classList.add('waiting'));
-    }
+        function handleSelect(e, val) {
+            document.querySelectorAll('.draggable-item').forEach(el => el.classList.remove('active-select'));
+            e.target.classList.add('active-select');
+            currentSelection = { el: e.target, val: val };
+            document.querySelectorAll('.drop-zone:not(.filled)').forEach(z => z.classList.add('waiting'));
+        }
 
-    function handleDrop(idx) {
-        if(!currentSelection) return;
-        const zone = document.getElementById(`drop-${idx}`);
-        zone.innerHTML = currentSelection.val;
-        zone.classList.add('filled');
-        zone.classList.remove('waiting');
-        currentSelection.el.style.visibility = 'hidden';
-        currentSelection = null;
-        document.querySelectorAll('.drop-zone').forEach(z => z.classList.remove('waiting'));
-    }
+        function handleDrop(idx) {
+            if (!currentSelection) return;
+            const zone = document.getElementById(`drop-${idx}`);
+            zone.innerHTML = currentSelection.val;
+            zone.classList.add('filled');
+            zone.classList.remove('waiting');
+            currentSelection.el.style.visibility = 'hidden';
+            currentSelection = null;
+            document.querySelectorAll('.drop-zone').forEach(z => z.classList.remove('waiting'));
+        }
 
-    function checkStage2() {
-        let correct = 0;
-        window.stage2Correct.forEach((ans, i) => { if(document.getElementById(`drop-${i}`).innerText.trim() === ans) correct++; });
-        score += (correct * 6); updateScore(); playSound(correct === 5); initStage3();
-    }
+        function checkStage2() {
+            let correct = 0;
+            window.stage2Correct.forEach((ans, i) => { if (document.getElementById(`drop-${i}`).innerText.trim() === ans) correct++; });
+            score += (correct * 6); updateScore(); playSound(correct === 5); initStage3();
+        }
 
-    // --- VÒNG 3 ---
-    let v3Idx = 0;
-    function initStage3() { stage = 3; v3Idx = 0; document.getElementById('stage-name').innerText = "VÒNG 3: VỀ ĐÍCH"; renderV3(); }
-    function renderV3() {
-        if(v3Idx >= DATA.V3.length) { finishGame(); return; }
-        const item = DATA.V3[v3Idx];
-        document.getElementById('q-content').innerHTML = `<b>Câu ${v3Idx+1}:</b> ${item.q}`;
-        let html = `<div class="options-grid">`;
-        item.opts.forEach((o, i) => { html += `<button class="opt-btn" onclick="checkV3(${i})">${o}</button>`; });
-        document.getElementById('play-area').innerHTML = html + `</div>`;
-    }
-    function checkV3(idx) { if(idx === DATA.V3[v3Idx].c) { score += 6; playSound(true); } else { playSound(false); } updateScore(); v3Idx++; setTimeout(renderV3, 800); }
+        // --- VÒNG 3 ---
+        let v3Idx = 0;
+        function initStage3() { stage = 3; v3Idx = 0; document.getElementById('stage-name').innerText = "VÒNG 3: VỀ ĐÍCH"; renderV3(); }
+        function renderV3() {
+            if (v3Idx >= DATA.V3.length) { finishGame(); return; }
+            const item = DATA.V3[v3Idx];
+            document.getElementById('q-content').innerHTML = `<b>Câu ${v3Idx + 1}:</b> ${item.q}`;
+            let html = `<div class="options-grid">`;
+            item.opts.forEach((o, i) => { html += `<button class="opt-btn" onclick="checkV3(${i})">${o}</button>`; });
+            document.getElementById('play-area').innerHTML = html + `</div>`;
+        }
+        function checkV3(idx) { if (idx === DATA.V3[v3Idx].c) { score += 6; playSound(true); } else { playSound(false); } updateScore(); v3Idx++; setTimeout(renderV3, 800); }
 
-    function updateScore() { document.getElementById('score-display').innerText = `ĐIỂM: ${score}/100`; }
-    function shuffle(arr) { return arr.sort(() => Math.random() - 0.5); }
-    function playSound(c) { const s = document.getElementById(c ? 'sound-correct' : 'sound-wrong'); s.currentTime = 0; s.play(); }
-    function showToast(msg, color) { const t = document.getElementById('toast'); t.innerText = msg; t.style.backgroundColor = color; t.classList.add('show-toast'); setTimeout(() => t.classList.remove('show-toast'), 2000); }
+        function updateScore() { document.getElementById('score-display').innerText = `ĐIỂM: ${score}/100`; }
+        function shuffle(arr) { return arr.sort(() => Math.random() - 0.5); }
+        function playSound(c) { const s = document.getElementById(c ? 'sound-correct' : 'sound-wrong'); s.currentTime = 0; s.play(); }
+        function showToast(msg, color) { const t = document.getElementById('toast'); t.innerText = msg; t.style.backgroundColor = color; t.classList.add('show-toast'); setTimeout(() => t.classList.remove('show-toast'), 2000); }
 
-    function finishGame() {
-        isPlaying = false; document.getElementById('play-area').classList.add('hidden'); document.getElementById('result-screen').classList.remove('hidden'); document.getElementById('final-score').innerText = score;
-        const duration = Math.floor((Date.now() - startTime) / 1000);
-        const ref = db.ref('scores/Tuan_19');
-        ref.once('value', (snap) => {
-            let count = 1; const data = snap.val();
-            if(data) { for(let id in data) { if((data[id].fullName || "").toLowerCase() === savedName.toLowerCase() && data[id].className === savedClass) count++; } }
-            ref.push({ fullName: savedName, className: savedClass, score: score, duration: duration, attempt: count, date: new Date().toLocaleString('vi-VN'), timestamp: firebase.database.ServerValue.TIMESTAMP }, () => { document.getElementById('save-status').innerText = `✅ Đã lưu kết quả lần ${count}!`; setTimeout(() => window.location.href = "index.html", 3000); });
-        });
-    }
-</script>
+        function finishGame() {
+            isPlaying = false; document.getElementById('play-area').classList.add('hidden'); document.getElementById('result-screen').classList.remove('hidden'); document.getElementById('final-score').innerText = score;
+            const duration = Math.floor((Date.now() - startTime) / 1000);
+            const ref = db.ref('scores/Tuan_19');
+            ref.once('value', (snap) => {
+                let count = 1; const data = snap.val();
+                if (data) { for (let id in data) { if ((data[id].fullName || "").toLowerCase() === savedName.toLowerCase() && data[id].className === savedClass) count++; } }
+                ref.push({
+                    fullName: savedName,
+                    className: savedClass,
+                    schoolName: savedSchool || '---',
+                    score: score,
+                    duration: duration,
+                    attempt: count,
+                    date: new Date().toLocaleString('vi-VN'),
+                    timestamp: firebase.database.ServerValue.TIMESTAMP
+                }, () => { document.getElementById('save-status').innerText = `✅ Đã lưu kết quả lần ${count}!`; setTimeout(() => window.location.href = "index.html", 3000); });
+            });
+        }
+    </script>
 </body>
+
 </html>
