@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ÔN TẬP TUẦN 33 - CHINH PHỤC RỪNG XANH</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Lexend:wght@400;600;700&display=swap"
+        rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <style>
+        :root {
+            --primary: #2d3436;
+            --jungle: #27ae60;
+            --wood: #7158e2;
+            /* Changed to a vibrant purple-ish for better contrast, or keep wood brown */
+            --brown: #8d6e63;
+            --sun: #fbc531;
+            --leaf: #2ecc71;
+            --correct: #27ae60;
+            --wrong: #e74c3c;
+            --bg: #f5f6fa;
+        }
+
+        body {
+            font-family: 'Lexend', sans-serif;
+            background: linear-gradient(135deg, #16a085 0%, #2ecc71 100%);
+            color: white;
+            margin: 0;
+            padding: 5px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            user-select: none;
+            padding-bottom: 40px;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            margin-bottom: 50px;
+        }
+
+        .header {
+            background: rgba(45, 52, 54, 0.4);
+            padding: 15px;
+            border-radius: 20px;
+            border: 3px solid var(--sun);
+            text-align: center;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.4rem;
+            color: var(--sun);
+            text-transform: uppercase;
+            font-family: 'Bungee';
+            letter-spacing: 1px;
+            text-shadow: 2px 2px 0 #000;
+        }
+
+        .info-bar {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.95rem;
+            color: #fff;
+            font-weight: 600;
+            padding: 10px 15px;
+            margin-top: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        .game-stage {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 25px;
+            padding: 25px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+            min-height: 350px;
+            position: relative;
+            color: #2c3e50;
+        }
+
+        .stage-label {
+            background: var(--jungle);
+            color: white;
+            padding: 5px 20px;
+            border-radius: 20px;
+            font-family: 'Bungee';
+            display: inline-block;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 0 #1e8449;
+        }
+
+        .question-box {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 25px;
+            line-height: 1.5;
+            min-height: 80px;
+            border-left: 5px solid var(--jungle);
+            padding-left: 15px;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .opt-btn {
+            background: #f0f0f0;
+            border: 2px solid #ddd;
+            padding: 18px;
+            border-radius: 15px;
+            color: #2c3e50;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            font-size: 1.05rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            min-height: 70px;
+            box-shadow: 0 5px 0 #bdc3c7;
+        }
+
+        .opt-btn:hover {
+            transform: translateY(-2px);
+            background: #e9e9e9;
+        }
+
+        .opt-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 #bdc3c7;
+        }
+
+        .opt-btn.correct {
+            background: var(--correct);
+            border-color: #27ae60;
+            color: white;
+            box-shadow: 0 5px 0 #1e8449;
+        }
+
+        .opt-btn.wrong {
+            background: var(--wrong);
+            border-color: #c0392b;
+            color: white;
+            box-shadow: 0 5px 0 #922b21;
+        }
+
+        .progress-container {
+            width: 100%;
+            height: 12px;
+            background: #dfe6e9;
+            border-radius: 6px;
+            margin-top: 30px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--jungle), var(--sun));
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        #result-screen {
+            text-align: center;
+            padding: 50px 20px;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border-radius: 30px;
+            border: 2px solid var(--sun);
+            color: white;
+        }
+
+        .trophy {
+            font-size: 6rem;
+            margin-bottom: 20px;
+            filter: drop-shadow(0 0 20px var(--sun));
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+            }
+        }
+
+        .final-score {
+            font-size: 4rem;
+            font-weight: bold;
+            color: var(--sun);
+            text-shadow: 3px 3px 0 #000;
+            margin: 20px 0;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .btn-restart {
+            padding: 15px 40px;
+            background: var(--sun);
+            border: none;
+            border-radius: 50px;
+            color: #2c3e50;
+            font-weight: 800;
+            font-family: 'Bungee';
+            cursor: pointer;
+            font-size: 1.2rem;
+            box-shadow: 0 6px 0 #d35400;
+            margin-top: 30px;
+        }
+
+        .game-footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 8px 0;
+            text-align: center;
+            font-size: 0.7rem;
+            color: #ddd;
+            z-index: 1000;
+        }
+
+        #start-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #16a085;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .btn-start {
+            background: var(--sun);
+            color: #2d3436;
+            padding: 18px 45px;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            font-family: 'Bungee';
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 0 #d35400;
+            text-transform: uppercase;
+            margin-top: 20px;
+        }
+
+        .btn-start:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 9px 0 #d35400;
+            filter: brightness(1.1);
+        }
+
+        @media (max-width: 600px) {
+            .options-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 1.1rem;
+            }
+
+            .question-box {
+                font-size: 1rem;
+            }
+
+            .opt-btn {
+                font-size: 0.95rem;
+                padding: 12px;
+                min-height: 50px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="start-screen">
+        <h1
+            style="color: var(--sun); font-size: 2.2rem; font-family: 'Bungee'; text-align: center; text-shadow: 2px 2px 0 #000;">
+            TUẦN 33: CHINH PHỤC RỪNG XANH</h1>
+        <p id="welcome-msg" style="margin-bottom: 20px; font-weight: bold; color: white;"></p>
+        <button class="btn-start" onclick="startGame()">BẮT ĐẦU THÁM HIỂM</button>
+    </div>
+
+    <div class="container hidden" id="game-ui">
+        <div class="header">
+            <h1>ÔN TẬP TUẦN 33 - TOÁN LỚP 5</h1>
+            <p style="margin: 5px 0; color: #f1f2f6; font-weight: bold; font-size: 0.85rem;">CHỦ ĐỀ: HÌNH HỌC VÀ ĐO
+                LƯỜNG</p>
+            <div class="info-bar">
+                <span>👤 <b id="user-name">---</b></span>
+                <span>🏫 <b id="user-class">---</b></span>
+                <span>⭐ <b id="current-score" style="color:var(--sun)">0</b>/100</span>
+                <span>⏳ <b id="timer">00:00</b></span>
+            </div>
+        </div>
+
+        <div class="game-stage">
+            <div id="stage-info">
+                <div class="stage-label" id="stage-label">VÒNG 1: KHÁM PHÁ</div>
+                <div class="question-box" id="q-content">Đang chuẩn bị câu hỏi...</div>
+            </div>
+
+            <div id="interaction-area" class="options-grid"></div>
+
+            <div class="progress-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+            <div style="text-align:right; font-size:0.75rem; color:#636e72; margin-top:8px; font-weight: 600;">Tiến độ:
+                <span id="progress-text">0/13</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="result-screen" class="container hidden">
+        <div class="trophy">🌴</div>
+        <h2>THÀNH QUẢ THÁM HIỂM!</h2>
+        <div class="final-score" id="final-score">0</div>
+        <p style="font-size: 1.2rem;">Thời gian hoàn thành: <b id="final-time-text" style="color: var(--sun);">--:--</b>
+        </p>
+        <p id="save-msg" style="color:#55efc4; font-weight:bold; margin-top:20px;">Đang kết nối hệ thống...</p>
+        <p id="redirect-msg" style="color:#dfe6e9; font-size:0.9rem;">Sẽ quay lại trang chủ trong giây lát...</p>
+        <button class="btn-restart" onclick="location.reload()">CHƠI LẠI</button>
+    </div>
+
+    <div class="game-footer">© 2026 EduBot - Chinh phục Toán 5 - Thiết kế bởi Lê Thành Long</div>
+
+    <script>
+        const firebaseConfig = { databaseURL: "https://gamhoctap-default-rtdb.asia-southeast1.firebasedatabase.app" };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        const savedName = localStorage.getItem('studentName') || "Người chơi";
+        const savedClass = localStorage.getItem('studentClass') || "---";
+        const savedSchool = localStorage.getItem('studentSchool') || "---";
+
+        let isPlaying = false;
+        let startTime;
+
+        window.onload = () => {
+            if (!localStorage.getItem('studentName') || !localStorage.getItem('studentClass')) {
+                document.getElementById('welcome-msg').innerHTML = "<b style='color:red'>⚠️ Em cần đăng ký ở bản đồ trước!</b>";
+                document.querySelector('#start-screen .btn-start').onclick = () => window.location.href = "index.html";
+            } else {
+                document.getElementById('welcome-msg').innerText = `Thí sinh: ${savedName} - Lớp ${savedClass}`;
+                document.getElementById('user-name').innerText = savedName;
+                document.getElementById('user-class').innerText = savedClass;
+            }
+        };
+
+        function startGame() {
+            isPlaying = true;
+            startTime = Date.now();
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('game-ui').classList.remove('hidden');
+            initGame();
+            startTimer();
+        }
+
+        const questions = {
+            r1: [
+                { q: "Công thức tính diện tích hình chữ nhật (dài a, rộng b) là:", a: ["S = a + b", "S = a × b", "S = (a + b) × 2", "S = a × a"], c: "S = a × b" },
+                { q: "Muốn tính chu vi hình vuông có cạnh a, ta làm thế nào?", a: ["P = a × a", "P = a × 4", "P = a + 4", "P = a × 2"], c: "P = a × 4" },
+                { q: "Công thức tính diện tích hình tam giác là S = (a × h) : ?", a: ["2", "3", "4", "1"], c: "2" },
+                { q: "Công thức tính diện tích hình thang (đáy a, b; cao h) là:", a: ["S = (a + b) × h", "S = (a + b) × h : 2", "S = a × b × h", "S = a + b + h"], c: "S = (a + b) × h : 2" },
+                { q: "Chu vi hình tròn bán kính r được tính theo công thức:", a: ["C = r × 3,14", "C = r × 2 × 3,14", "C = r × r × 3,14", "C = d × 2"], c: "C = r × 2 × 3,14" },
+                { q: "Diện tích toàn phần hình lập phương cạnh a bằng S một mặt nhân với mấy?", a: ["4", "6", "8", "12"], c: "6" },
+                { q: "Thể tích hình hộp chữ nhật (a, b, c) là:", a: ["V = a + b + c", "V = a × b × c", "V = (a + b) × c", "V = a × b"], c: "V = a × b × c" },
+                { q: "1 ki-lô-mét (km) bằng bao nhiêu mét (m)?", a: ["10 m", "100 m", "1000 m", "10 000 m"], c: "1000 m" },
+                { q: "Đơn vị diện tích 'ha' tương ứng với đơn vị nào?", a: ["m²", "dm²", "hm²", "km²"], c: "hm²" },
+                { q: "Một tấn bằng bao nhiêu ki-lô-gam (kg)?", a: ["100 kg", "1000 kg", "10 000 kg", "10 kg"], c: "1000 kg" },
+                { q: "1 lít nước tương đương với ?", a: ["1 cm³", "1 dm³", "1 m³", "10 dm³"], c: "1 dm³" },
+                { q: "Một thế kỉ có bao nhiêu năm?", a: ["10 năm", "50 năm", "100 năm", "1000 năm"], c: "100 năm" },
+                { q: "Một ngày có bao nhiêu giờ?", a: ["12 giờ", "24 giờ", "48 giờ", "60 giờ"], c: "24 giờ" },
+                { q: "Tính diện tích hình tròn ta lấy bán kính nhân bán kính rồi nhân với:", a: ["2", "3,14", "4", "r"], c: "3,14" },
+                { q: "Đơn vị nào thường dùng đo khối lượng vật rất lớn như xe tải?", a: ["Gam", "Yến", "Tạ", "Tấn"], c: "Tấn" },
+                { q: "Hình hộp chữ nhật có bao nhiêu mặt?", a: ["4 mặt", "6 mặt", "8 mặt", "12 mặt"], c: "6 mặt" },
+                { q: "1 m³ bằng bao nhiêu dm³?", a: ["10 dm³", "100 dm³", "1000 dm³", "1 000 000 dm³"], c: "1000 dm³" },
+                { q: "Diện tích xung quanh hình hộp chữ nhật (a, b, c) là:", a: ["S = (a + b) × 2", "S = (a + b) × 2 × c", "S = a × b × c", "S = a + b + c"], c: "S = (a + b) × 2 × c" },
+                { q: "Đơn vị đo thời gian nào nhỏ hơn phút?", a: ["Ngày", "Giờ", "Giây", "Tháng"], c: "Giây" },
+                { q: "1 mét vuông (m²) bằng bao nhiêu đề-xi-mét vuông (dm²)?", a: ["10 dm²", "100 dm²", "1000 dm²", "10 000 dm²"], c: "100 dm²" }
+            ],
+            r2: [
+                { q: "Tính diện tích tam giác đáy 10 cm, cao 6 cm:", a: ["60 cm²", "30 cm²", "16 cm²", "20 cm²"], c: "30 cm²" },
+                { q: "Hình thang đáy 12 dm, 8 dm; cao 5 dm. Diện tích là:", a: ["100 dm²", "50 dm²", "25 dm²", "200 dm²"], c: "50 dm²" },
+                { q: "Chu vi hình tròn đường kính 5 m là:", a: ["15,7 m", "31,4 m", "7,85 m", "10 m"], c: "15,7 m" },
+                { q: "Hình vuông cạnh 0,5 m. Diện tích là:", a: ["2 m²", "1 m²", "0,25 m²", "0,5 m²"], c: "0,25 m²" },
+                { q: "Đổi 1,5 km sang mét (m):", a: ["150 m", "1500 m", "15 000 m", "15 m"], c: "1500 m" },
+                { q: "Đổi 2 tạ 30 kg sang kg:", a: ["23 kg", "230 kg", "2300 kg", "50 kg"], c: "230 kg" },
+                { q: "Thể tích hình lập phương cạnh 4 cm:", a: ["16 cm³", "64 cm³", "12 cm³", "40 cm³"], c: "64 cm³" },
+                { q: "Hình chữ nhật S = 48 m², dài 8 m. Chiều rộng là:", a: ["6 m", "40 m", "12 m", "4 m"], c: "6 m" },
+                { q: "Đổi 4000 cm² sang dm²:", a: ["4 dm²", "40 dm²", "400 dm²", "0,4 dm²"], c: "40 dm²" },
+                { q: "Đổi 0,42 m³ sang dm³:", a: ["42 dm³", "420 dm³", "4200 dm³", "0,042 dm³"], c: "420 dm³" },
+                { q: "Diện tích xung quanh lập phương là 100 cm². Diện tích 1 mặt là:", a: ["10 cm²", "25 cm²", "20 cm²", "16 cm²"], c: "25 cm²" },
+                { q: "Diện tích hình tròn bán kính 2 dm:", a: ["6,28 dm²", "12,56 dm²", "4 dm²", "3,14 dm²"], c: "12,56 dm²" },
+                { q: "Một năm rưỡi có bao nhiêu tháng?", a: ["12 tháng", "15 tháng", "18 tháng", "24 tháng"], c: "18 tháng" },
+                { q: "Đổi 3 giờ 15 phút sang phút:", a: ["180 phút", "195 phút", "210 phút", "315 phút"], c: "195 phút" },
+                { q: "Thể tích hình hộp chữ nhật kích thước 5 dm, 4 dm, 3 dm:", a: ["12 dm³", "60 dm³", "20 dm³", "15 dm³"], c: "60 dm³" },
+                { q: "Đổi 7500 kg sang tấn:", a: ["75 tấn", "7,5 tấn", "0,75 tấn", "750 tấn"], c: "7,5 tấn" },
+                { q: "Tam giác vuông có cạnh góc vuông 4 cm và 5 cm. Diện tích là:", a: ["20 cm²", "10 cm²", "9 cm²", "40 cm²"], c: "10 cm²" },
+                { q: "Đổi 1,6 ha sang m²:", a: ["160 m²", "1600 m²", "16 000 m²", "160 000 m²"], c: "16 000 m²" },
+                { q: "Đổi 2 phút 30 giây sang giây:", a: ["120 giây", "150 giây", "230 giây", "130 giây"], c: "150 giây" },
+                { q: "Lập phương cạnh 10 cm. Diện tích toàn phần là:", a: ["100 cm²", "400 cm²", "600 cm²", "1000 cm²"], c: "600 cm²" }
+            ],
+            r3: [
+                { q: "Bể cá đáy 60 cm x 40 cm. Diện tích đáy bể là:", a: ["240 cm²", "2400 cm²", "200 cm²", "100 cm²"], c: "2400 cm²" },
+                { q: "Bể đáy 2400 cm², nước cao 30 cm. Thể tích nước theo lít là:", a: ["7,2 lít", "72 lít", "720 lít", "24 lít"], c: "72 lít" },
+                { q: "Đĩa tròn đường kính 24 cm. Chu vi đĩa là:", a: ["37,68 cm", "75,36 cm", "150,72 cm", "24 cm"], c: "75,36 cm" },
+                { q: "Phòng 8m x 6m, lát gạch 0,4m x 0,4m. Số gạch cần là:", a: ["120 viên", "300 viên", "480 viên", "600 viên"], c: "300 viên" },
+                { q: "Phòng 8x6x4m, trần 48m², cửa 6,5m². Diện tích quét vôi tường+trần là:", a: ["160 m²", "153,5 m²", "200 m²", "112 m²"], c: "153,5 m²" },
+                { q: "Đá 1 m³ nặng 2,75 tấn. Khối 0,4 m³ nặng bao nhiêu kg?", a: ["110 kg", "1100 kg", "275 kg", "400 kg"], c: "1100 kg" },
+                { q: "Bể 480 m³ nước, đã hút 5/8 lượng nước. Còn lại:", a: ["300 m³", "180 m³", "240 m³", "60 m³"], c: "180 m³" },
+                { q: "Vườn vuông chu vi 240 m. Diện tích theo ha là:", a: ["0,036 ha", "0,36 ha", "3,6 ha", "24 ha"], c: "0,36 ha" },
+                { q: "Cạnh lập phương tăng 2 lần. Thể tích tăng mấy lần?", a: ["2 lần", "4 lần", "6 lần", "8 lần"], c: "8 lần" },
+                { q: "Đi từ 6h10p đến 18h ngày hôm sau. Tổng thời gian là:", a: ["12h", "24h", "35h 50p", "36h 10p"], c: "35h 50p" },
+                { q: "Hình thang cao 40m, đáy lớn 60m (gấp rưỡi đáy bé). Diện tích là:", a: ["2000 m²", "2400 m²", "3000 m²", "4000 m²"], c: "2000 m²" },
+                { q: "Hộp lập phương cạnh 12 cm. Diện tích giấy dán các mặt (dm²) là:", a: ["864 dm²", "8,64 dm²", "0,864 dm²", "1,44 dm²"], c: "8,64 dm²" },
+                { q: "Bể 10dm x 6dm, đá làm nước dâng 0,2dm. Thể tích đá (dm³):", a: ["12", "1,2", "120", "20"], c: "12" },
+                { q: "Đồng hồ chậm 25p/ngày. Sau 4 ngày chậm bao lâu?", a: ["1h", "1h 40p", "2h", "100p"], c: "1h 40p" },
+                { q: "Sân bóng 28m x 15m. Chu vi sân là:", a: ["43 m", "86 m", "420 m", "100 m"], c: "86 m" },
+                { q: "Bể 60x40x50cm, nước chiếm 90%. Lượng nước (lít) là:", a: ["120", "108", "90", "54"], c: "108" },
+                { q: "Bìa tròn r=10cm, cắt bỏ 1/4. Diện tích còn lại là:", a: ["314 cm²", "235,5 cm²", "78,5 cm²", "100 cm²"], c: "235,5 cm²" },
+                { q: "Đổi 2,4 giờ sang giờ và phút:", a: ["2h 40p", "2h 24p", "2h 4p", "2h 15p"], c: "2h 24p" },
+                { q: "Hộp chữ nhật a=8,5, b=4, c=4 (cm). S toàn phần là:", a: ["68 cm²", "136 cm²", "168 cm²", "200 cm²"], c: "168 cm²" },
+                { q: "Dài tăng 20%, rộng giữ nguyên. Diện tích tăng bao nhiêu %?", a: ["10%", "20%", "40%", "0%"], c: "20%" }
+            ]
+        };
+
+        let queue = [];
+        let currIdx = 0;
+        let score = 0;
+        let timer = 0;
+        let itv;
+
+        function shuffle(a) { return a.sort(() => Math.random() - 0.5); }
+
+        function initGame() {
+            const r1 = shuffle([...questions.r1]).slice(0, 5).map(q => ({ ...q, pts: 7, label: "VÒNG 1: KHÁM PHÁ" }));
+            const r2 = shuffle([...questions.r2]).slice(0, 5).map(q => ({ ...q, pts: 7, label: "VÒNG 2: LUYỆN TẬP" }));
+            const r3 = shuffle([...questions.r3]).slice(0, 3).map(q => ({ ...q, pts: 10, label: "VÒNG 3: ỨNG DỤNG" }));
+            queue = [...r1, ...r2, ...r3];
+            renderQ();
+        }
+
+        function renderQ() {
+            if (currIdx >= queue.length) { finish(); return; }
+            const q = queue[currIdx];
+            document.getElementById('stage-label').innerText = q.label;
+            document.getElementById('q-content').innerText = q.q;
+            document.getElementById('progress-text').innerText = `${currIdx + 1}/${queue.length}`;
+            document.getElementById('progress-bar').style.width = `${(currIdx / queue.length) * 100}%`;
+
+            const area = document.getElementById('interaction-area');
+            area.innerHTML = '';
+            shuffle([...q.a]).forEach(opt => {
+                const btn = document.createElement('div');
+                btn.className = 'opt-btn';
+                btn.innerText = opt;
+                btn.onclick = () => check(btn, opt, q.c, q.pts);
+                area.appendChild(btn);
+            });
+        }
+
+        function check(btn, choice, correct, pts) {
+            document.querySelectorAll('.opt-btn').forEach(b => b.onclick = null);
+            if (choice === correct) {
+                btn.classList.add('correct');
+                score += pts;
+                playSound('correct');
+            } else {
+                btn.classList.add('wrong');
+                playSound('wrong');
+            }
+            document.getElementById('current-score').innerText = score;
+            setTimeout(() => { currIdx++; renderQ(); }, 1500);
+        }
+
+        function startTimer() {
+            itv = setInterval(() => {
+                timer++;
+                const m = Math.floor(timer / 60).toString().padStart(2, '0');
+                const s = (timer % 60).toString().padStart(2, '0');
+                document.getElementById('timer').innerText = `${m}:${s}`;
+            }, 1000);
+        }
+
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const t = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const g = audioCtx.createGain();
+            osc.connect(g); g.connect(audioCtx.destination);
+            if (type === 'correct') {
+                osc.type = 'sine'; osc.frequency.setValueAtTime(523, t); osc.frequency.exponentialRampToValueAtTime(880, t + 0.1);
+                g.gain.setValueAtTime(0.3, t); g.gain.exponentialRampToValueAtTime(0.01, t + 0.3);
+                osc.start(t); osc.stop(t + 0.3);
+            } else {
+                osc.type = 'square'; osc.frequency.setValueAtTime(110, t); osc.frequency.linearRampToValueAtTime(80, t + 0.2);
+                g.gain.setValueAtTime(0.3, t); g.gain.exponentialRampToValueAtTime(0.01, t + 0.3);
+                osc.start(t); osc.stop(t + 0.3);
+            }
+        }
+
+        function finish() {
+            clearInterval(itv);
+            document.getElementById('game-ui').classList.add('hidden');
+            document.getElementById('result-screen').classList.remove('hidden');
+            document.getElementById('final-score').innerText = score;
+            document.getElementById('final-time-text').innerText = document.getElementById('timer').innerText;
+
+            db.ref('scores/Tuan_33').push({
+                fullName: savedName, className: savedClass, schoolName: savedSchool,
+                score: score, duration: timer, date: new Date().toLocaleString('vi-VN')
+            }, () => {
+                document.getElementById('save-msg').innerText = "Thám hiểm hoàn tất! Kết quả đã được lưu.";
+                let count = 5;
+                const rd = document.getElementById('redirect-msg');
+                const itv2 = setInterval(() => {
+                    count--;
+                    rd.innerText = `Sẽ quay lại trang chủ trong ${count}s...`;
+                    if (count <= 0) { clearInterval(itv2); window.location.href = "index.html"; }
+                }, 1000);
+            });
+        }
+    </script>
+</body>
+
+</html>
