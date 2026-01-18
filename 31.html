@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ÔN TẬP TUẦN 31 - HỌC VIỆN SỐ HỌC</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Lexend:wght@400;600;700&display=swap"
+        rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <style>
+        :root {
+            --primary: #800000;
+            /* Burgundy */
+            --dark: #2c0000;
+            --light: #f5f5dc;
+            /* Beige/Parchment */
+            --accent: #d4af37;
+            /* Metallic Gold */
+            --correct: #2e7d32;
+            --wrong: #c62828;
+            --bg: #1a0000;
+        }
+
+        body {
+            font-family: 'Lexend', sans-serif;
+            background: linear-gradient(135deg, #2c0000 0%, #1a0000 100%);
+            color: #f5f5dc;
+            margin: 0;
+            padding: 5px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            user-select: none;
+            padding-bottom: 40px;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            margin-bottom: 50px;
+        }
+
+        .header {
+            background: rgba(128, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 20px;
+            border: 3px solid var(--accent);
+            text-align: center;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.4rem;
+            color: var(--accent);
+            text-transform: uppercase;
+            font-family: 'Bungee';
+            letter-spacing: 1px;
+            text-shadow: 2px 2px 0 #000;
+        }
+
+        .info-bar {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.95rem;
+            color: #f5f5dc;
+            font-weight: 600;
+            padding: 10px 15px;
+            margin-top: 10px;
+            background: rgba(212, 175, 55, 0.1);
+            border-radius: 10px;
+        }
+
+        .game-stage {
+            background: #fff;
+            border-radius: 25px;
+            padding: 25px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
+            min-height: 400px;
+            position: relative;
+            color: #2c0000;
+            border: 1px solid var(--accent);
+        }
+
+        .stage-label {
+            background: var(--primary);
+            color: white;
+            padding: 5px 20px;
+            border-radius: 20px;
+            font-family: 'Bungee';
+            display: inline-block;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 0 #4d0000;
+        }
+
+        .question-box {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 25px;
+            line-height: 1.5;
+            min-height: 80px;
+            border-left: 5px solid var(--primary);
+            padding-left: 15px;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .opt-btn {
+            background: #fbf8f0;
+            border: 2px solid #ddd6c1;
+            padding: 18px;
+            border-radius: 15px;
+            color: var(--dark);
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            font-size: 1.05rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            min-height: 70px;
+            box-shadow: 0 5px 0 #c4b998;
+        }
+
+        .opt-btn:hover {
+            transform: translateY(-2px);
+            background: #f0e6cc;
+        }
+
+        .opt-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 #c4b998;
+        }
+
+        .opt-btn.correct {
+            background: var(--correct);
+            border-color: #1b5e20;
+            color: white;
+            box-shadow: 0 5px 0 #1b5e20;
+        }
+
+        .opt-btn.wrong {
+            background: var(--wrong);
+            border-color: #b71c1c;
+            color: white;
+            box-shadow: 0 5px 0 #b71c1c;
+        }
+
+        .progress-container {
+            width: 100%;
+            height: 12px;
+            background: #e0e0e0;
+            border-radius: 6px;
+            margin-top: 30px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        #result-screen {
+            text-align: center;
+            padding: 50px 20px;
+            background: rgba(128, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 30px;
+            border: 2px solid var(--accent);
+            color: var(--light);
+        }
+
+        .trophy {
+            font-size: 6rem;
+            margin-bottom: 20px;
+            filter: drop-shadow(0 0 20px var(--accent));
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+            }
+        }
+
+        .final-score {
+            font-size: 4rem;
+            font-weight: bold;
+            color: var(--accent);
+            text-shadow: 3px 3px 0 #000;
+            margin: 20px 0;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .btn-restart {
+            padding: 15px 40px;
+            background: var(--accent);
+            border: none;
+            border-radius: 50px;
+            color: #000;
+            font-weight: 800;
+            font-family: 'Bungee';
+            cursor: pointer;
+            font-size: 1.2rem;
+            box-shadow: 0 6px 0 #8c7325;
+            margin-top: 30px;
+        }
+
+        .game-footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 8px 0;
+            text-align: center;
+            font-size: 0.7rem;
+            color: #aaa;
+            z-index: 1000;
+        }
+
+        #start-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--dark);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .btn-start {
+            background: var(--primary);
+            color: white;
+            padding: 18px 45px;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            font-family: 'Bungee';
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 0 #000;
+            text-transform: uppercase;
+            margin-top: 20px;
+            border: 2px solid var(--accent);
+        }
+
+        .btn-start:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 9px 0 #000;
+            filter: brightness(1.2);
+        }
+
+        @media (max-width: 600px) {
+            .options-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 1.1rem;
+            }
+
+            .question-box {
+                font-size: 1rem;
+            }
+
+            .opt-btn {
+                font-size: 0.95rem;
+                padding: 12px;
+                min-height: 50px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="start-screen">
+        <h1 style="color: var(--accent); font-size: 2rem; font-family: 'Bungee'; text-align: center;">ÔN TẬP TUẦN 31 -
+            HỌC VIỆN SỐ HỌC</h1>
+        <p id="welcome-msg" style="margin-bottom: 20px; font-weight: bold; color: var(--light);"></p>
+        <button class="btn-start" onclick="startGame()">BẮT ĐẦU THÍ NGHIỆM</button>
+    </div>
+
+    <div class="container hidden" id="game-ui">
+        <div class="header">
+            <h1>ÔN TẬP TUẦN 31 - TOÁN LỚP 5</h1>
+            <p style="margin: 5px 0; color: var(--accent); font-weight: bold; font-size: 0.85rem;">CHỦ ĐỀ: SỐ TỰ NHIÊN,
+                PHÂN SỐ, SỐ THẬP PHÂN</p>
+            <div class="info-bar">
+                <span>👤 <b id="user-name">---</b></span>
+                <span>🏫 <b id="user-class">---</b></span>
+                <span>⭐ <b id="current-score" style="color:var(--accent)">0</b>/100</span>
+                <span>⏳ <b id="timer">00:00</b></span>
+            </div>
+        </div>
+
+        <div class="game-stage">
+            <div id="stage-info">
+                <div class="stage-label" id="stage-label">VÒNG 1: NHẬN BIẾT</div>
+                <div class="question-box" id="q-content">Đang chuẩn bị câu hỏi...</div>
+            </div>
+
+            <div id="interaction-area" class="options-grid"></div>
+
+            <div class="progress-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+            <div style="text-align:right; font-size:0.75rem; color:#636e72; margin-top:8px; font-weight: 600;">Tiến độ:
+                <span id="progress-text">0/13</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="result-screen" class="container hidden">
+        <div class="trophy">🎓</div>
+        <h2>SỨ MỆNH HOÀN THÀNH!</h2>
+        <div class="final-score" id="final-score">0</div>
+        <p style="font-size: 1.2rem;">Thời gian hoàn thành: <b id="final-time-text"
+                style="color: var(--accent);">--:--</b></p>
+        <p id="save-msg" style="color:#2ecc71; font-weight:bold; margin-top:20px;">Đang kết nối hệ thống...</p>
+        <p id="redirect-msg" style="color:#aaa; font-size:0.9rem;">Sẽ quay lại trang chủ trong giây lát...</p>
+        <button class="btn-restart" onclick="location.reload()">CHƠI LẠI</button>
+    </div>
+
+    <div class="game-footer">© 2026 EduBot - Chinh phục Toán 5 - Thiết kế bởi Lê Thành Long</div>
+
+    <script>
+        const firebaseConfig = { databaseURL: "https://gamhoctap-default-rtdb.asia-southeast1.firebasedatabase.app" };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        const savedName = localStorage.getItem('studentName') || "Người chơi";
+        const savedClass = localStorage.getItem('studentClass') || "---";
+        const savedSchool = localStorage.getItem('studentSchool') || "---";
+
+        let isPlaying = false;
+        let startTime;
+
+        window.onload = () => {
+            if (!localStorage.getItem('studentName') || !localStorage.getItem('studentClass')) {
+                document.getElementById('welcome-msg').innerHTML = "<b style='color:red'>⚠️ Em cần đăng ký ở bản đồ trước!</b>";
+                document.querySelector('#start-screen .btn-start').onclick = () => window.location.href = "index.html";
+            } else {
+                document.getElementById('welcome-msg').innerText = `Thí sinh: ${savedName} - Lớp ${savedClass}`;
+                document.getElementById('user-name').innerText = savedName;
+                document.getElementById('user-class').innerText = savedClass;
+            }
+        };
+
+        function startGame() {
+            isPlaying = true;
+            startTime = Date.now();
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('game-ui').classList.remove('hidden');
+            initGame();
+            startTimer();
+        }
+
+        const questions = {
+            r1: [
+                { q: "Đọc số tự nhiên sau: 204 506 700", a: ["Hai trăm linh bốn triệu năm trăm linh sáu nghìn bảy trăm", "Hai trăm bốn mươi triệu năm trăm sáu mươi nghìn bảy trăm", "Hai trăm linh bốn triệu năm mươi sáu nghìn bảy trăm", "Hai mươi bốn triệu năm trăm linh sáu nghìn bảy trăm"], c: "Hai trăm linh bốn triệu năm trăm linh sáu nghìn bảy trăm" },
+                { q: "Giá trị của chữ số 5 trong số 153 280 là:", a: ["500", "5 000", "50 000", "500 000"], c: "50 000" },
+                { q: "Làm tròn số 8 362 đến hàng trăm được kết quả là:", a: ["8 300", "8 360", "8 400", "8 000"], c: "8 400" },
+                { q: "Viết số gồm 5 triệu, 4 nghìn và 2 đơn vị:", a: ["5 000 402", "5 004 002", "5 400 002", "5 004 020"], c: "5 004 002" },
+                { q: "Viết ba số tự nhiên liên tiếp biết số lớn nhất là 1 001:", a: ["1 001, 1 002, 1 003", "999, 1 000, 1 001", "1 000, 1 001, 1 002", "998, 999, 1 000"], c: "999, 1 000, 1 001" },
+                { q: "Phân số chỉ phần đã tô màu của hình vuông chia 9 phần, tô 4 phần là:", a: ["9/4", "4/9", "5/9", "4/5"], c: "4/9" },
+                { q: "Rút gọn phân số 18/24 về tối giản:", a: ["9/12", "6/8", "3/4", "1/2"], c: "3/4" },
+                { q: "Mẫu số chung nhỏ nhất của 2/3 và 5/6 là:", a: ["3", "6", "12", "18"], c: "6" },
+                { q: "Viết hỗn số ứng với 2 hình tròn nguyên và 1/2 hình tròn khác:", a: ["1 1/2", "2 1/2", "3 1/2", "2 2/1"], c: "2 1/2" },
+                { q: "Viết phân số 3/5 dưới dạng phân số thập phân có mẫu là 10:", a: ["3/10", "6/10", "30/10", "15/10"], c: "6/10" },
+                { q: "Đọc số thập phân: 15,08", a: ["Mười lăm phẩy tám", "Mười lăm phẩy không tám", "Mười lăm phẩy không mươi tám", "Một năm phẩy không tám"], c: "Mười lăm phẩy không tám" },
+                { q: "Số thập phân 4,25 gồm:", a: ["4 đơn vị và 25 phần mười", "4 chục và 25 đơn vị", "4 đơn vị và 25 phần trăm", "42 đơn vị và 5 phần mười"], c: "4 đơn vị và 25 phần trăm" },
+                { q: "So sánh 7,9 và 7,89:", a: ["7,9 < 7,89", "7,9 = 7,89", "7,9 > 7,89", "Không so sánh được"], c: "7,9 > 7,89" },
+                { q: "Viết số thập phân thích hợp: 5m 8dm = ... m", a: ["5,08 m", "5,8 m", "58 m", "0,58 m"], c: "5,8 m" },
+                { q: "Làm tròn số 12,38 đến hàng phần mười được:", a: ["12,3", "12,4", "12,0", "13"], c: "12,4" },
+                { q: "Số tự nhiên bé nhất là số nào?", a: ["Số 1", "Số 0", "Không có", "Số 0,1"], c: "Số 0" },
+                { q: "Viết hỗn số 3 và 1/4 thành phân số:", a: ["7/4", "11/4", "13/4", "3/4"], c: "13/4" },
+                { q: "Viết phân số 21/30 dưới dạng số thập phân:", a: ["0,21", "0,3", "0,7", "0,07"], c: "0,7" },
+                { q: "Sắp xếp 0,5; 0,45; 0,52 từ bé đến lớn:", a: ["0,45; 0,52; 0,5", "0,45; 0,5; 0,52", "0,5; 0,45; 0,52", "0,52; 0,5; 0,45"], c: "0,45; 0,5; 0,52" },
+                { q: "Chữ số 7 trong số 70,517 thuộc các hàng nào?", a: ["Hàng chục và hàng phần nghìn", "Hàng đơn vị và hàng phần trăm", "Hàng chục và hàng phần mười", "Hàng trăm và hàng đơn vị"], c: "Hàng chục và hàng phần nghìn" }
+            ],
+            r2: [
+                { q: "Tìm x biết 50 000 + x + 300 + 40 + 6 = 57 346", a: ["x = 70", "x = 700", "x = 7 000", "x = 70 000"], c: "x = 7 000" },
+                { q: "Tìm số tự nhiên lớn nhất có 4 chữ số khác nhau:", a: ["9999", "9876", "9786", "1234"], c: "9876" },
+                { q: "Nước A (98 500 000 người), nước B (110 200 000 người). Nước nào ít hơn?", a: ["Nước A", "Nước B", "Hai nước bằng nhau", "Không rõ"], c: "Nước A" },
+                { q: "Tìm x để x/5 = 12/20:", a: ["x = 2", "x = 3", "x = 4", "x = 5"], c: "x = 3" },
+                { q: "Sắp xếp 71,5; 68,93; 71,09 từ lớn đến bé:", a: ["71,5; 68,93; 71,09", "71,5; 71,09; 68,93", "68,93; 71,09; 71,5", "71,09; 71,5; 68,93"], c: "71,5; 71,09; 68,93" },
+                { q: "Túi táo nặng 2kg 50g viết dưới dạng số thập phân kg là:", a: ["2,5 kg", "2,05 kg", "2,005 kg", "250 kg"], c: "2,05 kg" },
+                { q: "Viết phân số 6 024 / 1 000 thành số thập phân:", a: ["60,24", "6,024", "602,4", "0,6024"], c: "6,024" },
+                { q: "Tìm số tự nhiên n sao cho 3,5 < n < 4,5:", a: ["n = 3", "n = 4", "n = 5", "n = 4,0"], c: "n = 4" },
+                { q: "Phân số nào lớn hơn: 15/21 hay 20/35?", a: ["15/21", "20/35", "Bằng nhau", "Không rõ"], c: "15/21" },
+                { q: "Sản lượng tháng 3 gấp rưỡi tháng 2. Tháng 3 bằng bao nhiêu % tháng 2?", a: ["50%", "100%", "150%", "200%"], c: "150%" },
+                { q: "Số thập phân gồm 6 chục, 5 phần mười, 7 phần nghìn là:", a: ["60,57", "60,507", "6,507", "60,570"], c: "60,507" },
+                { q: "Tìm số liền sau của số lớn nhất có sáu chữ số khác nhau (987 654):", a: ["987 653", "987 655", "999 999", "1 000 000"], c: "987 655" },
+                { q: "Mai làm bài hết 1/3 giờ, Lan hết 0,3 giờ. Ai làm nhanh hơn?", a: ["Mai", "Lan", "Bằng nhau", "Không rõ"], c: "Lan" },
+                { q: "Tiền điện 105 362 đồng, làm tròn đến hàng nghìn để trả là:", a: ["105 400", "105 000", "106 000", "105 300"], c: "105 000" },
+                { q: "Phân số lớn hơn 1 có mẫu 5 và tử lẻ bé hơn 10 có thể là:", a: ["3/5", "5/5", "7/5", "11/5"], c: "7/5" },
+                { q: "Đổi đơn vị: 85 ml = ... l", a: ["0,85 l", "0,085 l", "8,5 l", "0,0085 l"], c: "0,085 l" },
+                { q: "Tìm chữ số x sao cho 16,x7 < 16,17:", a: ["x = 0", "x = 1", "x = 2", "Không có"], c: "x = 0" },
+                { q: "Số thập phân nào bằng 9,8?", a: ["9,08", "9,80", "9,81", "0,98"], c: "9,80" },
+                { q: "Viết bốn số lẻ liên tiếp từ 2 587:", a: ["2587, 2588, 2589, 2590", "2587, 2589, 2591, 2592", "2587, 2589, 2591, 2593", "2589, 2591, 2593, 2595"], c: "2587, 2589, 2591, 2593" },
+                { q: "Số thập phân 0,25 tương ứng với phân số tối giản nào?", a: ["1/4", "1/2", "25/100", "1/5"], c: "1/4" }
+            ],
+            r3: [
+                { q: "Số tự nhiên nhỏ nhất có 6 chữ số khác nhau tổng bằng 18 là:", a: ["102 345", "102 348", "123 456", "100 000"], c: "102 348" },
+                { q: "So sánh 2023/2024 và 2024/2025:", a: ["<", ">", "=", "Không so sánh được"], c: "<" },
+                { q: "Dân số 98,5 tr, tăng 1% mỗi năm. Làm tròn dân số năm sau đến hàng trăm nghìn:", a: ["99 400 000", "99 500 000", "98 600 000", "100 000 000"], c: "99 500 000" },
+                { q: "Số thập phân có 2 chữ số sau phẩy, thêm 5 vào bên trái được số gấp 26 lần là:", a: ["0,15", "0,20", "0,25", "0,30"], c: "0,20" },
+                { q: "Tìm các phân số mẫu 12 giữa 1/2 và 3/4:", a: ["5/12; 6/12", "7/12; 8/12", "9/12; 10/12", "1/12; 2/12"], c: "7/12; 8/12" },
+                { q: "Rô bốt cao 1,02m và 0,89m. Làm tròn đến hàng mét có bằng nhau không?", a: ["Có", "Không", "Gần bằng", "Tùy cách tính"], c: "Có" },
+                { q: "Số tự nhiên x lớn nhất sao cho x < 15,99:", a: ["14", "15", "16", "0"], c: "15" },
+                { q: "Ngày đầu 1,5 km, ngày sau 80% ngày đầu. Hai ngày sửa được:", a: ["2,5 km", "2,7 km", "3,0 km", "2,8 km"], c: "2,7 km" },
+                { q: "Sắp xếp 3/4; 0,8; 5/8; 0,75 từ bé đến lớn:", a: ["3/4; 5/8; 0,75; 0,8", "5/8; 3/4; 0,75; 0,8", "5/8; 0,75; 3/4; 0,8", "Dãy bất kỳ"], c: "5/8; 3/4; 0,75; 0,8" },
+                { q: "Dài gấp đôi rộng, rộng tăng 5m thì dài = 1,5 rộng mới. Diện tích mảnh đất ban đầu?", a: ["100 m²", "150 m²", "200 m²", "400 m²"], c: "200 m²" }
+            ]
+        };
+
+        let queue = [];
+        let currIdx = 0;
+        let score = 0;
+        let timer = 0;
+        let itv;
+
+        function shuffle(a) { return a.sort(() => Math.random() - 0.5); }
+
+        function initGame() {
+            const r1 = shuffle([...questions.r1]).slice(0, 5).map(q => ({ ...q, pts: 7, label: "VÒNG 1: NHẬN BIẾT & THÔNG HIỂU" }));
+            const r2 = shuffle([...questions.r2]).slice(0, 5).map(q => ({ ...q, pts: 7, label: "VÒNG 2: VẬN DỤNG CƠ BẢN" }));
+            const r3 = shuffle([...questions.r3]).slice(0, 3).map(q => ({ ...q, pts: 10, label: "VÒNG 3: VẬN DỤNG NÂNG CAO" }));
+            queue = [...r1, ...r2, ...r3];
+            renderQ();
+        }
+
+        function renderQ() {
+            if (currIdx >= queue.length) { finish(); return; }
+            const q = queue[currIdx];
+            document.getElementById('stage-label').innerText = q.label;
+            document.getElementById('q-content').innerText = q.q;
+            document.getElementById('progress-text').innerText = `${currIdx + 1}/${queue.length}`;
+            document.getElementById('progress-bar').style.width = `${(currIdx / queue.length) * 100}%`;
+
+            const area = document.getElementById('interaction-area');
+            area.innerHTML = '';
+            shuffle([...q.a]).forEach(opt => {
+                const btn = document.createElement('div');
+                btn.className = 'opt-btn';
+                btn.innerText = opt;
+                btn.onclick = () => check(btn, opt, q.c, q.pts);
+                area.appendChild(btn);
+            });
+        }
+
+        function check(btn, choice, correct, pts) {
+            document.querySelectorAll('.opt-btn').forEach(b => b.onclick = null);
+            if (choice === correct) {
+                btn.classList.add('correct');
+                score += pts;
+                playSound('correct');
+            } else {
+                btn.classList.add('wrong');
+                playSound('wrong');
+            }
+            document.getElementById('current-score').innerText = score;
+            setTimeout(() => { currIdx++; renderQ(); }, 1500);
+        }
+
+        function startTimer() {
+            itv = setInterval(() => {
+                timer++;
+                const m = Math.floor(timer / 60).toString().padStart(2, '0');
+                const s = (timer % 60).toString().padStart(2, '0');
+                document.getElementById('timer').innerText = `${m}:${s}`;
+            }, 1000);
+        }
+
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const t = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const g = audioCtx.createGain();
+            osc.connect(g); g.connect(audioCtx.destination);
+            if (type === 'correct') {
+                osc.type = 'sine'; osc.frequency.setValueAtTime(523, t); osc.frequency.exponentialRampToValueAtTime(880, t + 0.1);
+                g.gain.setValueAtTime(0.3, t); g.gain.exponentialRampToValueAtTime(0.01, t + 0.3);
+                osc.start(t); osc.stop(t + 0.3);
+            } else {
+                osc.type = 'square'; osc.frequency.setValueAtTime(110, t); osc.frequency.linearRampToValueAtTime(80, t + 0.2);
+                g.gain.setValueAtTime(0.3, t); g.gain.exponentialRampToValueAtTime(0.01, t + 0.3);
+                osc.start(t); osc.stop(t + 0.3);
+            }
+        }
+
+        function finish() {
+            clearInterval(itv);
+            document.getElementById('game-ui').classList.add('hidden');
+            document.getElementById('result-screen').classList.remove('hidden');
+            document.getElementById('final-score').innerText = score;
+            document.getElementById('final-time-text').innerText = document.getElementById('timer').innerText;
+
+            db.ref('scores/Tuan_31').push({
+                fullName: savedName, className: savedClass, schoolName: savedSchool,
+                score: score, duration: timer, date: new Date().toLocaleString('vi-VN')
+            }, () => {
+                document.getElementById('save-msg').innerText = "Thí nghiệm hoàn tất! Kết quả đã được lưu.";
+                let count = 5;
+                const rd = document.getElementById('redirect-msg');
+                const itv2 = setInterval(() => {
+                    count--;
+                    rd.innerText = `Sẽ quay lại trang chủ trong ${count}s...`;
+                    if (count <= 0) { clearInterval(itv2); window.location.href = "index.html"; }
+                }, 1000);
+            });
+        }
+    </script>
+</body>
+
+</html>
