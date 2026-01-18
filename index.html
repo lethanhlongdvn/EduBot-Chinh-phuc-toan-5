@@ -1,111 +1,494 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>HÀNH TRÌNH XUYÊN VIỆT - EduRobot.id.vn</title>
-    <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Lexend:wght@300;400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Lexend:wght@300;400;700&display=swap"
+        rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <style>
-        :root { --p: #FF9800; --dg: #2e7d32; --gold: #ffd700; --bg: #0f172a; --road: #ccff00; --sea: #00f2ff; --text-sec: #94a3b8; }
-        body { margin: 0; padding: 0; font-family: 'Lexend', sans-serif; background-color: var(--bg); color: white; display: flex; flex-direction: column; min-height: 100vh; overflow-x: hidden; }
-        
-        .welcome-banner { background: linear-gradient(90deg, #0f172a, #1e293b, #0f172a); padding: 15px 20px; border-bottom: 2px solid var(--p); text-align: center; }
-        .welcome-text { font-family: 'Bungee'; font-size: clamp(1rem, 4vw, 1.8rem); color: white; text-shadow: 2px 2px 0px var(--p); margin: 0; }
-        .game-header { background: #1e293b; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; }
+        :root {
+            --p: #FF9800;
+            --dg: #2e7d32;
+            --gold: #ffd700;
+            --bg: #0f172a;
+            --road: #ccff00;
+            --sea: #00f2ff;
+            --text-sec: #94a3b8;
+        }
 
-        .game-content-wrapper { display: flex; flex-direction: column; gap: 15px; padding: 15px; flex: 1; margin-bottom: 140px; }
-        @media (min-width: 900px) { .game-content-wrapper { flex-direction: row; } }
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Lexend', sans-serif;
+            background-color: var(--bg);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
 
-        .map-container { flex: 7; position: relative; background: #1e293b; border-radius: 15px; padding: 10px; box-shadow: inset 0 0 20px rgba(0,0,0,0.5); }
-        .map-relative-box { position: relative; width: 100%; border-radius: 10px; overflow: hidden; }
-        .map-image { width: 100%; height: auto; display: block; }
+        .welcome-banner {
+            background: linear-gradient(90deg, #0f172a, #1e293b, #0f172a);
+            padding: 15px 20px;
+            border-bottom: 2px solid var(--p);
+            text-align: center;
+        }
+
+        .welcome-text {
+            font-family: 'Bungee';
+            font-size: clamp(1rem, 4vw, 1.8rem);
+            color: white;
+            text-shadow: 2px 2px 0px var(--p);
+            margin: 0;
+        }
+
+        .game-header {
+            background: #1e293b;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #334155;
+        }
+
+        .game-content-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            padding: 15px;
+            flex: 1;
+            margin-bottom: 140px;
+        }
+
+        @media (min-width: 900px) {
+            .game-content-wrapper {
+                flex-direction: row;
+            }
+        }
+
+        .map-container {
+            flex: 7;
+            position: relative;
+            background: #1e293b;
+            border-radius: 15px;
+            padding: 10px;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .map-relative-box {
+            position: relative;
+            width: 100%;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .map-image {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
 
         /* ĐỊA DANH SIÊU NỔI BẬT */
-        .landmark { position: absolute; color: #fff; font-size: clamp(8px, 1.3vw, 13px); font-weight: 700; z-index: 8; white-space: nowrap; background: linear-gradient(135deg, #1e3a8a, #1e293b); padding: 3px 8px; border-radius: 6px; border: 1.5px solid var(--gold); box-shadow: 0 0 8px rgba(255, 215, 0, 0.4); pointer-events: none; }
-        #lm-lungcu { top: 1.2%; left: 38%; }
-        #lm-hanoi { top: 16%; left: 35%; }
-        #lm-hue { top: 44%; left: 63%; }
-        #lm-tphcm { top: 81%; left: 55%; }
-        #lm-camau { top: 93%; left: 32%; }
+        .landmark {
+            position: absolute;
+            color: #fff;
+            font-size: clamp(8px, 1.3vw, 13px);
+            font-weight: 700;
+            z-index: 8;
+            white-space: nowrap;
+            background: linear-gradient(135deg, #1e3a8a, #1e293b);
+            padding: 3px 8px;
+            border-radius: 6px;
+            border: 1.5px solid var(--gold);
+            box-shadow: 0 0 8px rgba(255, 215, 0, 0.4);
+            pointer-events: none;
+        }
 
-        #path-svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; }
-        .road-line { stroke: var(--road); stroke-width: 3.5; stroke-dasharray: 7,5; fill: none; opacity: 0.9; filter: drop-shadow(0 0 4px var(--road)); }
-        .sea-line { stroke: var(--sea); stroke-width: 4.5; stroke-dasharray: 10,5; fill: none; opacity: 1; filter: drop-shadow(0 0 6px var(--sea)); }
+        #lm-lungcu {
+            top: 1.2%;
+            left: 38%;
+        }
 
-        .station { position: absolute; width: 5.8%; aspect-ratio: 1/1; background: white; border: 2.5px solid var(--dg); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; color: var(--dg); font-size: clamp(8px, 1.6vw, 16px); z-index: 10; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
-        .station.locked { background: #334155 !important; border-color: #475569 !important; color: #94a3b8 !important; opacity: 0.6; filter: grayscale(1); }
-        .station.locked::after { content: '🔒'; position: absolute; font-size: 10px; bottom: -12px; left: 50%; transform: translateX(-50%); }
+        #lm-hanoi {
+            top: 16%;
+            left: 35%;
+        }
 
-        .leaderboard-sidebar { flex: 3; background: #1e293b; border: 2px solid var(--p); border-radius: 15px; padding: 15px; height: fit-content; }
-        .leaderboard-title { color: var(--gold); text-align: center; font-family: 'Bungee'; font-size: 0.8rem; margin-bottom: 10px; }
-        table { width: 100%; border-collapse: collapse; font-size: 0.75rem; }
-        th { background: var(--p); color: #000; padding: 8px; }
-        td { padding: 8px 4px; border-bottom: 1px solid #334155; text-align: center; }
+        #lm-hue {
+            top: 44%;
+            left: 63%;
+        }
+
+        #lm-tphcm {
+            top: 81%;
+            left: 55%;
+        }
+
+        #lm-camau {
+            top: 93%;
+            left: 32%;
+        }
+
+        #path-svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .road-line {
+            stroke: var(--road);
+            stroke-width: 3.5;
+            stroke-dasharray: 7, 5;
+            fill: none;
+            opacity: 0.9;
+            filter: drop-shadow(0 0 4px var(--road));
+        }
+
+        .sea-line {
+            stroke: var(--sea);
+            stroke-width: 4.5;
+            stroke-dasharray: 10, 5;
+            fill: none;
+            opacity: 1;
+            filter: drop-shadow(0 0 6px var(--sea));
+        }
+
+        .station {
+            position: absolute;
+            width: 5.8%;
+            aspect-ratio: 1/1;
+            background: white;
+            border: 2.5px solid var(--dg);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            color: var(--dg);
+            font-size: clamp(8px, 1.6vw, 16px);
+            z-index: 10;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .station.locked {
+            background: #334155 !important;
+            border-color: #475569 !important;
+            color: #94a3b8 !important;
+            opacity: 0.6;
+            filter: grayscale(1);
+        }
+
+        .station.locked::after {
+            content: '🔒';
+            position: absolute;
+            font-size: 10px;
+            bottom: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .leaderboard-sidebar {
+            flex: 3;
+            background: #1e293b;
+            border: 2px solid var(--p);
+            border-radius: 15px;
+            padding: 15px;
+            height: fit-content;
+        }
+
+        .leaderboard-title {
+            color: var(--gold);
+            text-align: center;
+            font-family: 'Bungee';
+            font-size: 0.8rem;
+            margin-bottom: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.75rem;
+        }
+
+        th {
+            background: var(--p);
+            color: #000;
+            padding: 8px;
+        }
+
+        td {
+            padding: 8px 4px;
+            border-bottom: 1px solid #334155;
+            text-align: center;
+        }
 
         /* FOOTER CỐ ĐỊNH 1 HÀNG */
-        .game-footer { background: #0f172a; padding: 10px 0; border-top: 2px solid var(--p); position: fixed; bottom: 0; width: 100%; z-index: 10000; box-shadow: 0 -5px 20px rgba(0,0,0,0.8); }
-        .footer-buttons { 
-            display: flex; 
-            flex-direction: row; /* Ép nằm ngang */
-            flex-wrap: nowrap;   /* Không cho xuống dòng */
-            justify-content: space-evenly; 
+        .game-footer {
+            background: #0f172a;
+            padding: 10px 0;
+            border-top: 2px solid var(--p);
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            z-index: 10000;
+            box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.8);
+        }
+
+        .footer-buttons {
+            display: flex;
+            flex-direction: row;
+            /* Ép nằm ngang */
+            flex-wrap: nowrap;
+            /* Không cho xuống dòng */
+            justify-content: space-evenly;
             align-items: center;
-            gap: 5px; 
-            max-width: 100%; 
-            margin: 0 auto 10px; 
+            gap: 5px;
+            max-width: 100%;
+            margin: 0 auto 10px;
             padding: 0 5px;
-            overflow-x: auto; /* Cuộn ngang nếu màn hình quá bé */
+            overflow-x: auto;
+            /* Cuộn ngang nếu màn hình quá bé */
             -webkit-overflow-scrolling: touch;
         }
-        .footer-buttons::-webkit-scrollbar { display: none; } /* Ẩn thanh cuộn để đẹp hơn */
 
-        .btn-nav { 
-            flex: 1; 
-            min-width: 75px; /* Giảm độ rộng tối thiểu để vừa màn hình điện thoại */
-            background: #1e293b; 
-            border: 1.5px solid var(--p); 
-            color: var(--p); 
-            padding: 8px 2px; 
-            border-radius: 8px; 
-            font-weight: 700; 
-            text-decoration: none; 
-            text-align: center; 
-            font-size: 0.65rem; /* Chữ nhỏ hơn một chút cho mobile */
-            cursor: pointer; 
-            transition: 0.2s; 
-            font-family: 'Lexend';
-            white-space: nowrap; /* Không cho chữ trong nút xuống dòng */
+        .footer-buttons::-webkit-scrollbar {
+            display: none;
         }
-        .btn-nav:hover { background: var(--p); color: white; }
-        .btn-share { color: var(--sea); border-color: var(--sea); }
-        
-        .copyright-box { border-top: 1px solid #1e293b; padding-top: 8px; text-align: center; }
-        .copyright-text { font-size: 0.6rem; color: #cbd5e1; letter-spacing: 0.5px; margin: 0; text-transform: uppercase; }
-        .copyright-text b { color: var(--p); }
 
-        #countdown-overlay, #auth-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.98); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 30000; text-align: center; padding: 20px; backdrop-filter: blur(10px); }
-        .notice-box, .auth-card { background: #1e293b; padding: 30px; border-radius: 20px; border: 2.5px solid var(--p); max-width: 350px; width: 90%; }
-        .timer-box { font-size: 1.8rem; font-family: 'Bungee'; color: #00ff00; margin: 15px 0; }
-        .auth-card input { width: 100%; padding: 14px; margin: 10px 0; border-radius: 10px; border: 1.5px solid #334155; background: #0f172a; color: white; box-sizing: border-box; font-family: 'Lexend'; }
+        /* Ẩn thanh cuộn để đẹp hơn */
 
-        #st-19 { top: 3%; left: 40%; } #st-20 { top: 8%; left: 45%; } #st-21 { top: 10%; left: 23%; }
-        #st-22 { top: 12%; left: 40%; } #st-23 { top: 17%; left: 54%; } #st-24 { top: 27%; left: 44%; }
-        #st-25 { top: 38%; left: 52%; } #st-26 { top: 46%; left: 63%; } #st-27 { top: 54%; left: 70%; }
-        #st-28 { top: 62%; left: 73%; } #st-29 { top: 70%; left: 74%; } #st-30 { top: 75%; left: 68%; }
-        #st-31 { top: 79%; left: 50%; } #st-32 { top: 80%; left: 35%; } #st-33 { top: 89%; left: 35%; }
-        #st-34 { top: 90%; left: 80%; } #st-35 { top: 46%; left: 85%; }
+        .btn-nav {
+            flex: 1;
+            min-width: 75px;
+            /* Giảm độ rộng tối thiểu để vừa màn hình điện thoại */
+            background: #1e293b;
+            border: 1.5px solid var(--p);
+            color: var(--p);
+            padding: 8px 2px;
+            border-radius: 8px;
+            font-weight: 700;
+            text-decoration: none;
+            text-align: center;
+            font-size: 0.65rem;
+            /* Chữ nhỏ hơn một chút cho mobile */
+            cursor: pointer;
+            transition: 0.2s;
+            font-family: 'Lexend';
+            white-space: nowrap;
+            /* Không cho chữ trong nút xuống dòng */
+        }
+
+        .btn-nav:hover {
+            background: var(--p);
+            color: white;
+        }
+
+        .btn-share {
+            color: var(--sea);
+            border-color: var(--sea);
+        }
+
+        .copyright-box {
+            border-top: 1px solid #1e293b;
+            padding-top: 8px;
+            text-align: center;
+        }
+
+        .copyright-text {
+            font-size: 0.6rem;
+            color: #cbd5e1;
+            letter-spacing: 0.5px;
+            margin: 0;
+            text-transform: uppercase;
+        }
+
+        .copyright-text b {
+            color: var(--p);
+        }
+
+        #countdown-overlay,
+        #auth-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.98);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 30000;
+            text-align: center;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .notice-box,
+        .auth-card {
+            background: #1e293b;
+            padding: 30px;
+            border-radius: 20px;
+            border: 2.5px solid var(--p);
+            max-width: 350px;
+            width: 90%;
+        }
+
+        .timer-box {
+            font-size: 1.8rem;
+            font-family: 'Bungee';
+            color: #00ff00;
+            margin: 15px 0;
+        }
+
+        .auth-card input {
+            width: 100%;
+            padding: 14px;
+            margin: 10px 0;
+            border-radius: 10px;
+            border: 1.5px solid #334155;
+            background: #0f172a;
+            color: white;
+            box-sizing: border-box;
+            font-family: 'Lexend';
+        }
+
+        #st-19 {
+            top: 3%;
+            left: 40%;
+        }
+
+        #st-20 {
+            top: 8%;
+            left: 45%;
+        }
+
+        #st-21 {
+            top: 10%;
+            left: 23%;
+        }
+
+        #st-22 {
+            top: 12%;
+            left: 40%;
+        }
+
+        #st-23 {
+            top: 17%;
+            left: 54%;
+        }
+
+        #st-24 {
+            top: 27%;
+            left: 44%;
+        }
+
+        #st-25 {
+            top: 38%;
+            left: 52%;
+        }
+
+        #st-26 {
+            top: 46%;
+            left: 63%;
+        }
+
+        #st-27 {
+            top: 54%;
+            left: 70%;
+        }
+
+        #st-28 {
+            top: 62%;
+            left: 73%;
+        }
+
+        #st-29 {
+            top: 70%;
+            left: 74%;
+        }
+
+        #st-30 {
+            top: 75%;
+            left: 68%;
+        }
+
+        #st-31 {
+            top: 79%;
+            left: 50%;
+        }
+
+        #st-32 {
+            top: 80%;
+            left: 35%;
+        }
+
+        #st-33 {
+            top: 89%;
+            left: 35%;
+        }
+
+        #st-34 {
+            top: 90%;
+            left: 80%;
+        }
+
+        #st-35 {
+            top: 46%;
+            left: 85%;
+        }
     </style>
 </head>
+
 <body>
 
     <div id="auth-overlay">
         <div class="auth-card">
             <h2 style="font-family:'Bungee'; color:var(--gold); margin-bottom: 5px;">HỒ SƠ THÁM HIỂM</h2>
-            <input type="text" id="input-name" placeholder="Họ và Tên đầy đủ">
-            <input type="text" id="input-class" placeholder="Lớp (Ví dụ: 5/4)">
-            <button onclick="saveAuthData()" style="background:var(--p); color:white; padding:15px; width:100%; border-radius:12px; border:none; font-weight:700; cursor:pointer; margin-top:10px; font-family:'Lexend'; font-size: 1.1rem;">BẮT ĐẦU</button>
+
+            <label style="display:block; text-align:left; color:#94a3b8; font-size:0.8rem; margin-top:10px;">Họ và
+                Tên:</label>
+            <input type="text" id="input-name" placeholder="Ví dụ: Nguyễn Văn A">
+
+            <label style="display:block; text-align:left; color:#94a3b8; font-size:0.8rem; margin-top:10px;">Chọn
+                Lớp:</label>
+            <select id="input-class"
+                style="width: 100%; padding: 14px; margin: 5px 0 10px; border-radius: 10px; border: 1.5px solid #334155; background: #0f172a; color: white; box-sizing: border-box; font-family: 'Lexend';">
+                <option value="" disabled selected>-- Chọn lớp --</option>
+                <option value="5/1">5/1</option>
+                <option value="5/2">5/2</option>
+                <option value="5/3">5/3</option>
+                <option value="5/4">5/4</option>
+                <option value="5/5">5/5</option>
+            </select>
+
+            <label style="display:block; text-align:left; color:#94a3b8; font-size:0.8rem; margin-top:10px;">Chọn
+                Trường:</label>
+            <select id="input-school-select" onchange="toggleSchoolInput()"
+                style="width: 100%; padding: 14px; margin: 5px 0 10px; border-radius: 10px; border: 1.5px solid #334155; background: #0f172a; color: white; box-sizing: border-box; font-family: 'Lexend';">
+                <option value="" disabled selected>-- Chọn trường --</option>
+                <option value="Tiểu học Đỗ Văn Nại">Tiểu học Đỗ Văn Nại</option>
+                <option value="Tiểu học Nhị Long">Tiểu học Nhị Long</option>
+                <option value="other">Trường khác...</option>
+            </select>
+
+            <input type="text" id="input-school-manual" placeholder="Nhập tên trường của bạn..."
+                style="display:none; margin-top:0;">
+
+            <button onclick="saveAuthData()"
+                style="background:var(--p); color:white; padding:15px; width:100%; border-radius:12px; border:none; font-weight:700; cursor:pointer; margin-top:15px; font-family:'Lexend'; font-size: 1.1rem;">BẮT
+                ĐẦU</button>
         </div>
     </div>
 
@@ -113,18 +496,24 @@
         <div class="notice-box">
             <h2 id="notice-title" style="font-family:'Bungee'; color:var(--gold);">CHẶNG CHƯA MỞ</h2>
             <div class="timer-box" id="timer-display">00:00:00</div>
-            <button class="btn-nav" onclick="closeNotice()" style="width:100%; border-color: #94a3b8; color: #fff;">ĐÃ HIỂU</button>
+            <button class="btn-nav" onclick="closeNotice()" style="width:100%; border-color: #94a3b8; color: #fff;">ĐÃ
+                HIỂU</button>
         </div>
     </div>
 
-    <div class="welcome-banner"><h1 class="welcome-text">THÁM HIỂM VIỆT NAM CÙNG ROBOT</h1></div>
+    <div class="welcome-banner">
+        <h1 class="welcome-text">THÁM HIỂM VIỆT NAM CÙNG ROBOT</h1>
+    </div>
 
     <header class="game-header">
         <div style="display:flex; align-items:center; gap:12px;">
-            <div style="width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg, var(--gold), #f59e0b); display:flex; align-items:center; justify-content:center; color:#000; font-weight:800;">R</div>
-            <div>
-                <span id="user-display" style="font-size:0.95rem; font-weight:bold; color:var(--gold);">Khách</span>
-                <span id="class-display" style="font-size:0.75rem; color:var(--text-sec); display:block;">Cần đăng ký</span>
+            <div
+                style="width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg, var(--gold), #f59e0b); display:flex; align-items:center; justify-content:center; color:#000; font-weight:800;">
+                R</div>
+            <div id="user-info-box"
+                style="display:flex; flex-direction:column; justify-content:center; line-height:1.3;">
+                <span style="font-size:0.95rem; font-weight:bold; color:var(--gold);">Khách</span>
+                <span style="font-size:0.75rem; color:var(--text-sec);">Cần đăng ký</span>
             </div>
         </div>
         <div style="text-align:right;">
@@ -137,7 +526,7 @@
         <div class="map-container">
             <div class="map-relative-box" id="map-box">
                 <img src="Bandogame.jpg" alt="Bản đồ" class="map-image" id="map-img">
-                
+
                 <div class="landmark" id="lm-lungcu">Lũng Cú</div>
                 <div class="landmark" id="lm-hanoi">Thủ đô Hà Nội</div>
                 <div class="landmark" id="lm-hue">Cố đô Huế</div>
@@ -146,7 +535,7 @@
 
                 <svg id="path-svg"></svg>
                 <script>
-                    for(let i=19; i<=35; i++) {
+                    for (let i = 19; i <= 35; i++) {
                         document.write(`<div class="station" id="st-${i}" onclick="handleStageClick(${i})">${i}</div>`);
                     }
                 </script>
@@ -157,7 +546,13 @@
             <h3 id="lb-title" class="leaderboard-title">🏆 TOP 10 CAO THỦ</h3>
             <table>
                 <thead>
-                    <tr><th>#</th><th>Thí sinh</th><th>Điểm</th><th>Thời gian</th></tr>
+                    <tr>
+                        <th>#</th>
+                        <th style="text-align:left">Thí sinh</th>
+                        <!-- <th style="text-align:left">Trường</th> -->
+                        <th>Điểm</th>
+                        <th>Thời gian</th>
+                    </tr>
                 </thead>
                 <tbody id="leaderboard-list-ui"></tbody>
             </table>
@@ -167,7 +562,8 @@
     <footer class="game-footer">
         <div class="footer-buttons">
             <a href="tuido.html" class="btn-nav">🎒 TÚI ĐỒ</a>
-            <a href="bang-vang.html" class="btn-nav" style="color:var(--gold); border-color:var(--gold);">🏆 BẢNG VÀNG</a>
+            <a href="bang-vang.html" class="btn-nav" style="color:var(--gold); border-color:var(--gold);">🏆 BẢNG
+                VÀNG</a>
             <button class="btn-nav btn-share" onclick="shareGame()">📤 CHIA SẺ</button>
             <button id="btn-auth-action" class="btn-nav" onclick="handleAuthAction()"></button>
         </div>
@@ -182,22 +578,23 @@
         const db = firebase.database();
 
         const SCHEDULE = {
-            19: "2026-01-16T13:00:00", 20: "2026-01-23T14:00:00", 21: "2026-01-30T14:00:00", 
-            22: "2026-02-06T14:00:00", 23: "2026-02-13T14:00:00", 24: "2026-02-20T14:00:00", 
-            25: "2026-02-27T14:00:00", 26: "2026-03-06T14:00:00", 27: "2026-03-13T14:00:00", 
-            28: "2026-03-20T14:00:00", 29: "2026-03-27T14:00:00", 30: "2026-04-03T14:00:00", 
-            31: "2026-04-10T14:00:00", 32: "2026-04-17T14:00:00", 33: "2026-04-24T14:00:00", 
+            19: "2026-01-16T13:00:00", 20: "2026-01-23T14:00:00", 21: "2026-01-30T14:00:00",
+            22: "2026-02-06T14:00:00", 23: "2026-02-13T14:00:00", 24: "2026-02-20T14:00:00",
+            25: "2026-02-27T14:00:00", 26: "2026-03-06T14:00:00", 27: "2026-03-13T14:00:00",
+            28: "2026-03-20T14:00:00", 29: "2026-03-27T14:00:00", 30: "2026-04-03T14:00:00",
+            31: "2026-04-10T14:00:00", 32: "2026-04-17T14:00:00", 33: "2026-04-24T14:00:00",
             34: "2026-05-01T14:00:00", 35: "2026-05-08T14:00:00"
         };
-        const WEEK_NUMBER = 19; 
+        const WEEK_NUMBER = 19;
 
         let currentName = localStorage.getItem('studentName');
         let currentClass = localStorage.getItem('studentClass');
+        let currentSchool = localStorage.getItem('studentSchool');
         let noticeInterval;
 
-        window.onload = function() {
+        window.onload = function () {
             updateUI();
-            updateStationStyles(); 
+            updateStationStyles();
             loadLeaderboard();
             if (!currentName) document.getElementById('auth-overlay').style.display = 'flex';
             const mapImg = document.getElementById('map-img');
@@ -210,8 +607,8 @@
             const now = new Date();
             for (let i = 19; i < 35; i++) {
                 const startEl = document.getElementById(`st-${i}`);
-                const endEl = document.getElementById(`st-${i+1}`);
-                const openTimeNext = new Date(SCHEDULE[i+1]);
+                const endEl = document.getElementById(`st-${i + 1}`);
+                const openTimeNext = new Date(SCHEDULE[i + 1]);
                 if (now >= openTimeNext) {
                     const x1 = startEl.offsetLeft + startEl.offsetWidth / 2;
                     const y1 = startEl.offsetTop + startEl.offsetHeight / 2;
@@ -229,26 +626,51 @@
 
         function updateUI() {
             const authBtn = document.getElementById('btn-auth-action');
-            if(currentName) {
-                document.getElementById('user-display').innerText = currentName;
-                document.getElementById('class-display').innerText = "Lớp: " + currentClass;
+            const infoBox = document.getElementById('user-info-box');
+            if (currentName) {
+                infoBox.innerHTML = `
+                    <span style="font-size:0.95rem; font-weight:bold; color:var(--gold);">${currentName}</span>
+                    <span style="font-size:0.75rem; color:var(--text-sec);">${currentClass}</span>
+                    <span style="font-size:0.65rem; color:#94a3b8;">${currentSchool || ''}</span>
+                `;
                 authBtn.innerHTML = "⚙️ ĐĂNG XUẤT";
                 authBtn.style.color = "#ff5252";
                 authBtn.style.borderColor = "#ff5252";
-            } else { authBtn.innerHTML = "👤 NHẬP TÊN"; }
+            } else {
+                infoBox.innerHTML = `
+                    <span style="font-size:0.95rem; font-weight:bold; color:var(--gold);">Khách</span>
+                    <span style="font-size:0.75rem; color:var(--text-sec);">Cần đăng ký</span>
+                `;
+                authBtn.innerHTML = "👤 NHẬP TÊN";
+            }
         }
 
         function handleAuthAction() {
-            if (currentName) { if(confirm("Xóa hồ sơ thám hiểm?")) { localStorage.clear(); location.reload(); } }
+            if (currentName) { if (confirm("Xóa hồ sơ thám hiểm?")) { localStorage.clear(); location.reload(); } }
             else { document.getElementById('auth-overlay').style.display = 'flex'; }
+        }
+
+        function toggleSchoolInput() {
+            const val = document.getElementById('input-school-select').value;
+            const manualInput = document.getElementById('input-school-manual');
+            manualInput.style.display = (val === 'other') ? 'block' : 'none';
         }
 
         function saveAuthData() {
             const n = document.getElementById('input-name').value.trim();
-            const c = document.getElementById('input-class').value.trim();
-            if(n.length < 4 || c.length < 2) return alert("Nhập đủ tên và lớp!");
+            const c = document.getElementById('input-class').value;
+            const sSelect = document.getElementById('input-school-select').value;
+            let s = sSelect;
+
+            if (sSelect === 'other') {
+                s = document.getElementById('input-school-manual').value.trim();
+            }
+
+            if (n.length < 2 || !c || !s) return alert("Vui lòng điền đủ Họ tên, Lớp và Trường!");
+
             localStorage.setItem('studentName', n);
             localStorage.setItem('studentClass', c);
+            localStorage.setItem('studentSchool', s);
             location.reload();
         }
 
@@ -305,7 +727,17 @@
                     if (top10.length >= 10) break;
                 }
                 listUI.innerHTML = top10.map((s, i) => `
-                    <tr><td>${i+1}</td><td style="text-align:left;"><b>${s.fullName || s.name}</b><br><small>${s.className || s.class}</small></td><td style="color:var(--p); font-weight:bold;">${s.score}</td><td style="color:#2ecc71;">${formatTime(s.duration)}</td></tr>
+                    <tr>
+                        <td>${i + 1}</td>
+                        <td style="text-align:left;">
+                            <span style="display:block; font-weight:bold; color:#fff;">${s.fullName || s.name}</span>
+                            <span style="display:block; font-size:0.75rem; color:#94a3b8; margin-top:2px;">${s.className || s.class}</span>
+                            <span style="display:block; font-size:0.65rem; color:#64748b; margin-top:2px;">${s.schoolName || '---'}</span>
+                        </td>
+                        <!-- <td style="text-align:left; font-size:0.7rem; color:#cbd5e1;">${s.schoolName || '---'}</td> -->
+                        <td style="color:var(--p); font-weight:bold;">${s.score}</td>
+                        <td style="color:#2ecc71;">${formatTime(s.duration)}</td>
+                    </tr>
                 `).join('');
                 if (top10.length > 0) document.getElementById('high-score').innerText = top10[0].score;
             });
@@ -317,4 +749,5 @@
         }
     </script>
 </body>
+
 </html>
