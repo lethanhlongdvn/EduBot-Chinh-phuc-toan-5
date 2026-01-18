@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ÔN TẬP TUẦN 28 - CHINH PHỤC TỐC ĐỘ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Lexend:wght@400;600;700&display=swap"
+        rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <style>
+        :root {
+            --primary: #d63031;
+            --dark: #2d3436;
+            --light: #f1f2f6;
+            --accent: #fbc531;
+            --correct: #4cd137;
+            --wrong: #e84118;
+            --bg: #130f40;
+        }
+
+        body {
+            font-family: 'Lexend', sans-serif;
+            background: linear-gradient(135deg, #2d3436 0%, #130f40 100%);
+            color: white;
+            margin: 0;
+            padding: 5px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            user-select: none;
+            padding-bottom: 40px;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            margin-bottom: 50px;
+        }
+
+        .header {
+            background: rgba(0, 0, 0, 0.6);
+            padding: 15px;
+            border-radius: 20px;
+            border: 3px solid var(--primary);
+            text-align: center;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.4rem;
+            color: var(--accent);
+            text-transform: uppercase;
+            font-family: 'Bungee';
+            letter-spacing: 1px;
+            text-shadow: 3px 3px 0 #000;
+        }
+
+        .info-bar {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.95rem;
+            color: #fff;
+            font-weight: 600;
+            padding: 10px 15px;
+            margin-top: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        .game-stage {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 25px;
+            padding: 25px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            min-height: 350px;
+            position: relative;
+            color: var(--dark);
+        }
+
+        .stage-label {
+            background: var(--primary);
+            color: white;
+            padding: 5px 20px;
+            border-radius: 20px;
+            font-family: 'Bungee';
+            display: inline-block;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 0 #922b21;
+        }
+
+        .question-box {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 25px;
+            line-height: 1.5;
+            min-height: 80px;
+            border-left: 5px solid var(--primary);
+            padding-left: 15px;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .opt-btn {
+            background: #f1f2f6;
+            border: 2px solid #dfe6e9;
+            padding: 18px;
+            border-radius: 15px;
+            color: var(--dark);
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            font-size: 1.05rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            min-height: 70px;
+            box-shadow: 0 5px 0 #bdc3c7;
+        }
+
+        .opt-btn:hover {
+            transform: translateY(-2px);
+            background: #e1e2e6;
+        }
+
+        .opt-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 #bdc3c7;
+        }
+
+        .opt-btn.correct {
+            background: var(--correct);
+            border-color: #27ae60;
+            color: white;
+            box-shadow: 0 5px 0 #27ae60;
+        }
+
+        .opt-btn.wrong {
+            background: var(--wrong);
+            border-color: #c0392b;
+            color: white;
+            box-shadow: 0 5px 0 #c0392b;
+        }
+
+        .progress-container {
+            width: 100%;
+            height: 12px;
+            background: #dfe6e9;
+            border-radius: 6px;
+            margin-top: 30px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        #result-screen {
+            text-align: center;
+            padding: 50px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 30px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .trophy {
+            font-size: 6rem;
+            margin-bottom: 20px;
+            filter: drop-shadow(0 0 20px var(--accent));
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+            }
+        }
+
+        .final-score {
+            font-size: 4rem;
+            font-weight: bold;
+            color: var(--accent);
+            text-shadow: 3px 3px 0 #000;
+            margin: 20px 0;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .btn-restart {
+            padding: 15px 40px;
+            background: var(--accent);
+            border: none;
+            border-radius: 50px;
+            color: #000;
+            font-weight: 800;
+            font-family: 'Bungee';
+            cursor: pointer;
+            font-size: 1.2rem;
+            box-shadow: 0 6px 0 #d35400;
+            margin-top: 30px;
+        }
+
+        .game-footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 8px 0;
+            text-align: center;
+            font-size: 0.7rem;
+            color: #ccc;
+            z-index: 1000;
+        }
+
+        #start-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .btn-start {
+            background: var(--primary);
+            color: white;
+            padding: 18px 45px;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            font-family: 'Bungee';
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 0 #000;
+            text-transform: uppercase;
+            margin-top: 20px;
+        }
+
+        .btn-start:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 9px 0 #000;
+            filter: brightness(1.2);
+        }
+
+        @media (max-width: 600px) {
+            .options-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 1rem;
+            }
+
+            .question-box {
+                font-size: 1rem;
+            }
+
+            .opt-btn {
+                font-size: 0.95rem;
+                padding: 12px;
+                min-height: 50px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="start-screen">
+        <h1 style="color: var(--accent); font-size: 2rem; font-family: 'Bungee'; text-align: center;">TUẦN 28: CHINH
+            PHỤC TỐC ĐỘ</h1>
+        <p id="welcome-msg" style="margin-bottom: 20px; font-weight: bold; color: white;"></p>
+        <button class="btn-start" onclick="startGame()">BẮT ĐẦU THÁM HIỂM</button>
+    </div>
+
+    <div class="container hidden" id="game-ui">
+        <div class="header">
+            <h1>TUẦN 28 - TOÁN LỚP 5</h1>
+            <p style="margin: 5px 0; color: var(--accent); font-weight: bold; font-size: 0.85rem;">CHỦ ĐỀ: VẬN TỐC -
+                QUÃNG ĐƯỜNG - THỜI GIAN</p>
+            <div class="info-bar">
+                <span>👤 <b id="user-name">---</b></span>
+                <span>🏫 <b id="user-class">---</b></span>
+                <span>⭐ <b id="current-score" style="color:var(--accent)">0</b>/100</span>
+                <span>⏳ <b id="timer">00:00</b></span>
+            </div>
+        </div>
+
+        <div class="game-stage">
+            <div id="stage-info">
+                <div class="stage-label" id="stage-label">VÒNG 1: VẬN TỐC</div>
+                <div class="question-box" id="q-content">Đang chuẩn bị câu hỏi...</div>
+            </div>
+
+            <div id="interaction-area" class="options-grid"></div>
+
+            <div class="progress-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+            <div style="text-align:right; font-size:0.75rem; color:#636e72; margin-top:8px; font-weight: 600;">Tiến độ:
+                <span id="progress-text">0/13</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="result-screen" class="container hidden">
+        <div class="trophy">🏆</div>
+        <h2>HOÀN THÀNH XUẤT SẮC!</h2>
+        <div class="final-score" id="final-score">0</div>
+        <p style="font-size: 1.2rem;">Thời gian hoàn thành: <b id="final-time-text"
+                style="color: var(--accent);">--:--</b></p>
+        <p id="save-msg" style="color:#55efc4; font-weight:bold; margin-top:20px;">Đang kết nối hệ thống...</p>
+        <p id="redirect-msg" style="color:#dfe6e9; font-size:0.9rem;">Sẽ quay lại trang chủ trong giây lát...</p>
+        <button class="btn-restart" onclick="location.reload()">CHƠI LẠI</button>
+    </div>
+
+    <div class="game-footer">© 2026 EduBot - Chinh phục Toán 5 - Thiết kế bởi Lê Thành Long</div>
+
+    <script>
+        const firebaseConfig = { databaseURL: "https://gamhoctap-default-rtdb.asia-southeast1.firebasedatabase.app" };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        const savedName = localStorage.getItem('studentName') || "Người chơi";
+        const savedClass = localStorage.getItem('studentClass') || "---";
+        const savedSchool = localStorage.getItem('studentSchool') || "---";
+
+        let isPlaying = false;
+        let startTime;
+
+        window.onload = () => {
+            if (!localStorage.getItem('studentName') || !localStorage.getItem('studentClass')) {
+                document.getElementById('welcome-msg').innerHTML = "<b style='color:red'>⚠️ Em cần đăng ký ở bản đồ trước!</b>";
+                document.querySelector('#start-screen .btn-start').onclick = () => window.location.href = "index.html";
+            } else {
+                document.getElementById('welcome-msg').innerText = `Thí sinh: ${savedName} - Lớp ${savedClass}`;
+                document.getElementById('user-name').innerText = savedName;
+                document.getElementById('user-class').innerText = savedClass;
+            }
+        };
+
+        function startGame() {
+            isPlaying = true;
+            startTime = Date.now();
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('game-ui').classList.remove('hidden');
+            initGame();
+            startTimer();
+        }
+
+        const questions = {
+            r1: [
+                { q: "Để biết một vật chuyển động nhanh hay chậm, người ta tìm đại lượng nào?", a: ["Quãng đường", "Thời gian", "Vận tốc", "Gia tốc"], c: "Vận tốc" },
+                { q: "Muốn tính vận tốc, ta làm như thế nào?", a: ["Lấy thời gian chia quãng đường", "Lấy quãng đường nhân thời gian", "Lấy quãng đường chia cho thời gian", "Lấy vận tốc nhân thời gian"], c: "Lấy quãng đường chia cho thời gian" },
+                { q: "Công thức tính vận tốc (v: vận tốc, s: quãng đường, t: thời gian) là:", a: ["v = s × t", "v = s / t", "v = t / s", "v = s + t"], c: "v = s / t" },
+                { q: "Đơn vị đo vận tốc thường gặp (km trong 1 giờ) là:", a: ["m/s", "km/h", "m/phút", "km/phút"], c: "km/h" },
+                { q: "Chim én bay 210 km trong 2 giờ. Vận tốc là bao nhiêu?", a: ["100 km/h", "105 km/h", "110 km/h", "420 km/h"], c: "105 km/h" },
+                { q: "Chuột túi chạy 70 m trong 5 giây. Vận tốc là bao nhiêu?", a: ["12 m/s", "14 m/s", "15 m/s", "350 m/s"], c: "14 m/s" },
+                { q: "Ô tô đi 180 km trong 2 giờ. Vận tốc là bao nhiêu?", a: ["80 km/h", "85 km/h", "90 km/h", "360 km/h"], c: "90 km/h" },
+                { q: "Người đi xe đạp 500 m trong 100 giây. Vận tốc m/s là:", a: ["4 m/s", "5 m/s", "6 m/s", "10 m/s"], c: "5 m/s" },
+                { q: "Đổi vận tốc: 72 km/h bằng bao nhiêu m/s?", a: ["15 m/s", "20 m/s", "25 m/s", "30 m/s"], c: "20 m/s" },
+                { q: "VĐV chạy 40 m hết 31 giây. Vận tốc (làm tròn 1 chữ số thập phân) là:", a: ["1,2 m/s", "1,3 m/s", "1,4 m/s", "1,5 m/s"], c: "1,3 m/s" },
+                { q: "Nếu s đơn vị là (m), t là (phút), thì v là gì?", a: ["km/h", "m/s", "m/phút", "cm/phút"], c: "m/phút" },
+                { q: "Tàu đi 120 km trong 3 giờ. Vận tốc là:", a: ["30 km/h", "40 km/h", "60 km/h", "40 m/s"], c: "40 km/h" },
+                { q: "Đà điểu chạy 5,25 km trong 5 phút. Vận tốc m/s là:", a: ["15 m/s", "17,5 m/s", "20 m/s", "10,5 m/s"], c: "17,5 m/s" },
+                { q: "Đổi vận tốc: 108 km/h bằng bao nhiêu m/s?", a: ["25 m/s", "30 m/s", "35 m/s", "40 m/s"], c: "30 m/s" },
+                { q: "Bác Nùng đi bộ 15 km hết 45 phút (0,75 giờ). Vận tốc km/h là:", a: ["18 km/h", "20 km/h", "22 km/h", "25 km/h"], c: "20 km/h" },
+                { q: "Xe đỏ đi được 108 km trong 2 giờ. Vận tốc là:", a: ["50 km/h", "52 km/h", "54 km/h", "216 km/h"], c: "54 km/h" },
+                { q: "Một vật đi với v = 15 m/s. Nghĩa là trong 1 giây vật đi được:", a: ["1 m", "10 m", "15 m", "15 km"], c: "15 m" },
+                { q: "Tàu thủy đi 66 km trong 3 giờ. Vận tốc là:", a: ["20 km/h", "22 km/h", "24 km/h", "198 km/h"], c: "22 km/h" },
+                { q: "Đổi vận tốc: 18 km/h bằng bao nhiêu m/s?", a: ["3 m/s", "5 m/s", "10 m/s", "5 km/h"], c: "5 m/s" },
+                { q: "S = 24 km, t = 3 giờ. Vận tốc là:", a: ["6 km/h", "7 km/h", "8 km/h", "72 km/h"], c: "8 km/h" }
+            ],
+            r2: [
+                { q: "Muốn tính quãng đường khi biết vận tốc và thời gian, ta làm thế nào?", a: ["Lấy v chia t", "Lấy t chia v", "Lấy v nhân với t", "Lấy v cộng t"], c: "Lấy v nhân với t" },
+                { q: "Công thức tính quãng đường s theo v và t là:", a: ["s = v / t", "s = v × t", "s = t / v", "s = v + t"], c: "s = v × t" },
+                { q: "Ô tô đi với v = 65 km/h trong 2 giờ. Quãng đường là:", a: ["120 km", "130 km", "140 km", "150 km"], c: "130 km" },
+                { q: "Tàu biển đi với v = 33,7 km/h trong 4 giờ. Quãng đường là:", a: ["120,8 km", "134,8 km", "132,4 km", "140 km"], c: "134,8 km" },
+                { q: "Chim cắt bay v = 108 m/s trong 15 giây. Quãng đường là:", a: ["1500 m", "1620 m", "1700 m", "1800 m"], c: "1620 m" },
+                { q: "Xe máy đi v = 55 km/h từ 7 giờ đến 10 giờ. Quãng đường là:", a: ["110 km", "155 km", "165 km", "220 km"], c: "165 km" },
+                { q: "Máy bay bay v = 800 km/h trong 2,5 giờ. Quãng đường là:", a: ["1600 km", "2000 km", "2400 km", "1800 km"], c: "2000 km" },
+                { q: "Tàu thám hiểm v = 30 000 km/h trong 14 giờ. Quãng đường là:", a: ["300 000 km", "420 000 km", "450 000 km", "42000 km"], c: "420 000 km" },
+                { q: "Tàu đi v = 80 km/h từ 6:10 đến 10:40. Quãng đường là:", a: ["320 km", "360 km", "400 km", "350 km"], c: "360 km" },
+                { q: "Đi bộ v = 4 km/h trong 1 giờ 30 phút. Quãng đường là:", a: ["4,5 km", "5 km", "6 km", "8 km"], c: "6 km" },
+                { q: "VĐV trượt tuyết v = 24 m/s trong 25 giây. Quãng đường là:", a: ["500 m", "600 m", "700 m", "800 m"], c: "600 m" },
+                { q: "Vận tốc 15 km/h, thời gian 4 giờ. Quãng đường là:", a: ["45 km", "60 km", "75 km", "60 m"], c: "60 km" },
+                { q: "Ô tô đi 42 km/h hết 1 giờ 30 phút. Quãng đường là:", a: ["50 km", "60 km", "63 km", "84 km"], c: "63 km" },
+                { q: "Bộ đội bơi 2,7 km/h trong 1 giờ 30 phút. Quãng đường là:", a: ["3,5 km", "4,05 km", "4,5 km", "5,4 km"], c: "4,05 km" },
+                { q: "Xe tải đi v = 16 km/h trong 3,5 giờ. Quãng đường là:", a: ["48 km", "56 km", "60 km", "64 km"], c: "56 km" },
+                { q: "Vật đi v = 5 m/s trong 1 phút (60 giây). Quãng đường là:", a: ["5 m", "60 m", "300 m", "500 m"], c: "300 m" },
+                { q: "Tàu thủy v = 32 km/h trong 2,5 giờ. Quãng đường là:", a: ["75 km", "80 km", "85 km", "90 km"], c: "80 km" },
+                { q: "Vận tốc 82 km/h, thời gian 5,5 giờ. Quãng đường là:", a: ["410 km", "451 km", "440 km", "460 km"], c: "451 km" },
+                { q: "Xe đạp v = 12 km/h trong 2,25 giờ. Quãng đường là:", a: ["24 km", "27 km", "30 km", "36 km"], c: "27 km" },
+                { q: "Robot v = 0,5 m/s trong 10 phút. Quãng đường là:", a: ["5 m", "30 m", "300 m", "600 m"], c: "300 m" }
+            ],
+            r3: [
+                { q: "Muốn tính thời gian khi biết quãng đường và vận tốc, ta làm thế nào?", a: ["Lấy s nhân v", "Lấy v chia s", "Lấy s chia cho v", "Lấy s cộng v"], c: "Lấy s chia cho v" },
+                { q: "Công thức tính thời gian t theo s và v là:", a: ["t = s / v", "t = s × v", "t = v / s", "t = s + v"], c: "t = s / v" },
+                { q: "Ô tô đi 120 km với v = 60 km/h. Thời gian đi là:", a: ["1,5 giờ", "2 giờ", "2,5 giờ", "3 giờ"], c: "2 giờ" },
+                { q: "Thầy Nam đi bộ 9 km với v = 1,5 km/h. Thời gian đi là:", a: ["4 giờ", "5 giờ", "6 giờ", "9 giờ"], c: "6 giờ" },
+                { q: "VĐV trượt tuyết 600 m với v = 24 m/s. Thời gian là:", a: ["20 giây", "25 giây", "30 giây", "15 giây"], c: "25 giây" },
+                { q: "Thuyền đi 75 km với v = 30 km/h. Thời gian đi là:", a: ["2 giờ", "2,5 giờ", "3 giờ", "3,5 giờ"], c: "2,5 giờ" },
+                { q: "Taxi bay 31,4 km với v = 60 km/h. Thời gian bay khoảng:", a: ["15 phút", "30 phút", "45 phút", "60 phút"], c: "30 phút" },
+                { q: "Xe đạp đi 160 km với v = 50 km/h. Thời gian là:", a: ["3,1 giờ", "3,2 giờ", "3,3 giờ", "3,4 giờ"], c: "3,2 giờ" },
+                { q: "S = 176 km, v = 88 km/h. Thời gian là:", a: ["1,5 giờ", "2 giờ", "2,5 giờ", "3 giờ"], c: "2 giờ" },
+                { q: "Tàu dài 200 m đi vào hầm với v = 20 m/s. Thời gian đuôi vào là:", a: ["5 giây", "10 giây", "15 giây", "20 giây"], c: "10 giây" },
+                { q: "Đi bộ 6 km với v = 4 km/h. Thời gian đi là:", a: ["1,2 giờ", "1,5 giờ", "2 giờ", "2,5 giờ"], c: "1,5 giờ" },
+                { q: "Máy bay bay 4500 km với v = 1000 km/h. Thời gian là:", a: ["4 giờ", "4,5 giờ", "5 giờ", "5,5 giờ"], c: "4,5 giờ" },
+                { q: "Rùa bò 10 m với v = 0,05 m/s. Thời gian bò là:", a: ["100 giây", "150 giây", "200 giây", "300 giây"], c: "200 giây" },
+                { q: "Ô tô đi 180 km với v = 80 km/h. Thời gian là:", a: ["2,15 giờ", "2,25 giờ", "2,5 giờ", "3 giờ"], c: "2,25 giờ" },
+                { q: "Chạy 100 m với v = 10 m/s. Thời gian là:", a: ["8 giây", "10 giây", "12 giây", "15 giây"], c: "10 giây" },
+                { q: "S = 425 km, v = 85 km/h. Thời gian là:", a: ["4 giờ", "5 giờ", "6 giờ", "7 giờ"], c: "5 giờ" },
+                { q: "Cá heo bơi 72 km với v = 24 km/h. Thời gian là:", a: ["2 giờ", "3 giờ", "4 giờ", "5 giờ"], c: "3 giờ" },
+                { q: "Đi 1,49 km với v = 0,5 km/phút. Thời gian là:", a: ["2,58 phút", "2,88 phút", "2,98 phút", "3,18 phút"], c: "2,98 phút" },
+                { q: "Robot đi 40 m với v = 0,4 m/s. Thời gian là:", a: ["80 giây", "100 giây", "120 giây", "150 giây"], c: "100 giây" },
+                { q: "Xe khách đi 156 km với v = 60 km/h. Thời gian là:", a: ["2,4 giờ", "2,5 giờ", "2,6 giờ", "2,8 giờ"], c: "2,6 giờ" }
+            ]
+        };
+
+        let queue = [];
+        let currIdx = 0;
+        let score = 0;
+        let timer = 0;
+        let itv;
+
+        function shuffle(a) { return a.sort(() => Math.random() - 0.5); }
+
+        function initGame() {
+            const r1 = shuffle([...questions.r1]).slice(0, 5).map(q => ({ ...q, pts: 7, label: "VÒNG 1: VẬN TỐC" }));
+            const r2 = shuffle([...questions.r2]).slice(0, 5).map(q => ({ ...q, pts: 7, label: "VÒNG 2: QUÃNG ĐƯỜNG" }));
+            const r3 = shuffle([...questions.r3]).slice(0, 3).map(q => ({ ...q, pts: 10, label: "VÒNG 3: THỜI GIAN" }));
+            queue = [...r1, ...r2, ...r3];
+            renderQ();
+        }
+
+        function renderQ() {
+            if (currIdx >= queue.length) { finish(); return; }
+            const q = queue[currIdx];
+            document.getElementById('stage-label').innerText = q.label;
+            document.getElementById('q-content').innerText = q.q;
+            document.getElementById('progress-text').innerText = `${currIdx + 1}/${queue.length}`;
+            document.getElementById('progress-bar').style.width = `${(currIdx / queue.length) * 100}%`;
+
+            const area = document.getElementById('interaction-area');
+            area.innerHTML = '';
+            shuffle([...q.a]).forEach(opt => {
+                const btn = document.createElement('div');
+                btn.className = 'opt-btn';
+                btn.innerText = opt;
+                btn.onclick = () => check(btn, opt, q.c, q.pts);
+                area.appendChild(btn);
+            });
+        }
+
+        function check(btn, choice, correct, pts) {
+            document.querySelectorAll('.opt-btn').forEach(b => b.onclick = null);
+            if (choice === correct) {
+                btn.classList.add('correct');
+                score += pts;
+                playSound('correct');
+            } else {
+                btn.classList.add('wrong');
+                playSound('wrong');
+            }
+            updateScoreUI();
+            setTimeout(() => { currIdx++; renderQ(); }, 1500);
+        }
+
+        function updateScoreUI() {
+            const el = document.getElementById('current-score');
+            el.innerText = score;
+            el.style.transform = "scale(1.3)";
+            setTimeout(() => el.style.transform = "scale(1)", 200);
+        }
+
+        function startTimer() {
+            itv = setInterval(() => {
+                timer++;
+                const m = Math.floor(timer / 60).toString().padStart(2, '0');
+                const s = (timer % 60).toString().padStart(2, '0');
+                document.getElementById('timer').innerText = `${m}:${s}`;
+            }, 1000);
+        }
+
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const t = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const g = audioCtx.createGain();
+            osc.connect(g); g.connect(audioCtx.destination);
+            if (type === 'correct') {
+                osc.type = 'sine'; osc.frequency.setValueAtTime(523, t); osc.frequency.exponentialRampToValueAtTime(880, t + 0.1);
+                g.gain.setValueAtTime(0.2, t); g.gain.exponentialRampToValueAtTime(0.01, t + 0.3);
+                osc.start(t); osc.stop(t + 0.3);
+            } else {
+                osc.type = 'square'; osc.frequency.setValueAtTime(110, t); osc.frequency.linearRampToValueAtTime(80, t + 0.2);
+                g.gain.setValueAtTime(0.2, t); g.gain.exponentialRampToValueAtTime(0.01, t + 0.3);
+                osc.start(t); osc.stop(t + 0.3);
+            }
+        }
+
+        function finish() {
+            clearInterval(itv);
+            document.getElementById('game-ui').classList.add('hidden');
+            document.getElementById('result-screen').classList.remove('hidden');
+            document.getElementById('final-score').innerText = score;
+            document.getElementById('final-time-text').innerText = document.getElementById('timer').innerText;
+
+            db.ref('scores/Tuan_28').push({
+                fullName: savedName, className: savedClass, schoolName: savedSchool,
+                score: score, duration: timer, date: new Date().toLocaleString('vi-VN')
+            }, () => {
+                document.getElementById('save-msg').innerText = "Đã lưu kết quả thành công!";
+                let count = 5;
+                const rd = document.getElementById('redirect-msg');
+                const itv2 = setInterval(() => {
+                    count--;
+                    rd.innerText = `Sẽ quay lại trang chủ trong ${count}s...`;
+                    if (count <= 0) { clearInterval(itv2); window.location.href = "index.html"; }
+                }, 1000);
+            });
+        }
+    </script>
+</body>
+
+</html>
