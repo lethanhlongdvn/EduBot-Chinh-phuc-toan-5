@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -9,66 +10,282 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.19.2/package/dist/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
+
     <style>
-        :root { --primary: #4CAF50; --secondary: #2196F3; --bg: #f4f7f6; --dark: #2c3e50; }
-        body { font-family: 'Lexend', sans-serif; background: var(--bg); margin: 0; display: flex; flex-direction: column; min-height: 100vh; }
-        
+        :root {
+            --primary: #4CAF50;
+            --secondary: #2196F3;
+            --bg: #f4f7f6;
+            --dark: #2c3e50;
+        }
+
+        body {
+            font-family: 'Lexend', sans-serif;
+            background: var(--bg);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
         /* Thu nhỏ Header */
-        header { background: white; padding: 0.8rem 5%; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; }
-        .logo { font-size: 1.2rem; font-weight: bold; color: var(--primary); text-decoration: none; white-space: nowrap; }
-        
+        header {
+            background: white;
+            padding: 0.8rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--primary);
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
         /* Thu nhỏ Hero Section */
-        .hero { text-align: center; padding: 15px 10px; background: linear-gradient(135deg, var(--secondary), #1976D2); color: white; }
-        .hero h1 { font-size: 1.4rem; margin: 5px 0; }
-        .hero p { font-size: 0.85rem; margin: 5px 0; opacity: 0.9; }
-        
-        .admin-container { max-width: 1100px; margin: 15px auto 50px; padding: 0 10px; width: 100%; box-sizing: border-box; }
-        
-        .week-accordion { background: white; border-radius: 12px; margin-bottom: 12px; overflow: hidden; border: 1px solid #ddd; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .week-header { padding: 12px 15px; background: #fff; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: 0.3s; user-select: none; }
-        .week-header.active { background: #e3f2fd; border-bottom: 2px solid var(--secondary); }
-        .week-title { font-weight: bold; font-size: 1rem; color: var(--dark); display: flex; align-items: center; gap: 8px; white-space: nowrap; }
-        .week-badge { background: var(--secondary); color: white; padding: 2px 8px; border-radius: 20px; font-size: 0.75rem; white-space: nowrap; }
-        
-        .week-content { display: none; padding: 0; background: white; }
-        .week-content.show { display: block; }
+        .hero {
+            text-align: center;
+            padding: 15px 10px;
+            background: linear-gradient(135deg, var(--secondary), #1976D2);
+            color: white;
+        }
 
-        .chart-section { padding: 15px; background: #fff; border-bottom: 1px solid #eee; }
-        .chart-container { position: relative; height: 250px; width: 100%; max-width: 800px; margin: 0 auto; }
-        .chart-title { text-align: center; font-size: 0.85rem; font-weight: bold; color: #555; margin-bottom: 10px; }
+        .hero h1 {
+            font-size: 1.4rem;
+            margin: 5px 0;
+        }
 
-        .action-bar { padding: 10px 15px; background: #fafafa; border-bottom: 1px solid #eee; display: flex; justify-content: flex-end; }
-        .btn-excel { background: var(--primary); color: white; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-family: 'Lexend'; font-weight: bold; font-size: 0.75rem; }
+        .hero p {
+            font-size: 0.85rem;
+            margin: 5px 0;
+            opacity: 0.9;
+        }
+
+        .admin-container {
+            max-width: 1100px;
+            margin: 15px auto 50px;
+            padding: 0 10px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .week-accordion {
+            background: white;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            overflow: hidden;
+            border: 1px solid #ddd;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        .week-header {
+            padding: 12px 15px;
+            background: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: 0.3s;
+            user-select: none;
+        }
+
+        .week-header.active {
+            background: #e3f2fd;
+            border-bottom: 2px solid var(--secondary);
+        }
+
+        .week-title {
+            font-weight: bold;
+            font-size: 1rem;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+
+        .week-badge {
+            background: var(--secondary);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            white-space: nowrap;
+        }
+
+        .week-content {
+            display: none;
+            padding: 0;
+            background: white;
+        }
+
+        .week-content.show {
+            display: block;
+        }
+
+        .chart-section {
+            padding: 15px;
+            background: #fff;
+            border-bottom: 1px solid #eee;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 250px;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .chart-title {
+            text-align: center;
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: #555;
+            margin-bottom: 10px;
+        }
+
+        .action-bar {
+            padding: 10px 15px;
+            background: #fafafa;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .btn-excel {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Lexend';
+            font-weight: bold;
+            font-size: 0.75rem;
+        }
 
         /* ÉP CHỮ KHÔNG XUỐNG HÀNG TRONG BẢNG */
-        table { width: 100%; border-collapse: collapse; min-width: 600px; }
-        th { text-align: left; padding: 10px 8px; background: #f1f1f1; color: #555; font-size: 0.7rem; text-transform: uppercase; white-space: nowrap; }
-        td { padding: 10px 8px; border-bottom: 1px solid #eee; font-size: 0.85rem; white-space: nowrap; }
-        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 600px;
+        }
+
+        th {
+            text-align: left;
+            padding: 10px 8px;
+            background: #f1f1f1;
+            color: #555;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 10px 8px;
+            border-bottom: 1px solid #eee;
+            font-size: 0.85rem;
+            white-space: nowrap;
+        }
+
         /* Giúp tên học sinh hiển thị tốt */
-        td b { display: inline-block; white-space: nowrap; }
+        td b {
+            display: inline-block;
+            white-space: nowrap;
+        }
 
-        .rank { width: 25px; height: 25px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: #eee; font-weight: bold; font-size: 0.75rem; }
-        tr:nth-child(1) .rank { background: #FFD700; color: #000; }
-        tr:nth-child(2) .rank { background: #C0C0C0; color: #000; }
-        tr:nth-child(3) .rank { background: #CD7F32; color: #000; }
+        .rank {
+            width: 25px;
+            height: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: #eee;
+            font-weight: bold;
+            font-size: 0.75rem;
+        }
 
-        .score-badge { color: var(--secondary); font-weight: bold; background: #E3F2FD; padding: 3px 8px; border-radius: 10px; white-space: nowrap; }
-        .time-badge { color: #e67e22; font-weight: 600; white-space: nowrap; }
-        .class-badge { background: #f0f0f0; padding: 2px 6px; border-radius: 4px; font-size: 0.8rem; border: 1px solid #ddd; white-space: nowrap; }
-        .attempt-badge { background: #fff3e0; color: #ef6c00; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; border: 1px solid #ffe0b2; white-space: nowrap; }
+        tr:nth-child(1) .rank {
+            background: #FFD700;
+            color: #000;
+        }
 
-        footer { background: var(--dark); color: white; text-align: center; padding: 15px; font-size: 0.75rem; margin-top: auto; }
+        tr:nth-child(2) .rank {
+            background: #C0C0C0;
+            color: #000;
+        }
+
+        tr:nth-child(3) .rank {
+            background: #CD7F32;
+            color: #000;
+        }
+
+        .score-badge {
+            color: var(--secondary);
+            font-weight: bold;
+            background: #E3F2FD;
+            padding: 3px 8px;
+            border-radius: 10px;
+            white-space: nowrap;
+        }
+
+        .time-badge {
+            color: #e67e22;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .class-badge {
+            background: #f0f0f0;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            border: 1px solid #ddd;
+            white-space: nowrap;
+        }
+
+        .attempt-badge {
+            background: #fff3e0;
+            color: #ef6c00;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border: 1px solid #ffe0b2;
+            white-space: nowrap;
+        }
+
+        footer {
+            background: var(--dark);
+            color: white;
+            text-align: center;
+            padding: 15px;
+            font-size: 0.75rem;
+            margin-top: auto;
+        }
 
         /* Cuộn ngang mượt cho bảng trên mobile */
-        .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .table-responsive {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
     </style>
 </head>
+
 <body>
     <header>
         <a href="index.html" class="logo">EduRobot.id.vn 🤖</a>
-        <nav><a href="index.html" style="text-decoration:none; color:#333; font-size: 0.85rem; font-weight: 600;">Trang chủ</a></nav>
+        <nav><a href="index.html" style="text-decoration:none; color:#333; font-size: 0.85rem; font-weight: 600;">Trang
+                chủ</a></nav>
     </header>
 
     <section class="hero">
@@ -122,6 +339,7 @@
                                         <th>Hạng</th>
                                         <th>Học sinh</th>
                                         <th>Lớp</th>
+                                        <th>Trường</th>
                                         <th>Điểm</th>
                                         <th>Thời gian</th>
                                         <th>Lần thi</th>
@@ -177,8 +395,8 @@
                     datasets: [{
                         data: distribution,
                         backgroundColor: [
-                            'rgba(231, 76, 60, 0.7)', 'rgba(230, 126, 34, 0.7)', 
-                            'rgba(241, 196, 15, 0.7)', 'rgba(52, 152, 219, 0.7)', 
+                            'rgba(231, 76, 60, 0.7)', 'rgba(230, 126, 34, 0.7)',
+                            'rgba(241, 196, 15, 0.7)', 'rgba(52, 152, 219, 0.7)',
                             'rgba(46, 204, 113, 0.7)'
                         ],
                         borderWidth: 1,
@@ -186,44 +404,44 @@
                     }]
                 },
                 plugins: [topLabelsPlugin],
-                options: { 
-                    responsive: true, 
-                    maintainAspectRatio: false, 
-                    plugins: { legend: { display: false } }, 
-                    scales: { 
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
                         y: { beginAtZero: true, ticks: { stepSize: 1, font: { size: 9 } } },
                         x: { ticks: { font: { size: 9, weight: '600' } } }
-                    } 
+                    }
                 }
             });
         }
 
-       function exportExcel(week) {
-    const table = document.querySelector(`#tbody-${week}`).parentElement;
-    const rows = table.querySelectorAll('tr');
-    const data = [];
+        function exportExcel(week) {
+            const table = document.querySelector(`#tbody-${week}`).parentElement;
+            const rows = table.querySelectorAll('tr');
+            const data = [];
 
-    rows.forEach((row, rowIndex) => {
-        const cols = row.querySelectorAll('th, td');
-        const rowData = [];
-        cols.forEach((col, colIndex) => {
-            let value = col.innerText.replace('⏱ ', '').replace('/100', '');
-            
-            // Nếu là cột "Lớp" (cột thứ 3 - index 2), ép kiểu String để tránh lỗi ngày tháng
-            if (colIndex === 2 && rowIndex > 0) {
-                rowData.push({ v: value, t: 's' }); // 's' nghĩa là string
-            } else {
-                rowData.push(value);
-            }
-        });
-        data.push(rowData);
-    });
+            rows.forEach((row, rowIndex) => {
+                const cols = row.querySelectorAll('th, td');
+                const rowData = [];
+                cols.forEach((col, colIndex) => {
+                    let value = col.innerText.replace('⏱ ', '').replace('/100', '');
 
-    const ws = XLSX.utils.aoa_to_sheet(data);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Tuần " + week);
-    XLSX.writeFile(wb, `BangVang_Tuan_${week}.xlsx`);
-}
+                    // Nếu là cột "Lớp" (cột thứ 3 - index 2), ép kiểu String để tránh lỗi ngày tháng
+                    if (colIndex === 2 && rowIndex > 0) {
+                        rowData.push({ v: value, t: 's' }); // 's' nghĩa là string
+                    } else {
+                        rowData.push(value);
+                    }
+                });
+                data.push(rowData);
+            });
+
+            const ws = XLSX.utils.aoa_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Tuần " + week);
+            XLSX.writeFile(wb, `BangVang_Tuan_${week}.xlsx`);
+        }
 
         db.ref('scores').on('value', (snap) => {
             const allData = snap.val();
@@ -235,7 +453,7 @@
                 const chartSection = document.getElementById(`chart-section-${i}`);
 
                 if (!weekData) {
-                    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:15px; color:#999; font-size:0.8rem;">Chưa có dữ liệu.</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:15px; color:#999; font-size:0.8rem;">Chưa có dữ liệu.</td></tr>`;
                     countBadge.innerText = `0 bạn`;
                     chartSection.style.display = 'none';
                     continue;
@@ -251,8 +469,8 @@
                     }
                 });
 
-                let sorted = Array.from(filteredMap.values()).sort((a,b) => (b.score !== a.score) ? b.score - a.score : (a.duration || 999) - (b.duration || 999));
-                
+                let sorted = Array.from(filteredMap.values()).sort((a, b) => (b.score !== a.score) ? b.score - a.score : (a.duration || 999) - (b.duration || 999));
+
                 let dist = [0, 0, 0, 0, 0];
                 sorted.forEach(s => {
                     let sc = s.score || 0;
@@ -266,9 +484,10 @@
                 countBadge.innerText = `${sorted.length} bạn`;
                 tbody.innerHTML = sorted.map((s, idx) => `
                     <tr>
-                        <td><div class="rank">${idx+1}</div></td>
+                        <td><div class="rank">${idx + 1}</div></td>
                         <td><b>${s.fullName || s.name}</b></td>
                         <td><span class="class-badge">${s.className || s.class}</span></td>
+                        <td><span style="font-size:0.8rem; color:#555;">${s.schoolName || '---'}</span></td>
                         <td><span class="score-badge">${s.score}/100</span></td>
                         <td><span class="time-badge">⏱ ${formatTime(s.duration)}</span></td>
                         <td><span class="attempt-badge">Lần ${s.attempt || 1}</span></td>
@@ -282,4 +501,5 @@
         initAccordion();
     </script>
 </body>
+
 </html>
