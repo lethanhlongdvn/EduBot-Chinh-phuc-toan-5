@@ -338,6 +338,33 @@
             z-index: 9999;
         }
 
+        .btn-start {
+            background: var(--p);
+            color: white;
+            padding: 18px 45px;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            font-family: 'Bungee';
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 0 #e67e22;
+            text-transform: uppercase;
+            margin-top: 20px;
+        }
+
+        .btn-start:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 9px 0 #e67e22;
+            filter: brightness(1.1);
+        }
+
+        .btn-start:active {
+            transform: translateY(3px);
+            box-shadow: 0 3px 0 #e67e22;
+        }
+
         .game-footer {
             position: fixed;
             bottom: 0;
@@ -358,8 +385,7 @@
         <h1 style="color: var(--p); font-size: 2rem; font-family: 'Bungee'; text-align: center;">TUẦN 22: XÂY THÁP TRI
             THỨC</h1>
         <p id="welcome-msg" style="margin-bottom: 20px; font-weight: bold;"></p>
-        <button class="quiz-btn" onclick="startGame()" style="width: auto; padding: 15px 40px; text-align: center;">BẮT
-            ĐẦU THÁM HIỂM</button>
+        <button class="btn-start" onclick="startGame()">BẮT ĐẦU THÁM HIỂM</button>
     </div>
 
     <div class="container hidden" id="game-ui">
