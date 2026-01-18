@@ -545,19 +545,7 @@
             } else {
                 playSound('wrong');
                 btn.classList.add('wrong');
-                allBtns.forEach(b => {
-                    if (b.innerText === correct) b.classList.add('correct');
-                });
-
-                // Hiện đáp án đúng rõ ràng hơn
-                const qContent = document.getElementById('q-content');
-                const fb = document.createElement('div');
-                fb.className = 'feedback-text';
-                fb.innerHTML = `ĐÁP ÁN ĐÚNG: ${correct}`;
-                qContent.appendChild(fb);
-
-                // Dừng lâu hơn để học sinh đọc
-                setTimeout(nextQ, 4000);
+                setTimeout(nextQ, 1500);
             }
         }
 
@@ -577,7 +565,7 @@
             } else {
                 playSound('wrong');
                 input.style.borderColor = "var(--danger)";
-                input.value += ` (Sai. Đ/a: ${correctArr[0]})`;
+                input.value += " (Sai)";
             }
             setTimeout(nextQ, 2000);
         }
