@@ -385,6 +385,7 @@
 
         const savedName = localStorage.getItem('studentName');
         const savedClass = localStorage.getItem('studentClass');
+        const savedSchool = localStorage.getItem('studentSchool');
         if (!savedName || !savedClass) { alert("Vui lòng đăng nhập!"); window.location.href = "index.html"; }
         document.getElementById('user-name').innerText = savedName;
         window.onbeforeunload = () => "Đang làm bài...";
@@ -625,7 +626,16 @@
             ref.once('value', (snap) => {
                 let attempt = 1; const data = snap.val();
                 if (data) { for (let id in data) { if (data[id].fullName === savedName && data[id].className === savedClass) attempt++; } }
-                ref.push({ fullName: savedName, className: savedClass, score: score, duration: seconds, attempt: attempt, date: new Date().toLocaleString('vi-VN'), timestamp: firebase.database.ServerValue.TIMESTAMP }, () => {
+                ref.push({
+                    fullName: savedName,
+                    className: savedClass,
+                    schoolName: savedSchool || '---',
+                    score: score,
+                    duration: seconds,
+                    attempt: attempt,
+                    date: new Date().toLocaleString('vi-VN'),
+                    timestamp: firebase.database.ServerValue.TIMESTAMP
+                }, () => {
                     let timeLeft = 5; const msg = document.getElementById('redirect-msg');
                     setInterval(() => { timeLeft--; msg.innerText = `Đã lưu điểm! Về trang chủ sau ${timeLeft}s...`; if (timeLeft <= 0) location.href = 'index.html'; }, 1000);
                 });
