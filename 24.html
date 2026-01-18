@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>BÀI 49: HÌNH KHAI TRIỂN - EDUBOT</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Lexend:wght@400;600;700&display=swap"
+        rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --dark: #2d3436;
+            --light: #fab1a0;
+            --accent: #fdcb6e;
+            --correct: #00b894;
+            --wrong: #d63031;
+            --bg: #0984e3;
+        }
+
+        body {
+            font-family: 'Lexend', sans-serif;
+            background: linear-gradient(135deg, #0984e3 0%, #6c5ce7 100%);
+            color: white;
+            margin: 0;
+            padding: 5px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            user-select: none;
+            padding-bottom: 40px;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            margin-bottom: 50px;
+        }
+
+        .header {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 15px;
+            border-radius: 20px;
+            border: 3px solid var(--accent);
+            text-align: center;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.4rem;
+            color: var(--accent);
+            text-transform: uppercase;
+            font-family: 'Bungee';
+            letter-spacing: 1px;
+            text-shadow: 3px 3px 0 #000;
+        }
+
+        .info-bar {
+            display: flex;
+            justify-content: space-between;
+            font-size: 1rem;
+            color: #fff;
+            font-weight: 600;
+            padding: 10px 15px;
+            margin-top: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        .game-stage {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 25px;
+            padding: 25px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+            min-height: 350px;
+            position: relative;
+            color: #2d3436;
+        }
+
+        .stage-label {
+            background: var(--primary);
+            color: white;
+            padding: 5px 20px;
+            border-radius: 20px;
+            font-family: 'Bungee';
+            display: inline-block;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 0 #4834d4;
+        }
+
+        .question-box {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 25px;
+            line-height: 1.5;
+            min-height: 80px;
+            border-left: 5px solid var(--primary);
+            padding-left: 15px;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .opt-btn {
+            background: #f1f2f6;
+            border: 2px solid #dfe6e9;
+            padding: 18px;
+            border-radius: 15px;
+            color: #2d3436;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            font-size: 1.05rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            min-height: 70px;
+            box-shadow: 0 5px 0 #bdc3c7;
+        }
+
+        .opt-btn:hover {
+            transform: translateY(-2px);
+            background: #e1e2e6;
+        }
+
+        .opt-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 #bdc3c7;
+        }
+
+        .opt-btn.correct {
+            background: var(--correct);
+            border-color: #009473;
+            color: white;
+            box-shadow: 0 5px 0 #009473;
+        }
+
+        .opt-btn.wrong {
+            background: var(--wrong);
+            border-color: #b32525;
+            color: white;
+            box-shadow: 0 5px 0 #b32525;
+        }
+
+        .progress-container {
+            width: 100%;
+            height: 12px;
+            background: #dfe6e9;
+            border-radius: 6px;
+            margin-top: 30px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--bg));
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        #result-screen {
+            text-align: center;
+            padding: 50px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 30px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .trophy {
+            font-size: 6rem;
+            margin-bottom: 20px;
+            filter: drop-shadow(0 0 20px var(--accent));
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .final-score {
+            font-size: 4rem;
+            font-weight: bold;
+            color: var(--accent);
+            text-shadow: 3px 3px 0 #000;
+            margin: 20px 0;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .btn-restart {
+            padding: 15px 40px;
+            background: var(--accent);
+            border: none;
+            border-radius: 50px;
+            color: #000;
+            font-weight: 800;
+            font-family: 'Bungee';
+            cursor: pointer;
+            font-size: 1.2rem;
+            box-shadow: 0 6px 0 #d35400;
+            transition: all 0.2s;
+            margin-top: 30px;
+        }
+
+        .btn-restart:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #d35400;
+        }
+
+        .game-footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 8px 0;
+            text-align: center;
+            font-size: 0.7rem;
+            color: #ccc;
+            z-index: 1000;
+        }
+
+        @media (max-width: 600px) {
+            .options-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 1.1rem;
+            }
+
+            .question-box {
+                font-size: 1rem;
+            }
+
+            .opt-btn {
+                font-size: 0.95rem;
+                padding: 12px;
+                min-height: 50px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container" id="game-ui">
+        <div class="header">
+            <h1>ÔN TẬP BÀI 49 - TOÁN LỚP 5</h1>
+            <p style="margin: 5px 0; color: var(--light); font-weight: bold; font-size: 0.9rem;">CHỦ ĐỀ: HÌNH KHAI TRIỂN
+            </p>
+            <div class="info-bar">
+                <span>👤 <b id="user-name">---</b></span>
+                <span>⭐ <b id="current-score" style="color:var(--accent)">0</b>/100</span>
+                <span>⏳ <b id="timer">00:00</b></span>
+            </div>
+        </div>
+
+        <div class="game-stage">
+            <div id="stage-info">
+                <div class="stage-label" id="stage-label">VÒNG 1: HÌNH LẬP PHƯƠNG</div>
+                <div class="question-box" id="q-content">Đang chuẩn bị câu hỏi...</div>
+            </div>
+
+            <div id="interaction-area" class="options-grid"></div>
+
+            <div class="progress-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+            <div style="text-align:right; font-size:0.75rem; color:#636e72; margin-top:8px; font-weight: 600;">Tiến độ:
+                <span id="progress-text">0/15</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="result-screen" class="container hidden">
+        <div class="trophy">🏆</div>
+        <h2 style="font-family:'Bungee'; letter-spacing: 2px;">HOÀN THÀNH XUẤT SẮC!</h2>
+        <div class="final-score" id="final-score">0</div>
+        <p style="font-size: 1.2rem;">Thời gian hoàn thành: <b id="final-time-text"
+                style="color: var(--accent);">--:--</b></p>
+        <p id="save-msg" style="color:#55efc4; font-weight:bold; margin-top:20px; font-size: 1.1rem;">Đang kết nối hệ
+            thống...</p>
+        <p id="redirect-msg" style="color:#dfe6e9; font-size:0.9rem;">Sẽ quay lại trang chủ trong giây lát...</p>
+        <button class="btn-restart" onclick="location.reload()">CHƠI LẠI</button>
+    </div>
+
+    <div class="game-footer">© 2026 EduBot - Chinh phục Toán 5 - Thiết kế bởi Lê Thành Long</div>
+
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = { databaseURL: "https://gamhoctap-default-rtdb.asia-southeast1.firebasedatabase.app" };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // User Data
+        const savedName = localStorage.getItem('studentName') || "Người chơi";
+        const savedClass = localStorage.getItem('studentClass') || "5A";
+        const savedSchool = localStorage.getItem('studentSchool') || "Tiểu học";
+        document.getElementById('user-name').innerText = savedName;
+
+        // Prevent accidental exit
+        window.addEventListener('beforeunload', function (e) {
+            if (!document.getElementById('result-screen').classList.contains('hidden')) return;
+            e.preventDefault(); e.returnValue = '';
+        });
+
+        // Question Data
+        const questions = {
+            r1: [
+                { q: "Hình khai triển của hình lập phương gồm bao nhiêu hình vuông bằng nhau?", a: ["4 hình", "5 hình", "6 hình", "12 hình"], c: "6 hình" },
+                { q: "Khi gấp hình khai triển của hình lập phương, các cạnh của các hình vuông sẽ trở thành:", a: ["Các mặt của hình lập phương", "Các cạnh của hình lập phương", "Các đỉnh của hình lập phương", "Các đường chéo của hình lập phương"], c: "Các cạnh của hình lập phương" },
+                { q: "Đặc điểm quan trọng nhất của các mặt trong hình khai triển hình lập phương là:", a: ["Có 3 cặp mặt khác nhau", "Tất cả 6 mặt đều là hình vuông bằng nhau", "Có 4 hình vuông và 2 hình chữ nhật", "Có 2 mặt đáy là hình tròn"], c: "Tất cả 6 mặt đều là hình vuông bằng nhau" },
+                { q: "Hình khai triển nào sau đây không thể gấp thành hình lập phương?", a: ["6 hình vuông xếp theo dạng chữ T", "6 hình vuông xếp theo dạng bậc thang (dạng 2-2-2)", "6 hình vuông xếp theo dạng 1-4-1", "6 hình vuông xếp thành một hàng ngang thẳng tắp"], c: "6 hình vuông xếp thành một hàng ngang thẳng tắp" },
+                { q: "Trong hình khai triển của hình lập phương, hai mặt đối diện nhau khi gấp lại sẽ:", a: ["Nằm cạnh nhau", "Nằm chồng lên nhau", "Không có cạnh chung", "Luôn là mặt đáy bên dưới"], c: "Không có cạnh chung" },
+                { q: "Để làm một chiếc đèn lồng hình lập phương, Mai cần chuẩn bị miếng bìa có bao nhiêu ô vuông?", a: ["4 ô", "6 ô", "8 ô", "10 ô"], c: "6 ô" },
+                { q: "Một hình lập phương có cạnh 4 cm. Mỗi mặt trong hình khai triển của nó có diện tích là:", a: ["4 cm²", "8 cm²", "16 cm²", "24 cm²"], c: "16 cm²" },
+                { q: "Nếu một hình khai triển chỉ có 5 hình vuông bằng nhau, ta có thể gấp được hình gì?", a: ["Hình lập phương hoàn chỉnh", "Hình hộp không có nắp (dạng lập phương)", "Hình hộp chữ nhật", "Hình trụ"], c: "Hình hộp không có nắp (dạng lập phương)" },
+                { q: "Khi quan sát một hình khai triển hình lập phương dạng '1-4-1', hình vuông đơn lẻ ở trên cùng được gọi là:", a: ["Mặt bên", "Một mặt đáy", "Cạnh bên", "Đỉnh"], c: "Một mặt đáy" },
+                { q: "Rô-bốt dùng miếng bìa gồm 6 hình vuông cạnh 1 dm để gấp hộp. Thể tích cái hộp đó là:", a: ["1 dm³", "6 dm³", "1 cm³", "1 m³"], c: "1 dm³" }
+            ],
+            r2: [
+                { q: "Hình khai triển của hình hộp chữ nhật có bao nhiêu mặt?", a: ["4 mặt", "5 mặt", "6 mặt", "8 mặt"], c: "6 mặt" },
+                { q: "Các mặt trong hình khai triển của hình hộp chữ nhật thường là hình gì?", a: ["Hình chữ nhật", "Hình tròn", "Hình tam giác", "Hình lập phương"], c: "Hình chữ nhật" },
+                { q: "Trong hình khai triển hình hộp chữ nhật, có bao nhiêu cặp mặt bằng nhau?", a: ["2 cặp", "3 cặp", "4 cặp", "6 cặp"], c: "3 cặp" },
+                { q: "Để phần còn lại là hình khai triển của một hình hộp chữ nhật, Rô-bốt cần cắt bỏ các hình chữ nhật thừa sao cho:", a: ["Chỉ còn lại 4 mặt bên", "Còn lại 2 mặt đáy", "Còn lại đúng 6 mặt xếp theo các cặp tương ứng", "Còn lại 6 mặt vuông"], c: "Còn lại đúng 6 mặt xếp theo các cặp tương ứng" },
+                { q: "Khi khai triển một hình hộp chữ nhật, 4 mặt bên xếp liên tiếp nhau sẽ tạo thành:", a: ["Diện tích toàn phần", "Diện tích xung quanh", "Mặt đáy của hình", "Thể tích của hình"], c: "Diện tích xung quanh" },
+                { q: "Hai mặt đáy trong hình khai triển của hình hộp chữ nhật phải có đặc điểm:", a: ["Là hai hình chữ nhật khác nhau", "Có diện tích lớn hơn các mặt bên", "Là hai hình chữ nhật bằng nhau", "Luôn là hình vuông"], c: "Là hai hình chữ nhật bằng nhau" },
+                { q: "Một hình hộp chữ nhật có 3 kích thước: chiều dài, chiều rộng, chiều cao. Các kích thước này sẽ xuất hiện bao nhiêu lần trên các cạnh của hình khai triển?", a: ["1 lần", "2 lần", "3 lần", "Nhiều lần trên các cạnh tương ứng"], c: "Nhiều lần trên các cạnh tương ứng" },
+                { q: "Nếu một hình khai triển gồm 2 hình vuông bằng nhau và 4 hình chữ nhật bằng nhau, nó có thể là hình khai triển của:", a: ["Hình lập phương", "Hình hộp chữ nhật có đáy là hình vuông", "Hình trụ", "Hình hộp chữ nhật có 6 mặt bằng nhau"], c: "Hình hộp chữ nhật có đáy là hình vuông" },
+                { q: "Muốn tính diện tích miếng bìa dùng để làm hình khai triển (diện tích toàn phần), ta làm thế nào?", a: ["Lấy diện tích xung quanh chia 2", "Lấy diện tích hai đáy nhân với chiều cao", "Cộng diện tích xung quanh với diện tích hai mặt đáy", "Lấy chu vi đáy nhân với chiều cao"], c: "Cộng diện tích xung quanh với diện tích hai mặt đáy" },
+                { q: "Hình nào sau đây không phải là hình khai triển của hình hộp chữ nhật?", a: ["Hình có 6 mặt chữ nhật xếp dạng 1-4-1", "Hình có các cặp mặt đối diện bằng nhau", "Hình có 6 mặt chữ nhật nhưng các mặt đối diện không bằng nhau", "Hình có 2 mặt đáy tách rời ở hai phía của các mặt bên"], c: "Hình có 6 mặt chữ nhật nhưng các mặt đối diện không bằng nhau" }
+            ],
+            r3: [
+                { q: "Hình khai triển của một hình trụ gồm những hình phẳng nào?", a: ["3 hình tròn", "1 hình chữ nhật và 1 hình tròn", "1 hình chữ nhật và 2 hình tròn bằng nhau", "2 hình chữ nhật và 2 hình tròn"], c: "1 hình chữ nhật và 2 hình tròn bằng nhau" },
+                { q: "Hai hình tròn trong hình khai triển của hình trụ đóng vai trò là:", a: ["Các mặt bên", "Mặt xung quanh", "Hai mặt đáy", "Các đỉnh"], c: "Hai mặt đáy" },
+                { q: "Hình chữ nhật trong hình khai triển của hình trụ khi cuộn lại sẽ tạo thành:", a: ["Mặt xung quanh của hình trụ", "Hai mặt đáy của hình trụ", "Chiều cao của hình vuông", "Thể tích hình trụ"], c: "Mặt xung quanh của hình trụ" },
+                { q: "Đặc điểm của hai hình tròn đáy trong hình khai triển là:", a: ["Có kích thước khác nhau", "Là hai hình tròn bằng nhau", "Một hình tròn to và một hình tròn nhỏ", "Có dạng hình bầu dục"], c: "Là hai hình tròn bằng nhau" },
+                { q: "Để gấp được hình trụ, hai hình tròn đáy phải nằm ở vị trí nào?", a: ["Nằm cùng một phía của hình chữ nhật", "Nằm ở hai phía đối diện của hình chữ nhật", "Nằm chồng lên nhau ở giữa", "Nằm ở bốn góc của hình chữ nhật"], c: "Nằm ở hai phía đối diện của hình chữ nhật" },
+                { q: "Khi gấp hình trụ, chiều dài của hình chữ nhật (mặt xung quanh) sẽ bằng với:", a: ["Chiều cao của hình trụ", "Chu vi của hình tròn đáy", "Diện tích của hình tròn đáy", "Đường kính của hình tròn đáy"], c: "Chu vi của hình tròn đáy" },
+                { q: "Chiều rộng của hình chữ nhật trong hình khai triển chính là:", a: ["Bán kính đáy", "Chu vi đáy", "Chiều cao của hình trụ", "Diện tích xung quanh"], c: "Chiều cao của hình trụ" },
+                { q: "Nếu miếng bìa chỉ gồm một hình chữ nhật, ta có thể gấp được hình trụ không?", a: ["Có, một hình trụ hoàn chỉnh", "Gấp được mặt xung quanh nhưng thiếu hai đáy", "Không thể gấp được bất cứ hình gì", "Gấp được hình lập phương"], c: "Gấp được mặt xung quanh nhưng thiếu hai đáy" },
+                { q: "Hình nào dưới đây mô tả đúng nhất hình khai triển của chiếc đèn lồng hình trụ?", a: ["6 hình vuông bằng nhau", "6 hình chữ nhật bằng nhau", "Một hình chữ nhật nằm giữa hai hình tròn", "Một hình tròn nằm giữa hai hình chữ nhật"], c: "Một hình chữ nhật nằm giữa hai hình tròn" },
+                { q: "Khi khai triển diện tích toàn phần của hình trụ, ta cần tính tổng diện tích của:", a: ["1 hình tròn và 1 hình chữ nhật", "2 hình chữ nhật", "1 hình chữ nhật và 2 hình tròn", "2 hình chữ nhật và 1 hình tròn"], c: "1 hình chữ nhật và 2 hình tròn" }
+            ]
+        };
+
+        // Game State
+        let gameQueue = [];
+        let currentIndex = 0;
+        let score = 0;
+        let seconds = 0;
+        let timerInterval;
+
+        function shuffle(arr) { return arr.sort(() => Math.random() - 0.5); }
+
+        function initGame() {
+            // Select 5/10 from each round
+            const r1 = shuffle([...questions.r1]).slice(0, 5).map(q => ({ ...q, points: 8, label: "VÒNG 1: HÌNH LẬP PHƯƠNG" }));
+            const r2 = shuffle([...questions.r2]).slice(0, 5).map(q => ({ ...q, points: 8, label: "VÒNG 2: HÌNH HỘP CHỮ NHẬT" }));
+            const r3 = shuffle([...questions.r3]).slice(0, 5).map(q => ({ ...q, points: 4, label: "VÒNG 3: HÌNH TRỤ" }));
+
+            gameQueue = [...r1, ...r2, ...r3];
+            renderQuestion();
+            startTimer();
+        }
+
+        function renderQuestion() {
+            if (currentIndex >= gameQueue.length) { finishGame(); return; }
+
+            const q = gameQueue[currentIndex];
+            document.getElementById('stage-label').innerText = q.label;
+            document.getElementById('q-content').innerText = q.q;
+            document.getElementById('progress-text').innerText = `${currentIndex + 1}/${gameQueue.length}`;
+            document.getElementById('progress-bar').style.width = `${(currentIndex / gameQueue.length) * 100}%`;
+
+            const area = document.getElementById('interaction-area');
+            area.innerHTML = '';
+
+            shuffle([...q.a]).forEach(opt => {
+                const btn = document.createElement('div');
+                btn.className = 'opt-btn';
+                btn.innerText = opt;
+                btn.onclick = () => checkAnswer(btn, opt, q.c, q.points);
+                area.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(btn, choice, correct, pts) {
+            // Disable all buttons
+            document.querySelectorAll('.opt-btn').forEach(b => b.onclick = null);
+
+            if (choice === correct) {
+                btn.classList.add('correct');
+                score += pts;
+                playSound('correct');
+            } else {
+                btn.classList.add('wrong');
+                playSound('wrong');
+            }
+
+            updateScoreUI();
+            setTimeout(() => {
+                currentIndex++;
+                renderQuestion();
+            }, 1200);
+        }
+
+        function updateScoreUI() {
+            const el = document.getElementById('current-score');
+            el.innerText = score;
+            el.style.transform = "scale(1.3)";
+            setTimeout(() => el.style.transform = "scale(1)", 200);
+        }
+
+        // Sound System
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const t = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const g = audioCtx.createGain();
+            osc.connect(g); g.connect(audioCtx.destination);
+
+            if (type === 'correct') {
+                osc.type = 'sine'; osc.frequency.setValueAtTime(523, t); osc.frequency.exponentialRampToValueAtTime(880, t + 0.1);
+                g.gain.setValueAtTime(0.2, t); g.gain.exponentialRampToValueAtTime(0.01, t + 0.3);
+                osc.start(t); osc.stop(t + 0.3);
+            } else {
+                osc.type = 'square'; osc.frequency.setValueAtTime(110, t); osc.frequency.linearRampToValueAtTime(80, t + 0.2);
+                g.gain.setValueAtTime(0.2, t); g.gain.exponentialRampToValueAtTime(0.01, t + 0.3);
+                osc.start(t); osc.stop(t + 0.3);
+            }
+        }
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                seconds++;
+                const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+                const s = (seconds % 60).toString().padStart(2, '0');
+                document.getElementById('timer').innerText = `${m}:${s}`;
+            }, 1000);
+        }
+
+        function finishGame() {
+            clearInterval(timerInterval);
+            document.getElementById('game-ui').classList.add('hidden');
+            document.getElementById('result-screen').classList.remove('hidden');
+            document.getElementById('final-score').innerText = score;
+            document.getElementById('final-time-text').innerText = document.getElementById('timer').innerText;
+
+            saveScore();
+        }
+
+        function saveScore() {
+            const ref = db.ref('scores/Tuan_24');
+            ref.once('value', (snap) => {
+                let attempt = 1;
+                const data = snap.val();
+                if (data) {
+                    for (let id in data) {
+                        if (data[id].fullName === savedName) attempt++;
+                    }
+                }
+
+                ref.push({
+                    fullName: savedName,
+                    className: savedClass,
+                    schoolName: savedSchool,
+                    score: score,
+                    duration: seconds,
+                    attempt: attempt,
+                    date: new Date().toLocaleString('vi-VN')
+                }, () => {
+                    document.getElementById('save-msg').innerText = "Đã lưu kết quả thành công!";
+                    let count = 5;
+                    const rd = document.getElementById('redirect-msg');
+                    const itv = setInterval(() => {
+                        count--;
+                        rd.innerText = `Sẽ quay lại trang chủ trong ${count}s...`;
+                        if (count <= 0) {
+                            clearInterval(itv);
+                            window.location.href = "index.html";
+                        }
+                    }, 1000);
+                });
+            });
+        }
+
+        initGame();
+    </script>
+</body>
+
+</html>
