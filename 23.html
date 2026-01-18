@@ -262,23 +262,45 @@
             color: #a4b0be;
             border-top: 1px solid #1e3799;
             z-index: 999;
-        }
 
-        sup {
-            font-size: 0.7em;
-            vertical-align: super;
-        }
+            sup {
+                font-size: 0.7em;
+                vertical-align: super;
+            }
+
+            #start-screen {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: #001f3f;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                z-index: 9999;
+            }
     </style>
 </head>
 
 <body>
+    <div id="start-screen">
+        <h1 style="color: var(--accent); font-size: 2rem; font-family: 'Bungee'; text-align: center;">TUẦN 23: THÁM HIỂM
+            ĐẠI DƯƠNG</h1>
+        <p id="welcome-msg" style="margin-bottom: 20px; font-weight: bold; color: white;"></p>
+        <button class="opt-btn" onclick="startGame()"
+            style="width: auto; padding: 15px 40px; background: var(--accent); color: #000;">BẮT ĐẦU THÁM HIỂM</button>
+    </div>
 
-    <div class="container" id="game-ui">
+    <div class="container hidden" id="game-ui">
         <div class="header">
             <h1>TUẦN 23: THÁM HIỂM ĐẠI DƯƠNG</h1>
             <div class="info-bar">
-                <span>⚓ <b id="user-name">---</b></span>
-                <span>🏆 <b id="current-score" style="color:var(--accent)">0</b>/100</span>
+                <span>👤 <b id="user-name">---</b></span>
+                <span>🏫 <b id="user-class">---</b></span>
+                <span>🏢 <b id="user-school">---</b></span>
+                <span>⭐ <b id="current-score" style="color:var(--gold)">0</b>/100</span>
                 <span>⏱ <b id="timer">00:00</b></span>
             </div>
         </div>
@@ -318,15 +340,40 @@
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        const savedName = localStorage.getItem('studentName');
-        const savedClass = localStorage.getItem('studentClass');
-        const savedSchool = localStorage.getItem('studentSchool');
-        if (!savedName || !savedClass) { alert("Vui lòng đăng nhập!"); window.location.href = "index.html"; }
-        document.getElementById('user-name').innerText = savedName;
+        const savedName = localStorage.getItem('studentName') || "Người chơi";
+        const savedClass = localStorage.getItem('studentClass') || "---";
+        const savedSchool = localStorage.getItem('studentSchool') || "---";
+
+        let isPlaying = false;
+        let startTime;
+
+        window.onload = () => {
+            if (!localStorage.getItem('studentName') || !localStorage.getItem('studentClass')) {
+                document.getElementById('welcome-msg').innerHTML = "<b style='color:red'>⚠️ Em cần đăng ký ở bản đồ trước!</b>";
+                document.querySelector('#start-screen .opt-btn').onclick = () => window.location.href = "index.html";
+            } else {
+                document.getElementById('welcome-msg').innerText = `Thí sinh: ${savedName} - Lớp ${savedClass}`;
+                document.getElementById('user-name').innerText = savedName;
+                document.getElementById('user-class').innerText = savedClass;
+                document.getElementById('user-school').innerText = savedSchool;
+            }
+        };
+
+        function startGame() {
+            isPlaying = true;
+            startTime = Date.now();
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('game-ui').classList.remove('hidden');
+            initGame(); // Changed from initStage1() to initGame() to match existing function
+            startTimer();
+        }
 
         window.addEventListener('beforeunload', function (e) {
-            if (!document.getElementById('result-screen').classList.contains('hidden')) return;
-            e.preventDefault(); e.returnValue = '';
+            if (isPlaying && !document.getElementById('result-screen').classList.contains('hidden')) return;
+            if (isPlaying) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
         });
 
         const rawR1 = [
@@ -422,7 +469,6 @@
             currentIndex = 0;
             score = 0;
             stage2Mistakes = 0;
-            startTimer();
             renderQuestion();
         }
 
@@ -545,6 +591,7 @@
         }
 
         function finishGame() {
+            isPlaying = false; // Game finished
             clearInterval(timerInterval);
             document.querySelector('.ocean-stage').classList.add('hidden');
             document.getElementById('result-screen').classList.remove('hidden');
@@ -583,8 +630,6 @@
                 document.getElementById('timer').innerText = `${m}:${s}`;
             }, 1000);
         }
-
-        initGame();
     </script>
 </body>
 
