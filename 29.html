@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ÔN TẬP TUẦN 29 - KHÁM PHÁ VŨ TRỤ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Lexend:wght@400;600;700&display=swap"
+        rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --dark: #2d3436;
+            --light: #81ecec;
+            --accent: #fd79a8;
+            --correct: #00b894;
+            --wrong: #d63031;
+            --bg: #2d3436;
+        }
+
+        body {
+            font-family: 'Lexend', sans-serif;
+            background: linear-gradient(135deg, #2c3e50 0%, #000000 100%);
+            color: white;
+            margin: 0;
+            padding: 5px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            user-select: none;
+            padding-bottom: 40px;
+            overflow-x: hidden;
+        }
+
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: url('https://www.transparenttextures.com/patterns/stardust.png');
+            opacity: 0.5;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            margin-bottom: 50px;
+        }
+
+        .header {
+            background: rgba(108, 92, 231, 0.2);
+            padding: 15px;
+            border-radius: 20px;
+            border: 2px solid var(--primary);
+            text-align: center;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 20px rgba(108, 92, 231, 0.4);
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.4rem;
+            color: var(--light);
+            text-transform: uppercase;
+            font-family: 'Bungee';
+            letter-spacing: 1px;
+            text-shadow: 0 0 10px var(--primary);
+        }
+
+        .info-bar {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.95rem;
+            color: #fff;
+            font-weight: 600;
+            padding: 10px 15px;
+            margin-top: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+
+        .game-stage {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 25px;
+            padding: 25px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            min-height: 350px;
+            position: relative;
+            color: var(--dark);
+        }
+
+        .stage-label {
+            background: var(--primary);
+            color: white;
+            padding: 5px 20px;
+            border-radius: 20px;
+            font-family: 'Bungee';
+            display: inline-block;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 0 #4834d4;
+        }
+
+        .question-box {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 25px;
+            line-height: 1.5;
+            min-height: 80px;
+            border-left: 5px solid var(--primary);
+            padding-left: 15px;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .opt-btn {
+            background: #f1f2f6;
+            border: 2px solid #dfe6e9;
+            padding: 18px;
+            border-radius: 15px;
+            color: var(--dark);
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            font-size: 1.05rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            min-height: 70px;
+            box-shadow: 0 5px 0 #bdc3c7;
+        }
+
+        .opt-btn:hover {
+            transform: translateY(-2px);
+            background: #e1e2e6;
+        }
+
+        .opt-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 #bdc3c7;
+        }
+
+        .opt-btn.correct {
+            background: var(--correct);
+            border-color: #009473;
+            color: white;
+            box-shadow: 0 5px 0 #009473;
+        }
+
+        .opt-btn.wrong {
+            background: var(--wrong);
+            border-color: #b32525;
+            color: white;
+            box-shadow: 0 5px 0 #b32525;
+        }
+
+        .progress-container {
+            width: 100%;
+            height: 12px;
+            background: #dfe6e9;
+            border-radius: 6px;
+            margin-top: 30px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--light));
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        #result-screen {
+            text-align: center;
+            padding: 50px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 30px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .trophy {
+            font-size: 6rem;
+            margin-bottom: 20px;
+            filter: drop-shadow(0 0 20px var(--light));
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+            }
+        }
+
+        .final-score {
+            font-size: 4rem;
+            font-weight: bold;
+            color: var(--light);
+            text-shadow: 0 0 20px var(--primary);
+            margin: 20px 0;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .btn-restart {
+            padding: 15px 40px;
+            background: var(--primary);
+            border: none;
+            border-radius: 50px;
+            color: white;
+            font-weight: 800;
+            font-family: 'Bungee';
+            cursor: pointer;
+            font-size: 1.2rem;
+            box-shadow: 0 6px 0 #4834d4;
+            margin-top: 30px;
+        }
+
+        .game-footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 8px 0;
+            text-align: center;
+            font-size: 0.7rem;
+            color: var(--light);
+            z-index: 1000;
+        }
+
+        #start-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .btn-start {
+            background: var(--primary);
+            color: white;
+            padding: 18px 45px;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            font-family: 'Bungee';
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 0 #000;
+            text-transform: uppercase;
+            margin-top: 20px;
+            letter-spacing: 1px;
+        }
+
+        .btn-start:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 9px 0 #000;
+            filter: brightness(1.2);
+        }
+
+        @media (max-width: 600px) {
+            .options-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 1.1rem;
+            }
+
+            .question-box {
+                font-size: 1rem;
+            }
+
+            .opt-btn {
+                font-size: 0.95rem;
+                padding: 12px;
+                min-height: 50px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="stars"></div>
+
+    <div id="start-screen">
+        <h1
+            style="color: var(--light); font-size: 2.2rem; font-family: 'Bungee'; text-align: center; text-shadow: 0 0 15px var(--primary);">
+            TUẦN 29: KHÁM PHÁ VŨ TRỤ</h1>
+        <p id="welcome-msg" style="margin-bottom: 20px; font-weight: bold; color: white;"></p>
+        <button class="btn-start" onclick="startGame()">BẮT ĐẦU THÁM HIỂM</button>
+    </div>
+
+    <div class="container hidden" id="game-ui">
+        <div class="header">
+            <h1>TUẦN 29 - TOÁN LỚP 5</h1>
+            <p style="margin: 5px 0; color: var(--light); font-weight: bold; font-size: 0.85rem;">CHỦ ĐỀ: TÍNH TOÁN, ƯỚC
+                LƯỢNG VÀ LUYỆN TẬP CHUNG</p>
+            <div class="info-bar">
+                <span>👤 <b id="user-name">---</b></span>
+                <span>🏫 <b id="user-class">---</b></span>
+                <span>⭐ <b id="current-score" style="color:var(--light)">0</b>/100</span>
+                <span>⏳ <b id="timer">00:00</b></span>
+            </div>
+        </div>
+
+        <div class="game-stage">
+            <div id="stage-info">
+                <div class="stage-label" id="stage-label">VÒNG 1: TÍNH TOÁN & ƯỚC LƯỢNG</div>
+                <div class="question-box" id="q-content">Đang chuẩn bị câu hỏi...</div>
+            </div>
+
+            <div id="interaction-area" class="options-grid"></div>
+
+            <div class="progress-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+            <div style="text-align:right; font-size:0.75rem; color:#636e72; margin-top:8px; font-weight: 600;">Tiến độ:
+                <span id="progress-text">0/13</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="result-screen" class="container hidden">
+        <div class="trophy">🚀</div>
+        <h2>SỨ MỆNH HOÀN THÀNH!</h2>
+        <div class="final-score" id="final-score">0</div>
+        <p style="font-size: 1.2rem;">Thời gian thám hiểm: <b id="final-time-text"
+                style="color: var(--light);">--:--</b></p>
+        <p id="save-msg" style="color:#55efc4; font-weight:bold; margin-top:20px;">Đang kết nối hệ thống...</p>
+        <p id="redirect-msg" style="color:#dfe6e9; font-size:0.9rem;">Sẽ quay lại tàu mẹ trong giây lát...</p>
+        <button class="btn-restart" onclick="location.reload()">CHƠI LẠI</button>
+    </div>
+
+    <div class="game-footer">© 2026 EduBot - Chinh phục Toán 5 - Thiết kế bởi Lê Thành Long</div>
+
+    <script>
+        const firebaseConfig = { databaseURL: "https://gamhoctap-default-rtdb.asia-southeast1.firebasedatabase.app" };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        const savedName = localStorage.getItem('studentName') || "Người chơi";
+        const savedClass = localStorage.getItem('studentClass') || "---";
+        const savedSchool = localStorage.getItem('studentSchool') || "---";
+
+        let isPlaying = false;
+        let startTime;
+
+        window.onload = () => {
+            if (!localStorage.getItem('studentName') || !localStorage.getItem('studentClass')) {
+                document.getElementById('welcome-msg').innerHTML = "<b style='color:red'>⚠️ Em cần đăng ký ở bản đồ trước!</b>";
+                document.querySelector('#start-screen .btn-start').onclick = () => window.location.href = "index.html";
+            } else {
+                document.getElementById('welcome-msg').innerText = `Thí sinh: ${savedName} - Lớp ${savedClass}`;
+                document.getElementById('user-name').innerText = savedName;
+                document.getElementById('user-class').innerText = savedClass;
+            }
+        };
+
+        function startGame() {
+            isPlaying = true;
+            startTime = Date.now();
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('game-ui').classList.remove('hidden');
+            initGame();
+            startTimer();
+        }
+
+        const questions = {
+            r1: [
+                { q: "Muốn tính vận tốc của một chuyển động đều, ta thực hiện phép tính nào?", a: ["v = s × t", "v = s : t", "v = t : s", "v = s + t"], c: "v = s : t" },
+                { q: "Học sinh đi 40 m hết 31 giây. Vận tốc là bao nhiêu (làm tròn 1 chữ số thập phân)?", a: ["1,0 m/s", "1,3 m/s", "1,5 m/s", "2,3 m/s"], c: "1,3 m/s" },
+                { q: "Đi bộ 1 vòng hết 125 giây, v = 1,2 m/s. Ước lượng chu vi sân trường?", a: ["120 m", "150 m", "180 m", "200 m"], c: "150 m" },
+                { q: "Đường 1: 180km (80km/h). Đường 2: 160km (50km/h). Đường nào tốn ít thời gian hơn?", a: ["Đường (1)", "Đường (2)", "Bằng nhau", "Không xác định"], c: "Đường (1)" },
+                { q: "Thời gian dự định đi con đường thứ nhất (180 km, v = 80 km/h) là bao lâu?", a: ["2 giờ", "2 giờ 15 phút", "2 giờ 30 phút", "3 giờ"], c: "2 giờ 15 phút" },
+                { q: "Đi 1 giờ (80km/h), dừng lại nghỉ trên quãng đường 180km. Điểm nghỉ cách nơi đến bao nhiêu km?", a: ["80 km", "100 km", "120 km", "180 km"], c: "100 km" },
+                { q: "Đi 100 km còn lại hết 1 giờ 36 phút. Tính vận tốc trung bình (km/h)?", a: ["60 km/h", "62,5 km/h", "65 km/h", "70 km/h"], c: "62,5 km/h" },
+                { q: "Robot di chuyển 40 m hết 100 giây. Vận tốc robot là bao nhiêu?", a: ["0,2 m/s", "0,4 m/s", "0,5 m/s", "4 m/s"], c: "0,4 m/s" },
+                { q: "v = 4 km/h, quãng đường 2 km. Em cần bao nhiêu phút để đi hết?", a: ["15 phút", "20 phút", "30 phút", "45 phút"], c: "30 phút" },
+                { q: "Khi đo thời gian chạy của các bạn, em cần dùng bảng ghi chép gồm những cột nào?", a: ["Tên, điểm", "Tên, s, t", "Tên, tuổi", "Tên, trường"], c: "Tên, s, t" },
+                { q: "VĐV chạy 100 m hết 10 giây. Vận tốc VĐV đó là:", a: ["1 m/s", "5 m/s", "10 m/s", "100 m/s"], c: "10 m/s" },
+                { q: "Đi được trong 2,5 giờ với vận tốc 12 km/h. Quãng đường là:", a: ["25 km", "30 km", "35 km", "40 km"], c: "30 km" },
+                { q: "Quãng đường 28 km, vận tốc 14 km/h. Thời gian đi là:", a: ["1 giờ", "2 giờ", "3 giờ", "4 giờ"], c: "2 giờ" },
+                { q: "Cá heo bơi 72 km trong 3 giờ. Vận tốc cá heo là:", a: ["20 km/h", "24 km/h", "30 km/h", "72 km/h"], c: "24 km/h" },
+                { q: "Đổi vận tốc: 36 km/h sang đơn vị m/s.", a: ["5 m/s", "10 m/s", "15 m/s", "36 m/s"], c: "10 m/s" },
+                { q: "Rùa bò 10 m với v = 0,05 m/s. Thời gian rùa bò là:", a: ["100 giây", "200 giây", "300 giây", "50 giây"], c: "200 giây" },
+                { q: "Nếu biết quãng đường và thời gian, em tính được đại lượng nào?", a: ["Quãng đường", "Thời gian", "Vận tốc", "Gia tốc"], c: "Vận tốc" },
+                { q: "Xe máy đi v = 45 km/h trong 1,2 giờ. Quãng đường là:", a: ["45 km", "50 km", "54 km", "60 km"], c: "54 km" },
+                { q: "VĐV đi bộ được 500 m trong 10 phút. Vận tốc trung bình m/phút là:", a: ["5 m/phút", "50 m/phút", "100 m/phút", "500 m/phút"], c: "50 m/phút" },
+                { q: "Máy bay v = 800 km/h. Nó bay được bao xa trong 30 phút?", a: ["200 km", "300 km", "400 km", "800 km"], c: "400 km" }
+            ],
+            r2: [
+                { q: "9 phút 12 giây + 3 phút 38 giây = ?", a: ["12 phút 40 giây", "12 phút 50 giây", "13 phút", "11 phút 50 giây"], c: "12 phút 50 giây" },
+                { q: "7 giờ 15 phút – 2 giờ 30 phút = ?", a: ["4 giờ 45 phút", "5 giờ 15 phút", "4 giờ 15 phút", "5 giờ 45 phút"], c: "4 giờ 45 phút" },
+                { q: "2 tuần 5 ngày × 7 = ?", a: ["14 tuần", "17 tuần 5 ngày", "19 tuần", "20 tuần"], c: "19 tuần" },
+                { q: "9 năm 4 tháng : 8 = ?", a: ["1 năm 1 tháng", "1 năm 2 tháng", "1 năm 3 tháng", "1 năm 4 tháng"], c: "1 năm 2 tháng" },
+                { q: "Đổi: 24 km/h = ... m/s. (làm tròn số)", a: ["5 m/s", "6,67 m/s", "7 m/s", "8 m/s"], c: "6,67 m/s" },
+                { q: "Đổi: 207 km/h = ... m/s.", a: ["50 m/s", "55 m/s", "57,5 m/s", "60 m/s"], c: "57,5 m/s" },
+                { q: "Tàu v = 22 km/h, đi 3 giờ 30 phút trên AB dài 115 km. Cách B bao nhiêu km?", a: ["35 km", "38 km", "40 km", "77 km"], c: "38 km" },
+                { q: "Tàu dài 200 m, v = 20 m/s. Sau bao lâu đuôi tàu vào hầm hoàn toàn?", a: ["5 giây", "10 giây", "15 giây", "20 giây"], c: "10 giây" },
+                { q: "Đi bộ 6 km trong 30 phút. Vận tốc (km/h)?", a: ["6 km/h", "10 km/h", "12 km/h", "15 km/h"], c: "12 km/h" },
+                { q: "S = 56 km, v = 16 km/h. Xe rời bến lúc 5 giờ sáng, đến lúc mấy giờ?", a: ["7 giờ 30 phút", "8 giờ", "8 giờ 30 phút", "9 giờ"], c: "8 giờ 30 phút" },
+                { q: "Chạy 6,5 km với v = 13 km/h. Thời gian chạy là:", a: ["15 phút", "20 phút", "30 phút", "45 phút"], c: "30 phút" },
+                { q: "Bơi 2,7 km trong 1 giờ 30 phút. Vận tốc bơi m/s là:", a: ["0,1 m/s", "0,5 m/s", "1 m/s", "1,5 m/s"], c: "0,5 m/s" },
+                { q: "Xuất phát lúc 4 giờ, chạy 30p, bơi 1h30p. Đến nơi lúc mấy giờ?", a: ["5 giờ 30 phút", "6 giờ sáng", "6 giờ 30 phút", "7 giờ"], c: "6 giờ sáng" },
+                { q: "Taxi bay 31,4 km với v = 60 km/h. Thời gian bay là:", a: ["30 phút", "31,4 phút", "35 phút", "60 phút"], c: "31,4 phút" },
+                { q: "Trẻ gặp cún sau 4 phút. Trẻ v = 1m/s, cún v = 3m/s. Quãng đường trẻ đi là?", a: ["120 m", "240 m", "360 m", "480 m"], c: "240 m" },
+                { q: "Từ câu trước, quãng đường cún con đã chạy là?", a: ["240 m", "480 m", "720 m", "960 m"], c: "720 m" },
+                { q: "Đại lượng '4 m/s' được gọi là gì?", a: ["Quãng đường", "Thời gian", "Vận tốc", "Gia tốc"], c: "Vận tốc" },
+                { q: "Chạy 4 vòng sân hết 10 phút 40 giây. Trung bình mỗi vòng?", a: ["2 phút", "2 phút 20 giây", "2 phút 40 giây", "3 phút"], c: "2 phút 40 giây" },
+                { q: "Đổi: 1,4 giờ = ... giờ ... phút.", a: ["1 giờ 14 phút", "1 giờ 24 phút", "1 giờ 40 phút", "1 giờ 4 phút"], c: "1 giờ 24 phút" },
+                { q: "15 phút 20 giây × 3 = ?", a: ["45 phút", "46 phút", "45 phút 20 giây", "50 phút"], c: "46 phút" }
+            ],
+            r3: [
+                { q: "Công thức tính thời gian (t) khi biết quãng đường (s) và vận tốc (v) là:", a: ["t = s × v", "t = s : v", "t = v : s", "t = s + v"], c: "t = s : v" },
+                { q: "Học sinh chạy 40 m trong 10 giây. Vận tốc là:", a: ["4 km/h", "4 m/s", "400 m/s", "0,25 m/s"], c: "4 m/s" },
+                { q: "Con đường dài 180 km, ô tô đi v = 80 km/h thì thời gian đi là:", a: ["2 giờ", "2,25 giờ", "2,5 giờ", "3 giờ"], c: "2,25 giờ" },
+                { q: "Nếu vận tốc là 10 m/s, điều đó có nghĩa là:", a: ["Mỗi giây đi được 10 m", "Mỗi phút đi được 10 m", "Mỗi giờ đi được 10 m", "Mỗi giây đi được 1 m"], c: "Mỗi giây đi được 10 m" },
+                { q: "Kết quả của phép tính '7 giờ 15 phút – 2 giờ 30 phút' là:", a: ["5 giờ 15 phút", "5 giờ 45 phút", "4 giờ 45 phút", "4 giờ 15 phút"], c: "4 giờ 45 phút" },
+                { q: "Vận tốc 72 km/h tương ứng với bao nhiêu m/s?", a: ["10 m/s", "20 m/s", "30 m/s", "40 m/s"], c: "20 m/s" },
+                { q: "Tàu dài 200 m đi hết đoạn đường 200 m với v = 20 m/s thì mất:", a: ["10 giây", "20 giây", "4 giây", "40 giây"], c: "10 giây" },
+                { q: "Đi bộ v = 1 m/s trong 4 phút. Quãng đường đi được là:", a: ["4 m", "40 m", "240 m", "60 m"], c: "240 m" }
+            ]
+        };
+
+        let queue = [];
+        let currIdx = 0;
+        let score = 0;
+        let timer = 0;
+        let itv;
+
+        function shuffle(a) { return a.sort(() => Math.random() - 0.5); }
+
+        function initGame() {
+            const r1 = shuffle([...questions.r1]).slice(0, 5).map(q => ({ ...q, pts: 7, label: "VÒNG 1: TÍNH TOÁN & ƯỚC LƯỢNG" }));
+            const r2 = shuffle([...questions.r2]).slice(0, 5).map(q => ({ ...q, pts: 7, label: "VÒNG 2: LUYỆN TẬP CHUNG" }));
+            const r3 = shuffle([...questions.r3]).slice(0, 3).map(q => ({ ...q, pts: 10, label: "VÒNG 3: TRẮC NGHIỆM TỔNG HỢP" }));
+            queue = [...r1, ...r2, ...r3];
+            renderQ();
+        }
+
+        function renderQ() {
+            if (currIdx >= queue.length) { finish(); return; }
+            const q = queue[currIdx];
+            document.getElementById('stage-label').innerText = q.label;
+            document.getElementById('q-content').innerText = q.q;
+            document.getElementById('progress-text').innerText = `${currIdx + 1}/${queue.length}`;
+            document.getElementById('progress-bar').style.width = `${(currIdx / queue.length) * 100}%`;
+
+            const area = document.getElementById('interaction-area');
+            area.innerHTML = '';
+            shuffle([...q.a]).forEach(opt => {
+                const btn = document.createElement('div');
+                btn.className = 'opt-btn';
+                btn.innerText = opt;
+                btn.onclick = () => check(btn, opt, q.c, q.pts);
+                area.appendChild(btn);
+            });
+        }
+
+        function check(btn, choice, correct, pts) {
+            document.querySelectorAll('.opt-btn').forEach(b => b.onclick = null);
+            if (choice === correct) {
+                btn.classList.add('correct');
+                score += pts;
+                playSound('correct');
+            } else {
+                btn.classList.add('wrong');
+                playSound('wrong');
+            }
+            updateScoreUI();
+            setTimeout(() => { currIdx++; renderQ(); }, 1500);
+        }
+
+        function updateScoreUI() {
+            const el = document.getElementById('current-score');
+            el.innerText = score;
+            el.style.transform = "scale(1.3)";
+            setTimeout(() => el.style.transform = "scale(1)", 200);
+        }
+
+        function startTimer() {
+            itv = setInterval(() => {
+                timer++;
+                const m = Math.floor(timer / 60).toString().padStart(2, '0');
+                const s = (timer % 60).toString().padStart(2, '0');
+                document.getElementById('timer').innerText = `${m}:${s}`;
+            }, 1000);
+        }
+
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const t = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const g = audioCtx.createGain();
+            osc.connect(g); g.connect(audioCtx.destination);
+            if (type === 'correct') {
+                osc.type = 'sine'; osc.frequency.setValueAtTime(523, t); osc.frequency.exponentialRampToValueAtTime(880, t + 0.1);
+                g.gain.setValueAtTime(0.3, t); g.gain.exponentialRampToValueAtTime(0.01, t + 0.3);
+                osc.start(t); osc.stop(t + 0.3);
+            } else {
+                osc.type = 'square'; osc.frequency.setValueAtTime(110, t); osc.frequency.linearRampToValueAtTime(80, t + 0.2);
+                g.gain.setValueAtTime(0.3, t); g.gain.exponentialRampToValueAtTime(0.01, t + 0.3);
+                osc.start(t); osc.stop(t + 0.3);
+            }
+        }
+
+        function finish() {
+            clearInterval(itv);
+            document.getElementById('game-ui').classList.add('hidden');
+            document.getElementById('result-screen').classList.remove('hidden');
+            document.getElementById('final-score').innerText = score;
+            document.getElementById('final-time-text').innerText = document.getElementById('timer').innerText;
+
+            db.ref('scores/Tuan_29').push({
+                fullName: savedName, className: savedClass, schoolName: savedSchool,
+                score: score, duration: timer, date: new Date().toLocaleString('vi-VN')
+            }, () => {
+                document.getElementById('save-msg').innerText = "Đã lưu kết quả thành công!";
+                let count = 5;
+                const rd = document.getElementById('redirect-msg');
+                const itv2 = setInterval(() => {
+                    count--;
+                    rd.innerText = `Sẽ quay lại tàu mẹ trong ${count}s...`;
+                    if (count <= 0) { clearInterval(itv2); window.location.href = "index.html"; }
+                }, 1000);
+            });
+        }
+    </script>
+</body>
+
+</html>
