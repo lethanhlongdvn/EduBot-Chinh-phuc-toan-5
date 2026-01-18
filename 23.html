@@ -471,9 +471,6 @@
             } else {
                 playSound('wrong');
                 btn.classList.add('wrong');
-                document.querySelectorAll('.opt-btn').forEach(b => {
-                    if (b.innerText === correct) b.classList.add('correct');
-                });
             }
             updateScore();
             setTimeout(nextQ, 1500);
@@ -496,7 +493,7 @@
             } else {
                 playSound('wrong');
                 input.style.borderColor = "var(--wrong)";
-                input.value += ` ❌ (Đúng: ${correctArr[0]})`;
+                input.value += " ❌";
 
                 // Mistake handling V2
                 if (gameData[currentIndex].stage === 2) {
