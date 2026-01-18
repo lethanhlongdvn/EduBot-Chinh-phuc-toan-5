@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ÔN TẬP TUẦN 26 - TOÁN LỚP 5</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Lexend:wght@400;600;700&display=swap"
+        rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --dark: #2d3436;
+            --light: #fab1a0;
+            --accent: #fdcb6e;
+            --correct: #00b894;
+            --wrong: #d63031;
+            --bg: #0984e3;
+        }
+
+        body {
+            font-family: 'Lexend', sans-serif;
+            background: linear-gradient(135deg, #0984e3 0%, #6c5ce7 100%);
+            color: white;
+            margin: 0;
+            padding: 5px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            user-select: none;
+            padding-bottom: 40px;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            margin-bottom: 50px;
+        }
+
+        .header {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 15px;
+            border-radius: 20px;
+            border: 3px solid var(--accent);
+            text-align: center;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.4rem;
+            color: var(--accent);
+            text-transform: uppercase;
+            font-family: 'Bungee';
+            letter-spacing: 1px;
+            text-shadow: 3px 3px 0 #000;
+        }
+
+        .info-bar {
+            display: flex;
+            justify-content: space-between;
+            font-size: 1rem;
+            color: #fff;
+            font-weight: 600;
+            padding: 10px 15px;
+            margin-top: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        .game-stage {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 25px;
+            padding: 25px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+            min-height: 350px;
+            position: relative;
+            color: #2d3436;
+        }
+
+        .stage-label {
+            background: var(--primary);
+            color: white;
+            padding: 5px 20px;
+            border-radius: 20px;
+            font-family: 'Bungee';
+            display: inline-block;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 0 #4834d4;
+        }
+
+        .question-box {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 25px;
+            line-height: 1.5;
+            min-height: 80px;
+            border-left: 5px solid var(--primary);
+            padding-left: 15px;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .opt-btn {
+            background: #f1f2f6;
+            border: 2px solid #dfe6e9;
+            padding: 18px;
+            border-radius: 15px;
+            color: #2d3436;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            font-size: 1.05rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            min-height: 70px;
+            box-shadow: 0 5px 0 #bdc3c7;
+        }
+
+        .opt-btn:hover {
+            transform: translateY(-2px);
+            background: #e1e2e6;
+        }
+
+        .opt-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 #bdc3c7;
+        }
+
+        .opt-btn.correct {
+            background: var(--correct);
+            border-color: #009473;
+            color: white;
+            box-shadow: 0 5px 0 #009473;
+        }
+
+        .opt-btn.wrong {
+            background: var(--wrong);
+            border-color: #b32525;
+            color: white;
+            box-shadow: 0 5px 0 #b32525;
+        }
+
+        .input-area {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .answer-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2rem;
+            border: 3px solid var(--primary);
+            border-radius: 15px;
+            text-align: center;
+            font-family: inherit;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .btn-submit {
+            padding: 15px 40px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-family: 'Bungee';
+            cursor: pointer;
+            font-size: 1.1rem;
+            box-shadow: 0 5px 0 #4834d4;
+            transition: all 0.2s;
+        }
+
+        .btn-submit:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 #4834d4;
+        }
+
+        .progress-container {
+            width: 100%;
+            height: 12px;
+            background: #dfe6e9;
+            border-radius: 6px;
+            margin-top: 30px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--bg));
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        #result-screen {
+            text-align: center;
+            padding: 50px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 30px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .trophy {
+            font-size: 6rem;
+            margin-bottom: 20px;
+            filter: drop-shadow(0 0 20px var(--accent));
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .final-score {
+            font-size: 4rem;
+            font-weight: bold;
+            color: var(--accent);
+            text-shadow: 3px 3px 0 #000;
+            margin: 20px 0;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .btn-restart {
+            padding: 15px 40px;
+            background: var(--accent);
+            border: none;
+            border-radius: 50px;
+            color: #000;
+            font-weight: 800;
+            font-family: 'Bungee';
+            cursor: pointer;
+            font-size: 1.2rem;
+            box-shadow: 0 6px 0 #d35400;
+            transition: all 0.2s;
+            margin-top: 30px;
+        }
+
+        .btn-restart:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #d35400;
+        }
+
+        .game-footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 8px 0;
+            text-align: center;
+            font-size: 0.7rem;
+            color: #ccc;
+            z-index: 1000;
+        }
+
+        @media (max-width: 600px) {
+            .options-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 1.1rem;
+            }
+
+            .question-box {
+                font-size: 1rem;
+            }
+
+            .opt-btn {
+                font-size: 0.95rem;
+                padding: 12px;
+                min-height: 50px;
+            }
+
+            #start-screen {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: #0984e3;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                z-index: 9999;
+            }
+    </style>
+</head>
+
+<body>
+    <div id="start-screen">
+        <h1 style="color: var(--accent); font-size: 2rem; font-family: 'Bungee'; text-align: center;">ÔN TẬP TUẦN 26 -
+            TOÁN LỚP 5</h1>
+        <p id="welcome-msg" style="margin-bottom: 20px; font-weight: bold; color: white;"></p>
+        <button class="opt-btn" onclick="startGame()"
+            style="width: auto; padding: 15px 40px; background: var(--accent); color: #000;">BẮT ĐẦU THÁM HIỂM</button>
+    </div>
+
+    <div class="container hidden" id="game-ui">
+        <div class="header">
+            <h1>ÔN TẬP TUẦN 26 - TOÁN LỚP 5</h1>
+            <p style="margin: 5px 0; color: var(--light); font-weight: bold; font-size: 0.85rem;">CHỦ ĐỀ: THỰC HÀNH TÍNH
+                TOÁN VÀ ƯỚC LƯỢNG THỂ TÍCH - LUYỆN TẬP CHUNG
+            </p>
+            <div class="info-bar">
+                <span>👤 <b id="user-name">---</b></span>
+                <span>🏫 <b id="user-class">---</b></span>
+                <span>🏢 <b id="user-school">---</b></span>
+                <span>⭐ <b id="current-score" style="color:var(--accent)">0</b>/100</span>
+                <span>⏳ <b id="timer">00:00</b></span>
+            </div>
+        </div>
+
+        <div class="game-stage">
+            <div id="stage-info">
+                <div class="stage-label" id="stage-label">VÒNG 1: KHÁM PHÁ</div>
+                <div class="question-box" id="q-content">Đang chuẩn bị câu hỏi...</div>
+            </div>
+
+            <div id="interaction-area"></div>
+
+            <div class="progress-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+            <div style="text-align:right; font-size:0.75rem; color:#636e72; margin-top:8px; font-weight: 600;">Tiến độ:
+                <span id="progress-text">0/12</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="result-screen" class="container hidden">
+        <div class="trophy">🏆</div>
+        <h2 style="font-family:'Bungee'; letter-spacing: 2px;">HOÀN THÀNH XUẤT SẮC!</h2>
+        <div class="final-score" id="final-score">0</div>
+        <p style="font-size: 1.2rem;">Thời gian hoàn thành: <b id="final-time-text"
+                style="color: var(--accent);">--:--</b></p>
+        <p id="save-msg" style="color:#55efc4; font-weight:bold; margin-top:20px; font-size: 1.1rem;">Đang kết nối hệ
+            thống...</p>
+        <p id="redirect-msg" style="color:#dfe6e9; font-size:0.9rem;">Sẽ quay lại trang chủ trong giây lát...</p>
+        <button class="btn-restart" onclick="location.reload()">CHƠI LẠI</button>
+    </div>
+
+    <div class="game-footer">© 2026 EduBot - Chinh phục Toán 5 - Thiết kế bởi Lê Thành Long</div>
+
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = { databaseURL: "https://gamhoctap-default-rtdb.asia-southeast1.firebasedatabase.app" };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        const savedName = localStorage.getItem('studentName') || "Người chơi";
+        const savedClass = localStorage.getItem('studentClass') || "---";
+        const savedSchool = localStorage.getItem('studentSchool') || "---";
+
+        let isPlaying = false;
+        let startTime;
+
+        window.onload = () => {
+            if (!localStorage.getItem('studentName') || !localStorage.getItem('studentClass')) {
+                document.getElementById('welcome-msg').innerHTML = "<b style='color:red'>⚠️ Em cần đăng ký ở bản đồ trước!</b>";
+                document.querySelector('#start-screen .opt-btn').onclick = () => window.location.href = "index.html";
+            } else {
+                document.getElementById('welcome-msg').innerText = `Thí sinh: ${savedName} - Lớp ${savedClass}`;
+                document.getElementById('user-name').innerText = savedName;
+                document.getElementById('user-class').innerText = savedClass;
+                document.getElementById('user-school').innerText = savedSchool;
+            }
+        };
+
+        function startGame() {
+            isPlaying = true;
+            startTime = Date.now();
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('game-ui').classList.remove('hidden');
+            initGame(); // Renamed from initStage1 to match original function name
+            startTimer();
+        }
+
+        // Prevent accidental exit
+        window.addEventListener('beforeunload', function (e) {
+            if (isPlaying && document.getElementById('result-screen').classList.contains('hidden')) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        });
+
+        // Question Data
+        const questions = {
+            r1: [
+                { q: "Xăng-ti-mét khối (cm³) là thể tích của hình lập phương có cạnh dài bao nhiêu?", a: ["1 mm", "1 dm", "1 cm", "1 m"], c: "1 cm" },
+                { q: "Đề-xi-mét khối (dm³) là thể tích của hình lập phương có cạnh dài bao nhiêu?", a: ["1 cm", "1 dm", "10 dm", "1 m"], c: "1 dm" },
+                { q: "Chọn tỉ số đúng: 1 dm³ bằng bao nhiêu cm³?", a: ["10", "100", "1.000", "10.000"], c: "1.000" },
+                { q: "Mét khối (m³) là thể tích của hình lập phương có cạnh dài bao nhiêu?", a: ["1 dm", "10 cm", "1 m", "100 m"], c: "1 m" },
+                { q: "1 m³ bằng bao nhiêu đề-xi-mét khối?", a: ["100", "10", "1.000", "1.000.000"], c: "1.000" },
+                { q: "Muốn tính thể tích hình hộp chữ nhật, ta lấy chiều dài nhân chiều rộng rồi nhân với:", a: ["Chu vi đáy", "Chiều cao (cùng đơn vị đo)", "2", "Diện tích toàn phần"], c: "Chiều cao (cùng đơn vị đo)" },
+                { q: "Công thức tính thể tích hình lập phương cạnh a là:", a: ["V = a × a × a", "V = a × a × 6", "V = a × a × 4", "V = a × 4"], c: "V = a × a × a" },
+                { q: "Hình hộp chữ nhật có bao nhiêu mặt?", a: ["4 mặt", "6 mặt", "8 mặt", "12 mặt"], c: "6 mặt" },
+                { q: "Hình hộp chữ nhật có mấy kích thước?", a: ["1", "2", "3", "4"], c: "3" },
+                { q: "Hình lập phương có các mặt là hình gì?", a: ["Hình chữ nhật", "Hình vuông bằng nhau", "Hình tròn", "Hình tam giác"], c: "Hình vuông bằng nhau" },
+                { q: "Hình khai triển của hình lập phương gồm bao nhiêu hình vuông bằng nhau?", a: ["4", "5", "6", "8"], c: "6" },
+                { q: "Diện tích xung quanh hình hộp chữ nhật là tổng diện tích của:", a: ["4 mặt bên", "2 mặt đáy", "6 mặt", "Mặt đáy và mặt bên"], c: "4 mặt bên" },
+                { q: "Diện tích xung quanh hình lập phương bằng diện tích một mặt nhân với:", a: ["2", "4", "6", "1"], c: "4" },
+                { q: "Diện tích toàn phần hình hộp chữ nhật bằng diện tích xung quanh cộng với:", a: ["Diện tích một đáy", "Diện tích hai mặt đáy", "Chiều cao", "Thể tích"], c: "Diện tích hai mặt đáy" },
+                { q: "Diện tích toàn phần hình lập phương bằng diện tích một mặt nhân với:", a: ["4", "5", "6", "12"], c: "6" },
+                { q: "Hai mặt đối diện của hình hộp chữ nhật được gọi là:", a: ["Các mặt bên", "Hai mặt đáy", "Chiều cao", "Các cạnh"], c: "Hai mặt đáy" },
+                { q: "Bốn mặt còn lại (không phải mặt đáy) của hình hộp chữ nhật gọi là:", a: ["Các mặt bên", "Các mặt đáy", "Các cạnh", "Các đỉnh"], c: "Các mặt bên" },
+                { q: "Một hình lập phương cạnh 1 cm có thể tích là:", a: ["1 cm²", "1 dm", "1 cm³", "1 m³"], c: "1 cm³" },
+                { q: "Hình khai triển của hình trụ gồm hai hình tròn đáy và một hình gì?", a: ["Hình vuông", "Hình chữ nhật", "Hình tam giác", "Hình thoi"], c: "Hình chữ nhật" },
+                { q: "Đơn vị nào phù hợp nhất để ước lượng thể tích một phòng học?", a: ["cm³", "dm³", "m³", "mm³"], c: "m³" }
+            ],
+            r2: [
+                { q: "Tính thể tích hình hộp chữ nhật dài 8 cm, rộng 5 cm, cao 6 cm. (cm³)", c: "240" },
+                { q: "Tính thể tích hình lập phương cạnh 5 dm. (dm³)", c: "125" },
+                { q: "Diện tích xung quanh hình lập phương cạnh 4 cm là: (cm²)", c: "64" },
+                { q: "Diện tích toàn phần hình hộp chữ nhật dài 10 cm, rộng 8 cm, cao 5 cm là: (cm²)", c: "340" },
+                { q: "Đổi: 1,5 m³ sang đề-xi-mét khối. (dm³)", c: "1500" },
+                { q: "Một hình ghép bởi 12 hình lập phương nhỏ thể tích 1 cm³. Thể tích hình đó là: (cm³)", c: "12" },
+                { q: "Tính diện tích xung quanh hình hộp chữ nhật có chu vi đáy 20 cm, cao 5 cm. (cm²)", c: "100" },
+                { q: "Diện tích một mặt hình lập phương là 36 cm². Tìm cạnh của nó. (cm)", c: "6" },
+                { q: "Một bể nước chứa đầy được 2 m³. Hỏi bể đó chứa được bao nhiêu lít nước? (1 lít = 1 dm³).", c: "2000" },
+                { q: "Tính khối lượng khối kim loại 4 dm x 3 dm x 2 dm, biết mỗi dm³ nặng 7,5 kg. (kg)", c: "180" },
+                { q: "Tính diện tích gỗ làm hộp không nắp dài 25 cm, rộng 20 cm, cao 10 cm. (cm²)", c: "1400" },
+                { q: "Thể tích hình lập phương cạnh 2,5 dm là: (dm³)", c: "15,625" },
+                { q: "Diện tích toàn phần hình lập phương cạnh 1,5 m là: (m²)", c: "13,5" },
+                { q: "Tính tổng thể tích của 6 khối hộp chữ nhật, mỗi khối dài 10 cm, rộng 5 cm, cao 2 cm. (cm³)", c: "600" },
+                { q: "Một hình lập phương có thể tích 27 cm³. Cạnh của nó dài bao nhiêu? (cm)", c: "3" },
+                { q: "Diện tích xung quanh hình hộp chữ nhật dài 6,5 cm, rộng 3,5 cm, cao 5 cm là: (cm²)", c: "100" },
+                { q: "Tính diện tích 2 mặt đáy của hình hộp chữ nhật dài 35 cm, rộng 30 cm. (cm²)", c: "2100" },
+                { q: "Hình A có 12 khối lập phương nhỏ, hình B có 18 khối. Hình nào thể tích lớn hơn? (Ghi A hoặc B)", c: "B" },
+                { q: "Đổi: 800.000 cm³ sang mét khối. (m³)", c: "0,8" },
+                { q: "500 cm³ bằng bao nhiêu đề-xi-mét khối? (dm³)", c: "0,5" }
+            ],
+            r3: [
+                { q: "Tính diện tích sơn tường và trần phòng 8m × 6m × 4m, biết diện tích cửa là 6,5 m². (m²)", c: "153,5" },
+                { q: "Mực nước trong bể dài 2m, rộng 1,5m cao bao nhiêu mét nếu bể đang có 1.500 lít nước? (m)", c: "0,5" },
+                { q: "Thả hòn đá vào bể đáy 10dm × 8dm, nước dâng thêm 1,5 cm. Tính thể tích hòn đá. (dm³)", c: "12" },
+                { q: "Tính diện tích gạch lát hồ bơi dài 25 m, rộng 8 m, sâu 1,4 m. (m²)", c: "292,4" },
+                { q: "Cạnh hình lập phương A gấp 3 lần cạnh hình B. Thể tích hình A gấp mấy lần hình B? (lần)", c: "27" },
+                { q: "Một khối gỗ 5dm × 3dm × 3dm, bị cắt đi một phần lập phương cạnh 2dm. Tính thể tích gỗ còn lại. (dm³)", c: "37" },
+                { q: "Xếp 64 khối lập phương 1 cm³ thành một khối lập phương lớn. Tính diện tích toàn phần khối lớn. (cm²)", c: "96" },
+                { q: "Tìm chiều rộng hình hộp chữ nhật biết Sxq = 120 cm², cao 5 cm, dài 8 cm. (cm)", c: "4" },
+                { q: "Nếu các kích thước hình hộp chữ nhật đều tăng gấp đôi thì thể tích tăng mấy lần?", c: "8" },
+                { q: "Vòi nước chảy 50 lít/phút vào bể 24 m³. Sau bao nhiêu phút bể đầy?", c: "480" },
+                { q: "Cắt khối lập phương cạnh 4 cm làm 2 hình hộp chữ nhật bằng nhau. Tính tổng diện tích toàn phần 2 hình mới. (cm²)", c: "128" },
+                { q: "Diện tích toàn phần hình lập phương cạnh 0,5 m là: (m²)", c: "1,5" },
+                { q: "Thể tích một khối rubik là 216 cm³. Tìm độ dài cạnh rubik đó. (cm)", c: "6" },
+                { q: "Tính diện tích kính làm bể cá không nắp dài 1,2m, rộng 0,6m, cao 0,8m. (m²)", c: "3,6" },
+                { q: "Tính Sxq khuôn bánh chưng không đáy dài 16,5 cm, cao 4 cm. (cm²)", c: "264" },
+                { q: "Một tháp chất lỏng có lớp dầu cao 10cm, nước 15cm trên đáy 15 × 15 cm. Tính thể tích nước. (cm³)", c: "3375" },
+                { q: "Diện tích xung quanh hình lập phương tăng 4 lần thì thể tích tăng mấy lần?", c: "8" },
+                { q: "Xoay hộp nước 8 × 8 × 16 cm đang có nước cao 8cm sang tư thế nằm ngang. Chiều cao nước lúc này? (cm)", c: "4" },
+                { q: "Chi phí sơn 6 mặt container lập phương cạnh 2m, giá 50.000 đồng/m² là: (đồng)", c: "1200000" },
+                { q: "Thùng xe tải 1,2m × 2m × 1,5m xếp được bao nhiêu hộp loa 0,5m × 0,4m × 0,3m?", c: "60" }
+            ]
+        };
+
+        // Game State
+        let gameQueue = [];
+        let currentIndex = 0;
+        let score = 0;
+        let seconds = 0;
+        let timerInterval;
+
+        function shuffle(arr) { return arr.sort(() => Math.random() - 0.5); }
+
+        function initGame() {
+            // Select 5 questions from each round to make 12 total (as per 25.html logic, or slightly adjusted)
+            // 25.html used 5 from R1, 5 from R2, 2 from R3.
+            const r1 = shuffle([...questions.r1]).slice(0, 5).map(q => ({ ...q, points: 8, label: "VÒNG 1: KHÁM PHÁ", type: 'mc' }));
+            const r2 = shuffle([...questions.r2]).slice(0, 5).map(q => ({ ...q, points: 8, label: "VÒNG 2: LUYỆN TẬP", type: 'input' }));
+            const r3 = shuffle([...questions.r3]).slice(0, 2).map(q => ({ ...q, points: 10, label: "VÒNG 3: LUYỆN TẬP NÂNG CAO", type: 'input' }));
+
+            gameQueue = [...r1, ...r2, ...r3];
+            renderQuestion();
+            // startTimer(); // This is now called by startGame()
+        }
+
+        function renderQuestion() {
+            if (currentIndex >= gameQueue.length) { finishGame(); return; }
+
+            const q = gameQueue[currentIndex];
+            document.getElementById('stage-label').innerText = q.label;
+            document.getElementById('q-content').innerText = q.q;
+            document.getElementById('progress-text').innerText = `${currentIndex + 1}/${gameQueue.length}`;
+            document.getElementById('progress-bar').style.width = `${(currentIndex / gameQueue.length) * 100}%`;
+
+            const area = document.getElementById('interaction-area');
+            area.innerHTML = '';
+
+            if (q.type === 'mc') {
+                area.className = 'options-grid';
+                shuffle([...q.a]).forEach(opt => {
+                    const btn = document.createElement('div');
+                    btn.className = 'opt-btn';
+                    btn.innerText = opt;
+                    btn.onclick = () => checkMCAnswer(btn, opt, q.c, q.points);
+                    area.appendChild(btn);
+                });
+            } else if (q.type === 'input') {
+                area.className = 'input-area';
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.className = 'answer-input';
+                input.placeholder = 'Nhập đáp án của bạn...';
+                input.id = 'user-answer';
+                input.onkeypress = (e) => { if (e.key === 'Enter') checkInputAnswer(q.c, q.points); };
+
+                const submitBtn = document.createElement('button');
+                submitBtn.className = 'btn-submit';
+                submitBtn.innerText = 'GỬI ĐÁP ÁN';
+                submitBtn.onclick = () => checkInputAnswer(q.c, q.points);
+
+                area.appendChild(input);
+                area.appendChild(submitBtn);
+                input.focus();
+            }
+        }
+
+        function checkMCAnswer(btn, choice, correct, pts) {
+            document.querySelectorAll('.opt-btn').forEach(b => b.onclick = null);
+            if (choice === correct) {
+                btn.classList.add('correct');
+                score += pts;
+                playSound('correct');
+            } else {
+                btn.classList.add('wrong');
+                playSound('wrong');
+            }
+            nextQuestion();
+        }
+
+        function checkInputAnswer(correct, pts) {
+            const input = document.getElementById('user-answer');
+            const choice = input.value.trim().toString().replace(/,/g, '.').replace(/\s/g, '').toLowerCase();
+            const cleanCorrect = correct.trim().toString().replace(/,/g, '.').replace(/\s/g, '').toLowerCase();
+
+            input.disabled = true;
+            document.querySelector('.btn-submit').disabled = true;
+
+            if (choice === cleanCorrect) {
+                input.style.borderColor = 'var(--correct)';
+                input.style.backgroundColor = '#e6fffb';
+                score += pts;
+                playSound('correct');
+            } else {
+                input.style.borderColor = 'var(--wrong)';
+                input.style.backgroundColor = '#fff1f0';
+                playSound('wrong');
+            }
+            nextQuestion();
+        }
+
+        function nextQuestion() {
+            updateScoreUI();
+            setTimeout(() => {
+                currentIndex++;
+                renderQuestion();
+            }, 1500);
+        }
+
+        function updateScoreUI() {
+            const el = document.getElementById('current-score');
+            el.innerText = score;
+            el.style.transform = "scale(1.3)";
+            setTimeout(() => el.style.transform = "scale(1)", 200);
+        }
+
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const t = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const g = audioCtx.createGain();
+            osc.connect(g); g.connect(audioCtx.destination);
+            if (type === 'correct') {
+                osc.type = 'sine'; osc.frequency.setValueAtTime(523, t); osc.frequency.exponentialRampToValueAtTime(880, t + 0.1);
+                g.gain.setValueAtTime(0.2, t); g.gain.exponentialRampToValueAtTime(0.01, t + 0.3);
+                osc.start(t); osc.stop(t + 0.3);
+            } else {
+                osc.type = 'square'; osc.frequency.setValueAtTime(110, t); osc.frequency.linearRampToValueAtTime(80, t + 0.2);
+                g.gain.setValueAtTime(0.2, t); g.gain.exponentialRampToValueAtTime(0.01, t + 0.3);
+                osc.start(t); osc.stop(t + 0.3);
+            }
+        }
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                seconds++;
+                const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+                const s = (seconds % 60).toString().padStart(2, '0');
+                document.getElementById('timer').innerText = `${m}:${s}`;
+            }, 1000);
+        }
+
+        function finishGame() {
+            clearInterval(timerInterval);
+            document.getElementById('game-ui').classList.add('hidden');
+            document.getElementById('result-screen').classList.remove('hidden');
+            document.getElementById('final-score').innerText = score;
+            document.getElementById('final-time-text').innerText = document.getElementById('timer').innerText;
+            saveScore();
+        }
+
+        function saveScore() {
+            const ref = db.ref('scores/Tuan_26');
+            ref.once('value', (snap) => {
+                let attempt = 1;
+                const data = snap.val();
+                if (data) {
+                    for (let id in data) {
+                        if (data[id].fullName === savedName) attempt++;
+                    }
+                }
+                ref.push({
+                    fullName: savedName,
+                    className: savedClass,
+                    schoolName: savedSchool,
+                    score: score,
+                    duration: seconds,
+                    attempt: attempt,
+                    date: new Date().toLocaleString('vi-VN')
+                }, () => {
+                    document.getElementById('save-msg').innerText = "Đã lưu kết quả thành công!";
+                    let count = 5;
+                    const rd = document.getElementById('redirect-msg');
+                    const itv = setInterval(() => {
+                        count--;
+                        rd.innerText = `Sẽ quay lại trang chủ trong ${count}s...`;
+                        if (count <= 0) {
+                            clearInterval(itv);
+                            window.location.href = "index.html";
+                        }
+                    }, 1000);
+                });
+            });
+        }
+
+        initGame();
+    </script>
+</body>
+
+</html>
