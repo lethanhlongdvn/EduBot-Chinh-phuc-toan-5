@@ -1,289 +1,613 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>TUẦN 20: CÁN CÂN CÔNG LÝ</title>
-    <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Lexend:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Lexend:wght@400;600;700&display=swap"
+        rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <style>
-        :root { --p: #FF9800; --s: #2196F3; --bg: #0f172a; --card: #1e293b; --success: #2ecc71; --danger: #e74c3c; --gold: #ffd700; }
-        body { font-family: 'Lexend', sans-serif; background: var(--bg); color: white; margin: 0; padding: 5px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; user-select: none; padding-bottom: 40px; }
-        .container { max-width: 900px; width: 100%; margin-bottom: 50px; }
-        
+        :root {
+            --p: #FF9800;
+            --s: #2196F3;
+            --bg: #0f172a;
+            --card: #1e293b;
+            --success: #2ecc71;
+            --danger: #e74c3c;
+            --gold: #ffd700;
+        }
+
+        body {
+            font-family: 'Lexend', sans-serif;
+            background: var(--bg);
+            color: white;
+            margin: 0;
+            padding: 5px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            user-select: none;
+            padding-bottom: 40px;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+            margin-bottom: 50px;
+        }
+
         /* HEADER */
-        .header { background: var(--card); padding: 8px; border-radius: 12px; border-bottom: 3px solid var(--p); text-align: center; margin-bottom: 10px; box-shadow: 0 3px 10px rgba(0,0,0,0.3); }
-        .header h1 { margin: 0; font-size: 1.1rem; color: var(--p); text-transform: uppercase; font-family: 'Bungee'; letter-spacing: 1px; }
-        
-        .stage-indicator { display: flex; justify-content: center; gap: 6px; margin: 5px 0; }
-        .dot { width: 10px; height: 10px; background: #334155; border-radius: 50%; transition: 0.3s; }
-        .dot.active { background: var(--p); transform: scale(1.2); box-shadow: 0 0 8px var(--p); }
-        .dot.done { background: var(--success); }
-        
-        .info-bar { display: flex; justify-content: space-between; font-size: 0.8rem; color: #94a3b8; font-weight: 600; padding: 0 10px; }
-        .info-bar b { color: var(--gold); }
+        .header {
+            background: var(--card);
+            padding: 8px;
+            border-radius: 12px;
+            border-bottom: 3px solid var(--p);
+            text-align: center;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.1rem;
+            color: var(--p);
+            text-transform: uppercase;
+            font-family: 'Bungee';
+            letter-spacing: 1px;
+        }
+
+        .stage-indicator {
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            margin: 5px 0;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            background: #334155;
+            border-radius: 50%;
+            transition: 0.3s;
+        }
+
+        .dot.active {
+            background: var(--p);
+            transform: scale(1.2);
+            box-shadow: 0 0 8px var(--p);
+        }
+
+        .dot.done {
+            background: var(--success);
+        }
+
+        .info-bar {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: #94a3b8;
+            font-weight: 600;
+            padding: 0 10px;
+        }
+
+        .info-bar b {
+            color: var(--gold);
+        }
 
         /* SECTIONS */
-        .game-stage { display: none; animation: fadeIn 0.4s ease-out; }
-        .game-stage.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .section-title { text-align: center; color: var(--gold); font-family: 'Bungee'; font-size: 1rem; margin-bottom: 8px; }
+        .game-stage {
+            display: none;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .game-stage.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section-title {
+            text-align: center;
+            color: var(--gold);
+            font-family: 'Bungee';
+            font-size: 1rem;
+            margin-bottom: 8px;
+        }
 
         /* VÒNG 1 */
-        .mistake-counter { text-align: center; color: var(--danger); font-size: 0.8rem; margin-bottom: 5px; font-weight: bold; }
-        .matching-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-top: 5px; }
-        .match-item { background: #334155; padding: 2px 4px; border-radius: 6px; border: 1.5px solid #475569; cursor: pointer; font-size: 0.65rem; text-align: center; min-height: 55px; display: flex; align-items: center; justify-content: center; line-height: 1.2; transition: transform 0.1s; word-break: break-word; }
-        .match-item:active { transform: translateY(2px); }
-        .match-item.selected { border-color: var(--p); background: #475569; color: var(--p); font-weight: bold; }
-        .match-item.matched { background: #15803d; border-color: var(--success); opacity: 0; pointer-events: none; transition: opacity 0.5s; }
-        .match-item.wrong { background: var(--danger); animation: shake 0.4s; }
+        .mistake-counter {
+            text-align: center;
+            color: var(--danger);
+            font-size: 0.8rem;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .matching-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 4px;
+            margin-top: 5px;
+        }
+
+        .match-item {
+            background: #334155;
+            padding: 2px 4px;
+            border-radius: 6px;
+            border: 1.5px solid #475569;
+            cursor: pointer;
+            font-size: 0.65rem;
+            text-align: center;
+            min-height: 55px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1.2;
+            transition: transform 0.1s;
+            word-break: break-word;
+        }
+
+        .match-item:active {
+            transform: translateY(2px);
+        }
+
+        .match-item.selected {
+            border-color: var(--p);
+            background: #475569;
+            color: var(--p);
+            font-weight: bold;
+        }
+
+        .match-item.matched {
+            background: #15803d;
+            border-color: var(--success);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s;
+        }
+
+        .match-item.wrong {
+            background: var(--danger);
+            animation: shake 0.4s;
+        }
 
         /* VÒNG 2 */
-        .drop-row { background: #1e293b; padding: 12px; margin-bottom: 10px; border-radius: 10px; border-left: 4px solid var(--s); font-size: 0.9rem; }
-        .drop-target { display: inline-block; min-width: 60px; padding: 0 5px; border-bottom: 2px dashed var(--p); color: var(--gold); text-align: center; font-weight: bold; cursor: pointer; }
-        .drop-target.filled { border-bottom: 2px solid var(--success); color: var(--success); }
-        .drag-pool { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-top: 15px; padding: 10px; background: rgba(255,255,255,0.03); border-radius: 12px; border: 1px dashed #475569; }
-        .drag-item { background: var(--s); color: white; padding: 6px 14px; border-radius: 15px; cursor: pointer; font-size: 0.9rem; font-weight: bold; }
-        .drag-item.selected-drag { border: 2px solid var(--gold); background: #1976D2; transform: scale(1.05); }
-        .drag-item.used { opacity: 0.2; pointer-events: none; }
+        .drop-row {
+            background: #1e293b;
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            border-left: 4px solid var(--s);
+            font-size: 0.9rem;
+        }
+
+        .drop-target {
+            display: inline-block;
+            min-width: 60px;
+            padding: 0 5px;
+            border-bottom: 2px dashed var(--p);
+            color: var(--gold);
+            text-align: center;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .drop-target.filled {
+            border-bottom: 2px solid var(--success);
+            color: var(--success);
+        }
+
+        .drag-pool {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            justify-content: center;
+            margin-top: 15px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            border: 1px dashed #475569;
+        }
+
+        .drag-item {
+            background: var(--s);
+            color: white;
+            padding: 6px 14px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        .drag-item.selected-drag {
+            border: 2px solid var(--gold);
+            background: #1976D2;
+            transform: scale(1.05);
+        }
+
+        .drag-item.used {
+            opacity: 0.2;
+            pointer-events: none;
+        }
 
         /* VÒNG 3 */
-        .quiz-container { background: #1e293b; padding: 20px; border-radius: 15px; border: 1px solid #334155; min-height: 200px; }
-        .quiz-question { font-size: 1.05rem; font-weight: bold; margin-bottom: 20px; line-height: 1.5; text-align: justify; }
-        .quiz-options { display: flex; flex-direction: column; gap: 10px; }
-        .quiz-btn { background: #334155; color: white; border: 2px solid #475569; padding: 12px; border-radius: 10px; text-align: left; cursor: pointer; font-size: 0.95rem; transition: 0.2s; }
-        .quiz-btn:hover { background: #475569; }
-        .quiz-btn.correct { background: var(--success); border-color: var(--success); font-weight: bold; color: #000; }
-        .quiz-btn.wrong { background: var(--danger); border-color: var(--danger); opacity: 0.8; }
-        .quiz-progress { text-align: right; font-size: 0.8rem; color: #94a3b8; margin-bottom: 10px; }
+        .quiz-container {
+            background: #1e293b;
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid #334155;
+            min-height: 200px;
+        }
+
+        .quiz-question {
+            font-size: 1.05rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            line-height: 1.5;
+            text-align: justify;
+        }
+
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .quiz-btn {
+            background: #334155;
+            color: white;
+            border: 2px solid #475569;
+            padding: 12px;
+            border-radius: 10px;
+            text-align: left;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: 0.2s;
+        }
+
+        .quiz-btn:hover {
+            background: #475569;
+        }
+
+        .quiz-btn.correct {
+            background: var(--success);
+            border-color: var(--success);
+            font-weight: bold;
+            color: #000;
+        }
+
+        .quiz-btn.wrong {
+            background: var(--danger);
+            border-color: var(--danger);
+            opacity: 0.8;
+        }
+
+        .quiz-progress {
+            text-align: right;
+            font-size: 0.8rem;
+            color: #94a3b8;
+            margin-bottom: 10px;
+        }
 
         /* ACTIONS */
-        .btn-action { width: 100%; padding: 14px; background: var(--p); color: white; border: none; border-radius: 10px; font-size: 1rem; font-weight: bold; cursor: pointer; margin-top: 15px; font-family: 'Bungee'; box-shadow: 0 4px 0 #E65100; transition: 0.2s; text-transform: uppercase; }
-        .btn-action:active { transform: translateY(3px); box-shadow: none; }
-        
+        .btn-action {
+            width: 100%;
+            padding: 14px;
+            background: var(--p);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 15px;
+            font-family: 'Bungee';
+            box-shadow: 0 4px 0 #E65100;
+            transition: 0.2s;
+            text-transform: uppercase;
+        }
+
+        .btn-action:active {
+            transform: translateY(3px);
+            box-shadow: none;
+        }
+
         /* FOOTER */
-        .game-footer { position: fixed; bottom: 0; width: 100%; background: #0f172a; padding: 8px 0; text-align: center; font-size: 0.65rem; color: #64748b; border-top: 1px solid #334155; z-index: 999; }
+        .game-footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: #0f172a;
+            padding: 8px 0;
+            text-align: center;
+            font-size: 0.65rem;
+            color: #64748b;
+            border-top: 1px solid #334155;
+            z-index: 999;
+        }
 
         /* RESULT */
-        #result-screen { text-align: center; padding: 40px 20px; }
-        .score-circle { width: 120px; height: 120px; border-radius: 50%; background: var(--card); border: 5px solid var(--p); display: flex; align-items: center; justify-content: center; font-size: 2.5rem; font-weight: bold; color: var(--p); margin: 0 auto 15px; }
-        .auto-home-text { color: var(--s); margin-top: 15px; font-weight: bold; animation: blink 1s infinite; font-size: 0.9rem; }
+        #result-screen {
+            text-align: center;
+            padding: 40px 20px;
+        }
 
-        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
-        @keyframes blink { 50% { opacity: 0.5; } }
-        .hidden { display: none !important; }
+        .score-circle {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: var(--card);
+            border: 5px solid var(--p);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--p);
+            margin: 0 auto 15px;
+        }
+
+        .auto-home-text {
+            color: var(--s);
+            margin-top: 15px;
+            font-weight: bold;
+            animation: blink 1s infinite;
+            font-size: 0.9rem;
+        }
+
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-4px);
+            }
+
+            75% {
+                transform: translateX(4px);
+            }
+        }
+
+        @keyframes blink {
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .hidden {
+            display: none !important;
+        }
     </style>
 </head>
+
 <body>
 
-<div class="container" id="game-ui">
-    <div class="header">
-        <h1>TUẦN 20: CÁN CÂN CÔNG LÝ</h1>
-        <div class="stage-indicator">
-            <div class="dot active" id="dot-1"></div>
-            <div class="dot" id="dot-2"></div>
-            <div class="dot" id="dot-3"></div>
+    <div class="container" id="game-ui">
+        <div class="header">
+            <h1>TUẦN 20: CÁN CÂN CÔNG LÝ</h1>
+            <div class="stage-indicator">
+                <div class="dot active" id="dot-1"></div>
+                <div class="dot" id="dot-2"></div>
+                <div class="dot" id="dot-3"></div>
+            </div>
+            <div class="info-bar">
+                <span>👤 <b id="user-name">---</b></span>
+                <span>⭐ <b id="current-score" style="font-size:1.1rem; color: #FFD700;">0</b></span>
+                <span>⏱ <b id="timer">00:00</b></span>
+            </div>
         </div>
-        <div class="info-bar">
-            <span>👤 <b id="user-name">---</b></span>
-            <span>⭐ <b id="current-score" style="font-size:1.1rem; color: #FFD700;">0</b></span>
-            <span>⏱ <b id="timer">00:00</b></span>
+
+        <div class="game-stage active" id="stage-1">
+            <div class="section-title">VÒNG 1: KHỞI ĐỘNG</div>
+            <div class="mistake-counter">Lỗi: <span id="mistake-count">0</span>/3</div>
+            <div class="matching-grid" id="p1-grid"></div>
+        </div>
+
+        <div class="game-stage" id="stage-2">
+            <div class="section-title">VÒNG 2: VƯỢT CHƯỚNG NGẠI</div>
+            <div style="text-align:center; font-size:0.8rem; color:#94a3b8; margin-bottom:10px;">Kéo số thích hợp vào ô
+                trống</div>
+            <div id="p2-area"></div>
+            <div class="drag-pool" id="drag-container"></div>
+            <button class="btn-action" onclick="finishStage2()">QUA VÒNG 3 ➡</button>
+        </div>
+
+        <div class="game-stage" id="stage-3">
+            <div class="section-title">PHẦN 3: TRẮC NGHIỆM TỔNG HỢP</div>
+            <div id="p3-container"></div>
         </div>
     </div>
 
-    <div class="game-stage active" id="stage-1">
-        <div class="section-title">VÒNG 1: KHỞI ĐỘNG</div>
-        <div class="mistake-counter">Lỗi: <span id="mistake-count">0</span>/3</div>
-        <div class="matching-grid" id="p1-grid"></div>
+    <div id="result-screen" class="hidden">
+        <h2 style="color:var(--gold); font-family:'Bungee';">KẾT QUẢ THÁM HIỂM</h2>
+        <div class="score-circle" id="final-score">0</div>
+        <p>Thời gian: <span id="final-time-text">--:--</span></p>
+        <p class="auto-home-text" id="redirect-msg">Đang lưu điểm... Chuyển trang chủ sau 5s</p>
     </div>
 
-    <div class="game-stage" id="stage-2">
-        <div class="section-title">VÒNG 2: VƯỢT CHƯỚNG NGẠI</div>
-        <div style="text-align:center; font-size:0.8rem; color:#94a3b8; margin-bottom:10px;">Kéo số thích hợp vào ô trống</div>
-        <div id="p2-area"></div>
-        <div class="drag-pool" id="drag-container"></div>
-        <button class="btn-action" onclick="finishStage2()">QUA VÒNG 3 ➡</button>
+    <div class="game-footer">
+        @ 2026 EduRobot.id.vn - Lê Thành Long
     </div>
 
-    <div class="game-stage" id="stage-3">
-        <div class="section-title">PHẦN 3: TRẮC NGHIỆM TỔNG HỢP</div>
-        <div id="p3-container"></div>
-    </div>
-</div>
+    <script>
+        const firebaseConfig = { databaseURL: "https://gamhoctap-default-rtdb.asia-southeast1.firebasedatabase.app" };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
 
-<div id="result-screen" class="hidden">
-    <h2 style="color:var(--gold); font-family:'Bungee';">KẾT QUẢ THÁM HIỂM</h2>
-    <div class="score-circle" id="final-score">0</div>
-    <p>Thời gian: <span id="final-time-text">--:--</span></p>
-    <p class="auto-home-text" id="redirect-msg">Đang lưu điểm... Chuyển trang chủ sau 5s</p>
-</div>
+        const savedName = localStorage.getItem('studentName');
+        const savedClass = localStorage.getItem('studentClass');
+        const savedSchool = localStorage.getItem('studentSchool');
+        if (!savedName || !savedClass) { alert("Vui lòng đăng nhập!"); window.location.href = "index.html"; }
+        document.getElementById('user-name').innerText = savedName;
 
-<div class="game-footer">
-    @ 2026 EduRobot.id.vn - Lê Thành Long
-</div>
+        window.onbeforeunload = () => "Đang làm bài...";
 
-<script>
-    const firebaseConfig = { databaseURL: "https://gamhoctap-default-rtdb.asia-southeast1.firebasedatabase.app" };
-    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-
-    const savedName = localStorage.getItem('studentName');
-    const savedClass = localStorage.getItem('studentClass');
-    if(!savedName || !savedClass) { alert("Vui lòng đăng nhập!"); window.location.href="index.html"; }
-    document.getElementById('user-name').innerText = savedName;
-
-    window.onbeforeunload = () => "Đang làm bài...";
-
-    // --- AUDIO (SINE/TRIANGLE) ---
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    function playSound(type) {
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-        const t = audioCtx.currentTime;
-        const osc = audioCtx.createOscillator();
-        const gainNode = audioCtx.createGain();
-        osc.connect(gainNode);
-        gainNode.connect(audioCtx.destination);
-        if (type === 'correct') {
-            osc.type = 'sine'; osc.frequency.setValueAtTime(800, t); gainNode.gain.setValueAtTime(0.3, t);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, t + 0.6); osc.start(t); osc.stop(t + 0.6);
-        } else {
-            osc.type = 'triangle'; osc.frequency.setValueAtTime(200, t); osc.frequency.linearRampToValueAtTime(100, t + 0.3);
-            gainNode.gain.setValueAtTime(0.3, t); gainNode.gain.exponentialRampToValueAtTime(0.01, t + 0.3); osc.start(t); osc.stop(t + 0.3);
+        // --- AUDIO (SINE/TRIANGLE) ---
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const t = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            if (type === 'correct') {
+                osc.type = 'sine'; osc.frequency.setValueAtTime(800, t); gainNode.gain.setValueAtTime(0.3, t);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, t + 0.6); osc.start(t); osc.stop(t + 0.6);
+            } else {
+                osc.type = 'triangle'; osc.frequency.setValueAtTime(200, t); osc.frequency.linearRampToValueAtTime(100, t + 0.3);
+                gainNode.gain.setValueAtTime(0.3, t); gainNode.gain.exponentialRampToValueAtTime(0.01, t + 0.3); osc.start(t); osc.stop(t + 0.3);
+            }
         }
-    }
 
-    // --- DATA ---
-    // Vòng 1: Tìm 1 số (Lớn hoặc Bé) để tránh cộng trừ mò
-    const dataP1 = [
-        {q: "Tổng 20, tỉ 1/4. Số lớn là?", a: "16"}, {q: "Tổng 35, tỉ 2/5. Số bé là?", a: "10"},
-        {q: "Tổng 100, tỉ 3/7. Tìm số lớn.", a: "70"}, {q: "Tổng 72, tỉ 1/8. Tìm số lớn.", a: "64"},
-        {q: "Tổng 120, tỉ 5/7. Tìm số lớn.", a: "70"}, {q: "Tổng 49, tỉ 2/5. Tìm số bé.", a: "14"},
-        {q: "Tổng 180, tỉ 4/5. Tìm số bé.", a: "80"}, {q: "CV HCN:60m, dài gấp đôi rộng. Tìm chiều dài.", a: "20m"},
-        {q: "Tổng 200, tỉ 1/3. Tìm số bé.", a: "50"}, {q: "36 tivi, 55in gấp 3 lần 75in. Số TV 55in là?", a: "27"},
-        {q: "Tổng 40, tỉ 1/4. Tìm số lớn.", a: "32"}, {q: "Tổng 45, tỉ 2/3. Tìm số bé.", a: "18"},
-        {q: "Tổng 81, tỉ 4/5. Tìm số lớn.", a: "45"}, {q: "Tổng 54, tỉ 1/2. Tìm số bé.", a: "18"},
-        {q: "Tổng 63, tỉ 2/7. Tìm số bé.", a: "14"}, {q: "CV HCN:100m, dài=3/2 rộng. Tính chiều dài.", a: "30m"},
-        {q: "Tổng 144, tỉ 3/5. Tìm số lớn.", a: "90"}, {q: "Tổng 110, tỉ 4/7. Tính số bé.", a: "40"},
-        {q: "Tổng 121, tỉ 5/6. Tìm số lớn.", a: "66"}, {q: "Tổng 150, tỉ 7/8. Tìm số lớn.", a: "80"}
-    ];
-    
-    // Vòng 2: Tìm 1 số (Lớn hoặc Bé)
-    const dataP2 = [
-        {q: "Hiệu 30, tỉ 1/4. Tìm số lớn", a: "40"}, {q: "Hiệu 15, tỉ 2/5. Tìm số lớn", a: "25"},
-        {q: "Hiệu 40, tỉ 3/7. Tìm số bé", a: "30"}, {q: "Hiệu 21, tỉ 1/4. Tìm số bé", a: "7"},
-        {q: "Hiệu 20, tỉ 5/7. Tìm số lớn", a: "70"}, {q: "Hiệu 18, tỉ 1/3. Tìm số lớn", a: "27"},
-        {q: "Hiệu 25, tỉ 4/9. Tìm số bé", a: "20"}, {q: "Hiệu 12, tỉ 2/3. Tìm số bé", a: "24"},
-        {q: "Hiệu 50, tỉ 1/6. Tìm số lớn", a: "60"}, {q: "Hiệu 36, tỉ 5/8. Tìm số lớn", a: "96"},
-        {q: "Hiệu 6, tỉ 5/3. Tìm số bé", a: "9"}, {q: "Hiệu 24, tỉ 7/3. Tìm số bé", a: "18"},
-        {q: "Hiệu 50, tỉ 9/4. Tìm số lớn", a: "90"}, {q: "Hiệu 100, tỉ 1/6. Tìm số lớn", a: "120"},
-        {q: "Hiệu 30, tỉ 2/5. Tìm số lớn", a: "50"}, {q: "Hiệu 15, tỉ 4/7. Tìm số lớn", a: "35"},
-        {q: "Hiệu 10, tỉ 1/2. Tìm số lớn", a: "20"}, {q: "Hiệu 45, tỉ 1/4. Tìm số lớn", a: "60"},
-        {q: "Hiệu 60, tỉ 3/5. Tìm số bé", a: "90"}, {q: "Hiệu 14, tỉ 5/7. Tìm số lớn", a: "49"}
-    ];
-    
-    // Vòng 3: Full nội dung trắc nghiệm
-    const dataP3_Full = [
-        { q: "Tổng số phần bằng nhau của hai số có tỉ số 7/8 là:", options: ["A. 1", "B. 7", "C. 8", "D. 15"], correct: "D" },
-        { q: "Có 49 con bò, số bò khoang bằng 2/5 số bò vàng. Số bò khoang là:", options: ["A. 35 con", "B. 14 con", "C. 10 con", "D. 7 con"], correct: "B" },
-        { q: "Siêu thị có 36 chiếc ti vi, số ti vi 55 inch gấp 3 lần số ti vi 75 inch. Số ti vi 55 inch là:", options: ["A. 9 chiếc", "B. 12 chiếc", "C. 27 chiếc", "D. 18 chiếc"], correct: "C" },
-        { q: "Chu vi mảnh đất hình chữ nhật là 130 m, chiều rộng bằng 5/8 chiều dài. Chiều dài là:", options: ["A. 25 m", "B. 65 m", "C. 40 m", "D. 50 m"], correct: "C" },
-        { q: "Hiệu số phần bằng nhau của hai số có tỉ số 3/5 là:", options: ["A. 2", "B. 3", "C. 5", "D. 8"], correct: "A" },
-        { q: "Rác loại A ít hơn loại B là 8 kg, tỉ số giữa A và B là 3/7. Số rác loại B là:", options: ["A. 6 kg", "B. 14 kg", "C. 10 kg", "D. 21 kg"], correct: "B" },
-        { q: "Gia đình bác Năm thu hoạch cá loại A nhiều hơn cá loại B là 6 tấn, tỉ số cá loại A và cá loại B là 5/2. Loại A thu được:", options: ["A. 10 tấn", "B. 4 tấn", "C. 15 tấn", "D. 6 tấn"], correct: "A" },
-        { q: "Hiện nay mẹ hơn con 25 tuổi. Sau 2 năm nữa, tuổi con bằng 2/7 tuổi mẹ. Tuổi con hiện nay là:", options: ["A. 12 tuổi", "B. 10 tuổi", "C. 8 tuổi", "D. 35 tuổi"], correct: "C" }
-    ];
+        // --- DATA ---
+        // Vòng 1: Tìm 1 số (Lớn hoặc Bé) để tránh cộng trừ mò
+        const dataP1 = [
+            { q: "Tổng 20, tỉ 1/4. Số lớn là?", a: "16" }, { q: "Tổng 35, tỉ 2/5. Số bé là?", a: "10" },
+            { q: "Tổng 100, tỉ 3/7. Tìm số lớn.", a: "70" }, { q: "Tổng 72, tỉ 1/8. Tìm số lớn.", a: "64" },
+            { q: "Tổng 120, tỉ 5/7. Tìm số lớn.", a: "70" }, { q: "Tổng 49, tỉ 2/5. Tìm số bé.", a: "14" },
+            { q: "Tổng 180, tỉ 4/5. Tìm số bé.", a: "80" }, { q: "CV HCN:60m, dài gấp đôi rộng. Tìm chiều dài.", a: "20m" },
+            { q: "Tổng 200, tỉ 1/3. Tìm số bé.", a: "50" }, { q: "36 tivi, 55in gấp 3 lần 75in. Số TV 55in là?", a: "27" },
+            { q: "Tổng 40, tỉ 1/4. Tìm số lớn.", a: "32" }, { q: "Tổng 45, tỉ 2/3. Tìm số bé.", a: "18" },
+            { q: "Tổng 81, tỉ 4/5. Tìm số lớn.", a: "45" }, { q: "Tổng 54, tỉ 1/2. Tìm số bé.", a: "18" },
+            { q: "Tổng 63, tỉ 2/7. Tìm số bé.", a: "14" }, { q: "CV HCN:100m, dài=3/2 rộng. Tính chiều dài.", a: "30m" },
+            { q: "Tổng 144, tỉ 3/5. Tìm số lớn.", a: "90" }, { q: "Tổng 110, tỉ 4/7. Tính số bé.", a: "40" },
+            { q: "Tổng 121, tỉ 5/6. Tìm số lớn.", a: "66" }, { q: "Tổng 150, tỉ 7/8. Tìm số lớn.", a: "80" }
+        ];
 
-    let timerInterval, seconds = 0, score = 0;
-    let p1Matches = 0, p1Mistakes = 0;
-    let p1Selected = null, selectedDrag = null;
-    let p3Questions = [], p3Index = 0;
+        // Vòng 2: Tìm 1 số (Lớn hoặc Bé)
+        const dataP2 = [
+            { q: "Hiệu 30, tỉ 1/4. Tìm số lớn", a: "40" }, { q: "Hiệu 15, tỉ 2/5. Tìm số lớn", a: "25" },
+            { q: "Hiệu 40, tỉ 3/7. Tìm số bé", a: "30" }, { q: "Hiệu 21, tỉ 1/4. Tìm số bé", a: "7" },
+            { q: "Hiệu 20, tỉ 5/7. Tìm số lớn", a: "70" }, { q: "Hiệu 18, tỉ 1/3. Tìm số lớn", a: "27" },
+            { q: "Hiệu 25, tỉ 4/9. Tìm số bé", a: "20" }, { q: "Hiệu 12, tỉ 2/3. Tìm số bé", a: "24" },
+            { q: "Hiệu 50, tỉ 1/6. Tìm số lớn", a: "60" }, { q: "Hiệu 36, tỉ 5/8. Tìm số lớn", a: "96" },
+            { q: "Hiệu 6, tỉ 5/3. Tìm số bé", a: "9" }, { q: "Hiệu 24, tỉ 7/3. Tìm số bé", a: "18" },
+            { q: "Hiệu 50, tỉ 9/4. Tìm số lớn", a: "90" }, { q: "Hiệu 100, tỉ 1/6. Tìm số lớn", a: "120" },
+            { q: "Hiệu 30, tỉ 2/5. Tìm số lớn", a: "50" }, { q: "Hiệu 15, tỉ 4/7. Tìm số lớn", a: "35" },
+            { q: "Hiệu 10, tỉ 1/2. Tìm số lớn", a: "20" }, { q: "Hiệu 45, tỉ 1/4. Tìm số lớn", a: "60" },
+            { q: "Hiệu 60, tỉ 3/5. Tìm số bé", a: "90" }, { q: "Hiệu 14, tỉ 5/7. Tìm số lớn", a: "49" }
+        ];
 
-    function shuffle(arr) { return arr.sort(() => Math.random() - 0.5); }
-    function updateScoreUI() { document.getElementById('current-score').innerText = score; }
+        // Vòng 3: Full nội dung trắc nghiệm
+        const dataP3_Full = [
+            { q: "Tổng số phần bằng nhau của hai số có tỉ số 7/8 là:", options: ["A. 1", "B. 7", "C. 8", "D. 15"], correct: "D" },
+            { q: "Có 49 con bò, số bò khoang bằng 2/5 số bò vàng. Số bò khoang là:", options: ["A. 35 con", "B. 14 con", "C. 10 con", "D. 7 con"], correct: "B" },
+            { q: "Siêu thị có 36 chiếc ti vi, số ti vi 55 inch gấp 3 lần số ti vi 75 inch. Số ti vi 55 inch là:", options: ["A. 9 chiếc", "B. 12 chiếc", "C. 27 chiếc", "D. 18 chiếc"], correct: "C" },
+            { q: "Chu vi mảnh đất hình chữ nhật là 130 m, chiều rộng bằng 5/8 chiều dài. Chiều dài là:", options: ["A. 25 m", "B. 65 m", "C. 40 m", "D. 50 m"], correct: "C" },
+            { q: "Hiệu số phần bằng nhau của hai số có tỉ số 3/5 là:", options: ["A. 2", "B. 3", "C. 5", "D. 8"], correct: "A" },
+            { q: "Rác loại A ít hơn loại B là 8 kg, tỉ số giữa A và B là 3/7. Số rác loại B là:", options: ["A. 6 kg", "B. 14 kg", "C. 10 kg", "D. 21 kg"], correct: "B" },
+            { q: "Gia đình bác Năm thu hoạch cá loại A nhiều hơn cá loại B là 6 tấn, tỉ số cá loại A và cá loại B là 5/2. Loại A thu được:", options: ["A. 10 tấn", "B. 4 tấn", "C. 15 tấn", "D. 6 tấn"], correct: "A" },
+            { q: "Hiện nay mẹ hơn con 25 tuổi. Sau 2 năm nữa, tuổi con bằng 2/7 tuổi mẹ. Tuổi con hiện nay là:", options: ["A. 12 tuổi", "B. 10 tuổi", "C. 8 tuổi", "D. 35 tuổi"], correct: "C" }
+        ];
 
-    function initStage1() {
-        const questions = shuffle([...dataP1]).slice(0, 10);
-        let items = [];
-        questions.forEach(q => { items.push({ text: q.q, type: 'q', id: q.q }); items.push({ text: q.a, type: 'a', id: q.q }); });
-        items = shuffle(items);
-        document.getElementById('p1-grid').innerHTML = items.map(i => `<div class="match-item" onclick="clickMatch(this)" data-type="${i.type}" data-id="${i.id}">${i.text}</div>`).join('');
-    }
+        let timerInterval, seconds = 0, score = 0;
+        let p1Matches = 0, p1Mistakes = 0;
+        let p1Selected = null, selectedDrag = null;
+        let p3Questions = [], p3Index = 0;
 
-    function clickMatch(el) {
-        if(el.classList.contains('matched')) return;
-        if(!p1Selected) { p1Selected = el; el.classList.add('selected'); return; }
-        if(p1Selected === el) return;
-        if(p1Selected.dataset.type === el.dataset.type) { p1Selected.classList.remove('selected'); p1Selected = el; el.classList.add('selected'); return; }
+        function shuffle(arr) { return arr.sort(() => Math.random() - 0.5); }
+        function updateScoreUI() { document.getElementById('current-score').innerText = score; }
 
-        if(p1Selected.dataset.id === el.dataset.id) {
-            playSound('correct');
-            p1Selected.classList.remove('selected'); p1Selected.classList.add('matched'); el.classList.add('matched');
-            p1Selected = null; p1Matches++; score += 4; updateScoreUI();
-            if(p1Matches === 10) nextStage(2);
-        } else {
-            playSound('wrong');
-            el.classList.add('wrong'); p1Selected.classList.add('wrong');
-            p1Mistakes++;
-            document.getElementById('mistake-count').innerText = p1Mistakes;
-            setTimeout(() => {
-                el.classList.remove('wrong'); p1Selected.classList.remove('wrong', 'selected'); p1Selected = null;
-                if(p1Mistakes >= 3) { alert("Bạn đã sai 3 lần! Buộc phải chuyển sang Vòng 2."); nextStage(2); }
-            }, 400);
+        function initStage1() {
+            const questions = shuffle([...dataP1]).slice(0, 10);
+            let items = [];
+            questions.forEach(q => { items.push({ text: q.q, type: 'q', id: q.q }); items.push({ text: q.a, type: 'a', id: q.q }); });
+            items = shuffle(items);
+            document.getElementById('p1-grid').innerHTML = items.map(i => `<div class="match-item" onclick="clickMatch(this)" data-type="${i.type}" data-id="${i.id}">${i.text}</div>`).join('');
         }
-    }
 
-    function nextStage(num) {
-        if(num === 2) {
-            document.getElementById('stage-1').classList.remove('active'); document.getElementById('stage-2').classList.add('active');
-            document.getElementById('dot-1').classList.add('done'); document.getElementById('dot-2').classList.add('active');
-        } else if(num === 3) {
-            document.getElementById('stage-2').classList.remove('active'); document.getElementById('stage-3').classList.add('active');
-            document.getElementById('dot-2').classList.add('done'); document.getElementById('dot-3').classList.add('active');
-            initStage3(); 
+        function clickMatch(el) {
+            if (el.classList.contains('matched')) return;
+            if (!p1Selected) { p1Selected = el; el.classList.add('selected'); return; }
+            if (p1Selected === el) return;
+            if (p1Selected.dataset.type === el.dataset.type) { p1Selected.classList.remove('selected'); p1Selected = el; el.classList.add('selected'); return; }
+
+            if (p1Selected.dataset.id === el.dataset.id) {
+                playSound('correct');
+                p1Selected.classList.remove('selected'); p1Selected.classList.add('matched'); el.classList.add('matched');
+                p1Selected = null; p1Matches++; score += 4; updateScoreUI();
+                if (p1Matches === 10) nextStage(2);
+            } else {
+                playSound('wrong');
+                el.classList.add('wrong'); p1Selected.classList.add('wrong');
+                p1Mistakes++;
+                document.getElementById('mistake-count').innerText = p1Mistakes;
+                setTimeout(() => {
+                    el.classList.remove('wrong'); p1Selected.classList.remove('wrong', 'selected'); p1Selected = null;
+                    if (p1Mistakes >= 3) { alert("Bạn đã sai 3 lần! Buộc phải chuyển sang Vòng 2."); nextStage(2); }
+                }, 400);
+            }
         }
-    }
 
-    function initStage2() {
-        const questions = shuffle([...dataP2]).slice(0, 5);
-        document.getElementById('p2-area').innerHTML = questions.map((q, idx) => `<div class="drop-row"><b>Câu ${idx+1}:</b> ${q.q}. Đáp án: <span class="drop-target" data-ans="${q.a}" onclick="clickDrop(this)">[Chọn...]</span></div>`).join('');
-        let answers = questions.map(q => q.a); answers.push("32");
-        shuffle(answers).forEach(ans => {
-            const btn = document.createElement('div'); btn.className = 'drag-item'; btn.innerText = ans; btn.onclick = function() { clickDrag(this); };
-            document.getElementById('drag-container').appendChild(btn);
-        });
-    }
+        function nextStage(num) {
+            if (num === 2) {
+                document.getElementById('stage-1').classList.remove('active'); document.getElementById('stage-2').classList.add('active');
+                document.getElementById('dot-1').classList.add('done'); document.getElementById('dot-2').classList.add('active');
+            } else if (num === 3) {
+                document.getElementById('stage-2').classList.remove('active'); document.getElementById('stage-3').classList.add('active');
+                document.getElementById('dot-2').classList.add('done'); document.getElementById('dot-3').classList.add('active');
+                initStage3();
+            }
+        }
 
-    function clickDrag(el) {
-        if(el.classList.contains('used')) return;
-        document.querySelectorAll('.drag-item').forEach(d => d.classList.remove('selected-drag'));
-        if(selectedDrag === el) selectedDrag = null; else { selectedDrag = el; el.classList.add('selected-drag'); }
-    }
+        function initStage2() {
+            const questions = shuffle([...dataP2]).slice(0, 5);
+            document.getElementById('p2-area').innerHTML = questions.map((q, idx) => `<div class="drop-row"><b>Câu ${idx + 1}:</b> ${q.q}. Đáp án: <span class="drop-target" data-ans="${q.a}" onclick="clickDrop(this)">[Chọn...]</span></div>`).join('');
+            let answers = questions.map(q => q.a); answers.push("32");
+            shuffle(answers).forEach(ans => {
+                const btn = document.createElement('div'); btn.className = 'drag-item'; btn.innerText = ans; btn.onclick = function () { clickDrag(this); };
+                document.getElementById('drag-container').appendChild(btn);
+            });
+        }
 
-    function clickDrop(el) {
-        if(!selectedDrag) return;
-        el.innerText = selectedDrag.innerText; el.dataset.userAns = selectedDrag.innerText; el.classList.add('filled');
-        selectedDrag.classList.add('used'); selectedDrag.classList.remove('selected-drag'); selectedDrag = null;
-    }
+        function clickDrag(el) {
+            if (el.classList.contains('used')) return;
+            document.querySelectorAll('.drag-item').forEach(d => d.classList.remove('selected-drag'));
+            if (selectedDrag === el) selectedDrag = null; else { selectedDrag = el; el.classList.add('selected-drag'); }
+        }
 
-    function finishStage2() {
-        document.querySelectorAll('.drop-target').forEach(t => { if(t.dataset.userAns === t.dataset.ans) { score += 8; updateScoreUI(); } });
-        nextStage(3);
-    }
+        function clickDrop(el) {
+            if (!selectedDrag) return;
+            el.innerText = selectedDrag.innerText; el.dataset.userAns = selectedDrag.innerText; el.classList.add('filled');
+            selectedDrag.classList.add('used'); selectedDrag.classList.remove('selected-drag'); selectedDrag = null;
+        }
 
-    // --- LOGIC VÒNG 3 (TUẦN TỰ) ---
-    function initStage3() {
-        p3Questions = shuffle([...dataP3_Full]).slice(0, 3);
-        p3Index = 0;
-        renderP3Question();
-    }
+        function finishStage2() {
+            document.querySelectorAll('.drop-target').forEach(t => { if (t.dataset.userAns === t.dataset.ans) { score += 8; updateScoreUI(); } });
+            nextStage(3);
+        }
 
-    function renderP3Question() {
-        if(p3Index >= 3) { finishGame(); return; }
-        const q = p3Questions[p3Index];
-        const container = document.getElementById('p3-container');
-        
-        container.innerHTML = `
+        // --- LOGIC VÒNG 3 (TUẦN TỰ) ---
+        function initStage3() {
+            p3Questions = shuffle([...dataP3_Full]).slice(0, 3);
+            p3Index = 0;
+            renderP3Question();
+        }
+
+        function renderP3Question() {
+            if (p3Index >= 3) { finishGame(); return; }
+            const q = p3Questions[p3Index];
+            const container = document.getElementById('p3-container');
+
+            container.innerHTML = `
             <div class="quiz-container">
                 <div class="quiz-progress">Câu ${p3Index + 1} / 3</div>
                 <div class="quiz-question">${q.q}</div>
@@ -292,52 +616,61 @@
                 </div>
             </div>
         `;
-    }
+        }
 
-    function checkP3(btn, choice, correct) {
-        const allBtns = document.querySelectorAll('.quiz-btn');
-        allBtns.forEach(b => b.onclick = null); // Khóa click
+        function checkP3(btn, choice, correct) {
+            const allBtns = document.querySelectorAll('.quiz-btn');
+            allBtns.forEach(b => b.onclick = null); // Khóa click
 
-        if(choice === correct) {
-            playSound('correct');
-            btn.classList.add('correct');
-            score += 10;
-            updateScoreUI();
-        } else {
-            playSound('wrong');
-            btn.classList.add('wrong');
-            allBtns.forEach(b => {
-                if(b.innerText.startsWith(correct)) b.classList.add('correct');
+            if (choice === correct) {
+                playSound('correct');
+                btn.classList.add('correct');
+                score += 10;
+                updateScoreUI();
+            } else {
+                playSound('wrong');
+                btn.classList.add('wrong');
+                allBtns.forEach(b => {
+                    if (b.innerText.startsWith(correct)) b.classList.add('correct');
+                });
+            }
+            setTimeout(() => {
+                p3Index++;
+                renderP3Question();
+            }, 1500);
+        }
+
+        function finishGame() {
+            clearInterval(timerInterval); window.onbeforeunload = null;
+
+            document.getElementById('game-ui').classList.add('hidden'); document.getElementById('result-screen').classList.remove('hidden');
+            document.getElementById('final-score').innerText = score; document.getElementById('final-time-text').innerText = document.getElementById('timer').innerText;
+
+            const ref = db.ref('scores/Tuan_20');
+            ref.once('value', (snap) => {
+                let attempt = 1; const data = snap.val();
+                if (data) { for (let id in data) { if (data[id].fullName === savedName && data[id].className === savedClass) attempt++; } }
+                ref.push({
+                    fullName: savedName,
+                    className: savedClass,
+                    schoolName: savedSchool || '---',
+                    score: score,
+                    duration: seconds,
+                    attempt: attempt,
+                    date: new Date().toLocaleString('vi-VN')
+                }, () => {
+                    let timeLeft = 5; const msg = document.getElementById('redirect-msg');
+                    setInterval(() => { timeLeft--; msg.innerText = `Đã lưu điểm! Tự động về trang chủ sau ${timeLeft}s...`; if (timeLeft <= 0) location.href = 'index.html'; }, 1000);
+                });
             });
         }
-        setTimeout(() => {
-            p3Index++;
-            renderP3Question();
-        }, 1500);
-    }
 
-    function finishGame() {
-        clearInterval(timerInterval); window.onbeforeunload = null;
+        function startTimer() {
+            timerInterval = setInterval(() => { seconds++; const m = Math.floor(seconds / 60).toString().padStart(2, '0'); const s = (seconds % 60).toString().padStart(2, '0'); document.getElementById('timer').innerText = `${m}:${s}`; }, 1000);
+        }
 
-        document.getElementById('game-ui').classList.add('hidden'); document.getElementById('result-screen').classList.remove('hidden');
-        document.getElementById('final-score').innerText = score; document.getElementById('final-time-text').innerText = document.getElementById('timer').innerText;
-
-        const ref = db.ref('scores/Tuan_20');
-        ref.once('value', (snap) => {
-            let attempt = 1; const data = snap.val();
-            if(data) { for(let id in data) { if(data[id].fullName === savedName && data[id].className === savedClass) attempt++; } }
-            ref.push({ fullName: savedName, className: savedClass, score: score, duration: seconds, attempt: attempt, date: new Date().toLocaleString('vi-VN') }, () => {
-                let timeLeft = 5; const msg = document.getElementById('redirect-msg');
-                setInterval(() => { timeLeft--; msg.innerText = `Đã lưu điểm! Tự động về trang chủ sau ${timeLeft}s...`; if(timeLeft <= 0) location.href = 'index.html'; }, 1000);
-            });
-        });
-    }
-
-    function startTimer() {
-        timerInterval = setInterval(() => { seconds++; const m = Math.floor(seconds / 60).toString().padStart(2,'0'); const s = (seconds % 60).toString().padStart(2,'0'); document.getElementById('timer').innerText = `${m}:${s}`; }, 1000);
-    }
-
-    initStage1(); initStage2(); startTimer();
-</script>
+        initStage1(); initStage2(); startTimer();
+    </script>
 </body>
+
 </html>
