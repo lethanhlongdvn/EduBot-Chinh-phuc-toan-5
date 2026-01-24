@@ -49,14 +49,16 @@ function startFireworks() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
+    const launcherX = [canvas.width * 0.2, canvas.width * 0.4, canvas.width * 0.6, canvas.width * 0.8];
+
     class Star {
-        constructor() {
-            this.x = Math.random() * canvas.width;
-            this.y = canvas.height + 10;
+        constructor(startX) {
+            this.x = startX || Math.random() * canvas.width;
+            this.y = canvas.height - 30;
             this.size = Math.random() * 4 + 2;
-            this.speedX = (Math.random() - 0.5) * 10;
-            this.speedY = Math.random() * -15 - 10;
-            this.gravity = 0.3;
+            this.speedX = (Math.random() - 0.5) * 6;
+            this.speedY = Math.random() * -18 - 12;
+            this.gravity = 0.25;
             this.opacity = 1;
             this.color = `hsl(${Math.random() * 360}, 100%, 60%)`;
         }
@@ -64,15 +66,27 @@ function startFireworks() {
             this.x += this.speedX;
             this.y += this.speedY;
             this.speedY += this.gravity;
-            this.opacity -= 0.01;
+            this.opacity -= 0.008;
         }
         draw() {
             ctx.globalAlpha = this.opacity;
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = this.color;
             ctx.fillStyle = this.color;
             ctx.beginPath();
             ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
             ctx.fill();
+            ctx.shadowBlur = 0;
         }
+    }
+
+    function drawLaunchers() {
+        ctx.fillStyle = '#333';
+        launcherX.forEach(x => {
+            ctx.fillRect(x - 10, canvas.height - 40, 20, 40);
+            ctx.strokeStyle = '#555';
+            ctx.strokeRect(x - 10, canvas.height - 40, 20, 40);
+        });
     }
 
     let stars = [];
@@ -80,21 +94,28 @@ function startFireworks() {
 
     function animate() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        if (Math.random() < 0.2) {
-            for (let i = 0; i < 5; i++) stars.push(new Star());
+
+        drawLaunchers();
+
+        // Increased density: higher probability and more stars per burst
+        if (Math.random() < 0.4) {
+            const targetX = launcherX[Math.floor(Math.random() * launcherX.length)];
+            for (let i = 0; i < 8; i++) stars.push(new Star(targetX));
         }
+
         for (let i = 0; i < stars.length; i++) {
             stars[i].update();
             stars[i].draw();
             if (stars[i].opacity <= 0) { stars.splice(i, 1); i--; }
         }
-        if (stars.length > 0 || overlay.parentElement) requestAnimationFrame(animate);
+        if (stars.length > 0 || canvas.parentElement) requestAnimationFrame(animate);
     }
     animate();
 
+    // Cleanup after 15 seconds
     setTimeout(() => {
         fwSound.pause();
         if (canvas.parentElement) canvas.remove();
         if (overlay.parentElement) overlay.remove();
-    }, 10000);
+    }, 15000);
 }
