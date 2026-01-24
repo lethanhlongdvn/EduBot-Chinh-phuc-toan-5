@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đại Tiệc Sao 10 Giây - Lê Thành Tâm</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #000;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            height: 100vh;
+        }
+
+        /* Ống phóng pháo hoa */
+        #mortarBtn {
+            background: none;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+            z-index: 1002;
+            transition: all 0.2s ease;
+            margin-bottom: 15px;
+            outline: none;
+            filter: drop-shadow(0 5px 10px rgba(255, 255, 255, 0.1));
+        }
+
+        #mortarBtn:hover:not(:disabled) {
+            transform: scale(1.05) translateY(-5px);
+            filter: drop-shadow(0 0 20px rgba(241, 196, 15, 0.6)) drop-shadow(0 0 30px rgba(0, 255, 255, 0.4));
+        }
+
+        #mortarBtn:disabled {
+            cursor: not-allowed;
+            filter: grayscale(1) brightness(0.5);
+            transform: scale(0.95);
+        }
+
+        /* Container chữ */
+        .text-container {
+            position: fixed;
+            top: 40%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            width: 100%;
+            z-index: 1001;
+            pointer-events: none;
+        }
+
+        #victoryMessage {
+            margin: 0;
+            font-size: 65px;
+            font-weight: 900;
+            opacity: 0;
+            transform: scale(0);
+            transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            background: linear-gradient(to right, #f1c40f, #ff00cc, #00ffff, #f1c40f);
+            background-size: 300% auto;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shine 3s linear infinite;
+        }
+
+        #userNameDisplay {
+            margin-top: 15px;
+            font-size: 48px;
+            font-weight: 800;
+            opacity: 0;
+            transform: scale(0);
+            transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.2s;
+            color: #fff;
+            text-shadow: 0 0 15px rgba(241, 196, 15, 0.8), 0 0 30px rgba(255, 0, 204, 0.6);
+            letter-spacing: 3px;
+        }
+
+        @keyframes shine {
+            to {
+                background-position: 300% center;
+            }
+        }
+
+        .show #victoryMessage,
+        .show #userNameDisplay {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .show #victoryMessage {
+            animation: bounce 0.8s infinite alternate, shine 3s linear infinite;
+        }
+
+        @keyframes bounce {
+            from {
+                transform: scale(1);
+            }
+
+            to {
+                transform: scale(1.08);
+            }
+        }
+
+        #starCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 999;
+            pointer-events: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="wrapper">
+        <div class="text-container">
+            <h1 id="victoryMessage">CHÚC MỪNG CHIẾN THẮNG</h1>
+            <div id="userNameDisplay">Học sinh</div>
+        </div>
+    </div>
+
+    <button id="mortarBtn" title="Khai hỏa pháo hoa!">
+        <svg width="100px" height="140px" viewBox="0 0 100 140" xmlns="http://www.w3.org/2000/svg">
+            <rect x="10" y="120" width="80" height="20" rx="5" fill="#222" stroke="#444" stroke-width="2" />
+            <path d="M 25 120 L 32 25 L 68 25 L 75 120 Z" fill="url(#metal)" stroke="#333" stroke-width="2" />
+            <ellipse cx="50" cy="25" rx="18" ry="6" fill="#000" stroke="#555" stroke-width="2" />
+            <path d="M 30 90 L 70 90" stroke="#ff00cc" stroke-width="3" fill="none" />
+            <path d="M 31 60 L 69 60" stroke="#00ffff" stroke-width="3" fill="none" />
+            <defs>
+                <linearGradient id="metal" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" style="stop-color:#333" />
+                    <stop offset="50%" style="stop-color:#666" />
+                    <stop offset="100%" style="stop-color:#222" />
+                </linearGradient>
+            </defs>
+        </svg>
+    </button>
+
+    <canvas id="starCanvas"></canvas>
+
+    <script>
+        const canvas = document.getElementById('starCanvas');
+        const ctx = canvas.getContext('2d');
+        const btn = document.getElementById('mortarBtn');
+        const wrapper = document.getElementById('wrapper');
+
+        // Âm thanh pháo hoa
+        const audioURL1 = 'https://cdn.jsdelivr.net/gh/Roelatriper/Arsene/music/fireworks.mp3';
+        const audioURL2 = 'https://www.soundjay.com/misc/sounds/firework-show-01.mp3';
+
+        let fireworkSound = new Audio(audioURL1);
+        fireworkSound.loop = true;
+
+        // Cập nhật tên học sinh từ localStorage
+        const savedName = localStorage.getItem('studentName') || "Nhà thám hiểm";
+        document.getElementById('userNameDisplay').innerText = savedName.toUpperCase();
+
+        fireworkSound.addEventListener('error', function () {
+            console.log("Không tải được âm thanh từ nguồn 1, đang thử nguồn 2...");
+            fireworkSound.src = audioURL2;
+            fireworkSound.load();
+        });
+
+        fireworkSound.addEventListener('canplaythrough', function () {
+            console.log("Âm thanh đã sẵn sàng để phát.");
+        });
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Star {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.size = Math.random() * 5 + 3;
+                this.speedX = (Math.random() - 0.5) * 12;
+                this.speedY = Math.random() * -20 - 5;
+                this.gravity = 0.35;
+                this.opacity = 1;
+                this.rotation = Math.random() * Math.PI * 2;
+                this.rotationSpeed = (Math.random() - 0.5) * 0.3;
+
+                const colorGroup = Math.random();
+                if (colorGroup < 0.33) {
+                    this.color = `hsl(${Math.random() * 30 + 35}, 100%, 65%)`; // Vàng Gold
+                } else if (colorGroup < 0.66) {
+                    this.color = `hsl(${Math.random() * 40 + 180}, 100%, 60%)`; // Xanh Cyan
+                } else {
+                    this.color = `hsl(${Math.random() * 40 + 300}, 100%, 60%)`; // Hồng Neon
+                }
+            }
+
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                this.speedY += this.gravity;
+                this.opacity -= 0.007;
+                this.rotation += this.rotationSpeed;
+            }
+
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.rotation);
+                ctx.globalAlpha = this.opacity;
+                ctx.fillStyle = this.color;
+                ctx.shadowBlur = 20;
+                ctx.shadowColor = this.color;
+
+                ctx.beginPath();
+                for (let i = 0; i < 5; i++) {
+                    ctx.lineTo(0, -this.size);
+                    ctx.rotate(Math.PI / 5);
+                    ctx.lineTo(0, -this.size * 0.4);
+                    ctx.rotate(Math.PI / 5);
+                }
+                ctx.closePath();
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        let stars = [];
+
+        function animate() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            for (let i = 0; i < stars.length; i++) {
+                stars[i].update();
+                stars[i].draw();
+                if (stars[i].opacity <= 0) {
+                    stars.splice(i, 1);
+                    i--;
+                }
+            }
+            requestAnimationFrame(animate);
+        }
+
+        function startCelebration() {
+            btn.disabled = true;
+            wrapper.classList.add('show');
+
+            // Phát âm thanh
+            fireworkSound.currentTime = 0;
+            fireworkSound.play()
+                .then(() => console.log("Đang phát âm thanh pháo hoa..."))
+                .catch(e => {
+                    console.error("Lỗi phát âm thanh:", e);
+                    // Hiển thị thông báo nhỏ nếu trình duyệt chặn autoplay
+                    if (e.name === 'NotAllowedError') {
+                        console.warn("Trình duyệt yêu cầu tương tác trước khi phát âm thanh.");
+                    }
+                });
+
+            let timeLeft = 10;
+            const rainInterval = setInterval(() => {
+                const rect = btn.getBoundingClientRect();
+                const startX = rect.left + (rect.width / 2);
+                const startY = rect.top + 20;
+
+                for (let i = 0; i < 10; i++) {
+                    stars.push(new Star(startX, startY));
+                }
+            }, 60);
+
+            // Tự động dừng sau 10 giây
+            setTimeout(() => {
+                clearInterval(rainInterval);
+                btn.disabled = false;
+                wrapper.classList.remove('show');
+
+                // Dừng âm thanh
+                fireworkSound.pause();
+            }, 10000);
+        }
+
+        btn.addEventListener('click', startCelebration);
+        animate();
+    </script>
+</body>
+
+</html>
