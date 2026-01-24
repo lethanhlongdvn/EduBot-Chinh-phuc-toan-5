@@ -715,17 +715,48 @@
             document.getElementById('result-screen').classList.remove('hidden');
             document.getElementById('final-score').innerText = score;
 
+            let count = 5;
             // Hiệu ứng pháo hoa nếu điểm >= 90
             if (score >= 90) {
+                count = 10;
                 if (typeof startFireworks === 'function') {
                     startFireworks();
                 }
             }
 
-            db.ref('scores/Tuan_35').push({
-                fullName: savedName, score: score, duration: timer, date: new Date().toLocaleString('vi-VN')
-            }, () => {
-                document.getElementById('save-msg').innerText = "Hồ sơ điện tử đã được cập nhật!";
+            const ref = db.ref('scores/Tuan_35');
+            ref.once('value', (snap) => {
+                let attempt = 1;
+                const data = snap.val();
+                if (data) {
+                    for (let id in data) {
+                        if (data[id].fullName === savedName) attempt++;
+                    }
+                }
+                ref.push({
+                    fullName: savedName,
+                    className: savedClass,
+                    schoolName: savedSchool,
+                    score: score,
+                    duration: timer,
+                    attempt: attempt,
+                    date: new Date().toLocaleString('vi-VN')
+                }, () => {
+                    document.getElementById('save-msg').innerText = "Hồ sơ điện tử đã được cập nhật!";
+                    const rd = document.getElementById('redirect-msg');
+                    const itv2 = setInterval(() => {
+                        count--;
+                        if (score >= 90) {
+                            rd.innerText = `🎆 Đang bắn pháo hoa chúc mừng! Về trang chủ sau ${count}s...`;
+                        } else {
+                            rd.innerText = `Sẽ quay lại trang chủ trong ${count}s...`;
+                        }
+                        if (count <= 0) {
+                            clearInterval(itv2);
+                            window.location.href = "index.html";
+                        }
+                    }, 1000);
+                });
             });
         }
     </script>
