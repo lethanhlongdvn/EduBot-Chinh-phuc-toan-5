@@ -639,8 +639,10 @@
             document.getElementById('final-score').innerText = score;
             document.getElementById('final-time-text').innerText = document.getElementById('timer').innerText;
 
+            let count = 5;
             // Hiệu ứng pháo hoa nếu điểm >= 90
             if (score >= 90) {
+                count = 10;
                 if (typeof startFireworks === 'function') {
                     startFireworks();
                 }
@@ -659,8 +661,16 @@
                     attempt: attempt,
                     date: new Date().toLocaleString('vi-VN')
                 }, () => {
-                    let timeLeft = 5; const msg = document.getElementById('redirect-msg');
-                    setInterval(() => { timeLeft--; msg.innerText = `Đã lưu điểm! Về trang chủ sau ${timeLeft}s...`; if (timeLeft <= 0) location.href = 'index.html'; }, 1000);
+                    const msg = document.getElementById('redirect-msg');
+                    const itv = setInterval(() => {
+                        count--;
+                        if (score >= 90) {
+                            msg.innerText = `🎆 Đang bắn pháo hoa chúc mừng! Về trang chủ sau ${count}s...`;
+                        } else {
+                            msg.innerText = `Đã lưu điểm! Về trang chủ sau ${count}s...`;
+                        }
+                        if (count <= 0) { clearInterval(itv); location.href = 'index.html'; }
+                    }, 1000);
                 });
             });
         }
