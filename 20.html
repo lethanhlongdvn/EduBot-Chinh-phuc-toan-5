@@ -9,6 +9,7 @@
         rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="js/fireworks.js"></script>
     <style>
         :root {
             --p: #FF9800;
@@ -514,8 +515,15 @@
     </div>
     <div id="result-screen" class="hidden">
         <h2 style="color:var(--gold); font-family:'Bungee';">KẾT QUẢ THÁM HIỂM</h2>
-        <div class="score-circle" id="final-score">0</div>
-        <p>Thời gian: <span id="final-time-text">--:--</span></p>
+        document.getElementById('final-score').innerText = score;
+        document.getElementById('final-time-text').innerText = document.getElementById('timer').innerText;
+
+        // Hiệu ứng pháo hoa nếu điểm >= 90
+        if (score >= 90) {
+        if (typeof startFireworks === 'function') {
+        startFireworks();
+        }
+        }
         <p class="auto-home-text" id="redirect-msg">Đang lưu điểm... Chuyển trang chủ sau 5s</p>
     </div>
     <div id="notify-overlay" class="hidden">
@@ -634,7 +642,7 @@
 
             ,
         {
-            q: "CV HCN:60m, dài gấp đôi rộng. Tìm chiều dài.", a: "20m"
+            q: "Chu vi HCN:60m, dài gấp đôi rộng. Tìm chiều dài.", a: "20m"
         }
 
             ,
@@ -644,7 +652,7 @@
 
             ,
         {
-            q: "36 tivi, 55in gấp 3 lần 75in. Số TV 55in là?", a: "27"
+            q: "120 tivi, 55in gấp 3 lần 75in. Số TV 55in là?", a: "90"
         }
 
             ,
@@ -701,7 +709,7 @@
 
         // Vòng 2: Tìm 1 số (Lớn hoặc Bé)
         const dataP2 = [{
-            q: "Hiệu 30, tỉ 1/4. Tìm số lớn", a: "40"
+            q: "Hiệu 39, tỉ 1/4. Tìm số lớn", a: "52"
         }
 
             ,
@@ -711,7 +719,7 @@
 
             ,
         {
-            q: "Hiệu 40, tỉ 3/7. Tìm số bé", a: "30"
+            q: "Hiệu 60, tỉ 3/7. Tìm số bé", a: "45"
         }
 
             ,
@@ -808,7 +816,7 @@
 
             ,
         {
-            q: "Có 49 con bò, số bò khoang bằng 2/5 số bò vàng. Số bò khoang là:", options: ["A. 35 con", "B. 14 con", "C. 10 con", "D. 7 con"], correct: "B"
+            q: "Có 63 con bò, số bò khoang bằng 2/5 số bò vàng. Số bò khoang là:", options: ["A. 35 con", "B. 18 con", "C. 10 con", "D. 9 con"], correct: "B"
         }
 
             ,
