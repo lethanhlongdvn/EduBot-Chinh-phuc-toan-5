@@ -55,28 +55,49 @@ function startFireworks() {
         constructor(startX) {
             this.x = startX || Math.random() * canvas.width;
             this.y = canvas.height - 30;
-            this.size = Math.random() * 4 + 2;
-            this.speedX = (Math.random() - 0.5) * 6;
-            this.speedY = Math.random() * -18 - 12;
-            this.gravity = 0.25;
+            this.size = Math.random() * 5 + 3;
+            this.speedX = (Math.random() - 0.5) * 12;
+            this.speedY = Math.random() * -20 - 5;
+            this.gravity = 0.35;
             this.opacity = 1;
-            this.color = `hsl(${Math.random() * 360}, 100%, 60%)`;
+            this.rotation = Math.random() * Math.PI * 2;
+            this.rotationSpeed = (Math.random() - 0.5) * 0.3;
+
+            const colorGroup = Math.random();
+            if (colorGroup < 0.33) {
+                this.color = `hsl(${Math.random() * 30 + 35}, 100%, 65%)`; // Vàng Gold
+            } else if (colorGroup < 0.66) {
+                this.color = `hsl(${Math.random() * 40 + 180}, 100%, 60%)`; // Xanh Cyan
+            } else {
+                this.color = `hsl(${Math.random() * 40 + 300}, 100%, 60%)`; // Hồng Neon
+            }
         }
         update() {
             this.x += this.speedX;
             this.y += this.speedY;
             this.speedY += this.gravity;
-            this.opacity -= 0.008;
+            this.opacity -= 0.007;
+            this.rotation += this.rotationSpeed;
         }
         draw() {
+            ctx.save();
+            ctx.translate(this.x, this.y);
+            ctx.rotate(this.rotation);
             ctx.globalAlpha = this.opacity;
-            ctx.shadowBlur = 10;
-            ctx.shadowColor = this.color;
             ctx.fillStyle = this.color;
+            ctx.shadowBlur = 20;
+            ctx.shadowColor = this.color;
+
             ctx.beginPath();
-            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            for (let i = 0; i < 5; i++) {
+                ctx.lineTo(0, -this.size);
+                ctx.rotate(Math.PI / 5);
+                ctx.lineTo(0, -this.size * 0.4);
+                ctx.rotate(Math.PI / 5);
+            }
+            ctx.closePath();
             ctx.fill();
-            ctx.shadowBlur = 0;
+            ctx.restore();
         }
     }
 
@@ -92,16 +113,18 @@ function startFireworks() {
     let stars = [];
     fwSound.play().catch(() => console.log("Autoplay blocked"));
 
+    const rainInterval = setInterval(() => {
+        const targetX = launcherX[Math.floor(Math.random() * launcherX.length)];
+        for (let i = 0; i < 10; i++) {
+            stars.push(new Star(targetX));
+        }
+    }, 60);
+
     function animate() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
 
         drawLaunchers();
-
-        // Increased density: higher probability and more stars per burst
-        if (Math.random() < 0.4) {
-            const targetX = launcherX[Math.floor(Math.random() * launcherX.length)];
-            for (let i = 0; i < 8; i++) stars.push(new Star(targetX));
-        }
 
         for (let i = 0; i < stars.length; i++) {
             stars[i].update();
@@ -112,10 +135,11 @@ function startFireworks() {
     }
     animate();
 
-    // Cleanup after 15 seconds
+    // Cleanup after 10 seconds
     setTimeout(() => {
+        clearInterval(rainInterval);
         fwSound.pause();
         if (canvas.parentElement) canvas.remove();
         if (overlay.parentElement) overlay.remove();
-    }, 15000);
+    }, 10000);
 }
