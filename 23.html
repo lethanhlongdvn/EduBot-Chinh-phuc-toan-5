@@ -9,6 +9,7 @@
         rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="js/fireworks.js"></script>
     <style>
         :root {
             --primary: #00a8ff;
@@ -624,6 +625,13 @@
             document.getElementById('result-screen').classList.remove('hidden');
             document.getElementById('final-score').innerText = score;
             document.getElementById('final-time-text').innerText = document.getElementById('timer').innerText;
+
+            // Hiệu ứng pháo hoa nếu điểm >= 90
+            if (score >= 90) {
+                if (typeof startFireworks === 'function') {
+                    startFireworks();
+                }
+            }
 
             const ref = db.ref('scores/Tuan_23');
             ref.once('value', (snap) => {
