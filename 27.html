@@ -691,33 +691,48 @@
             document.getElementById('final-score').innerText = score;
             document.getElementById('final-time-text').innerText = document.getElementById('timer').innerText;
 
+            let count = 5;
             // Hiệu ứng pháo hoa nếu điểm >= 90
             if (score >= 90) {
+                count = 10;
                 if (typeof startFireworks === 'function') {
                     startFireworks();
                 }
             }
 
             const ref = db.ref('scores/Tuan_27');
-            ref.push({
-                fullName: savedName,
-                className: savedClass,
-                schoolName: savedSchool,
-                score: score,
-                duration: seconds,
-                date: new Date().toLocaleString('vi-VN')
-            }, () => {
-                document.getElementById('save-msg').innerText = "Đã lưu kết quả thành công!";
-                let count = 5;
-                const rd = document.getElementById('redirect-msg');
-                const itv = setInterval(() => {
-                    count--;
-                    rd.innerText = `Sẽ quay lại trang chủ trong ${count}s...`;
-                    if (count <= 0) {
-                        clearInterval(itv);
-                        window.location.href = "index.html";
+            ref.once('value', (snap) => {
+                let attempt = 1;
+                const data = snap.val();
+                if (data) {
+                    for (let id in data) {
+                        if (data[id].fullName === savedName) attempt++;
                     }
-                }, 1000);
+                }
+                ref.push({
+                    fullName: savedName,
+                    className: savedClass,
+                    schoolName: savedSchool,
+                    score: score,
+                    duration: seconds,
+                    attempt: attempt,
+                    date: new Date().toLocaleString('vi-VN')
+                }, () => {
+                    document.getElementById('save-msg').innerText = "Đã lưu kết quả thành công!";
+                    const rd = document.getElementById('redirect-msg');
+                    const itv = setInterval(() => {
+                        count--;
+                        if (score >= 90) {
+                            rd.innerText = `🎆 Đang bắn pháo hoa chúc mừng! Về trang chủ sau ${count}s...`;
+                        } else {
+                            rd.innerText = `Sẽ quay lại trang chủ trong ${count}s...`;
+                        }
+                        if (count <= 0) {
+                            clearInterval(itv);
+                            window.location.href = "index.html";
+                        }
+                    }, 1000);
+                });
             });
         }
     </script>
