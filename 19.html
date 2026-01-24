@@ -444,8 +444,10 @@
         function finishGame() {
             isPlaying = false; document.getElementById('play-area').classList.add('hidden'); document.getElementById('result-screen').classList.remove('hidden'); document.getElementById('final-score').innerText = score;
 
+            let count = 5;
             // Hiệu ứng pháo hoa nếu điểm >= 90
             if (score >= 90) {
+                count = 10;
                 if (typeof startFireworks === 'function') {
                     startFireworks();
                 }
@@ -453,18 +455,30 @@
             const duration = Math.floor((Date.now() - startTime) / 1000);
             const ref = db.ref('scores/Tuan_19');
             ref.once('value', (snap) => {
-                let count = 1; const data = snap.val();
-                if (data) { for (let id in data) { if ((data[id].fullName || "").toLowerCase() === savedName.toLowerCase() && data[id].className === savedClass) count++; } }
+                let attempt = 1; const data = snap.val();
+                if (data) { for (let id in data) { if ((data[id].fullName || "").toLowerCase() === savedName.toLowerCase() && data[id].className === savedClass) attempt++; } }
                 ref.push({
                     fullName: savedName,
                     className: savedClass,
                     schoolName: savedSchool || '---',
                     score: score,
                     duration: duration,
-                    attempt: count,
+                    attempt: attempt,
                     date: new Date().toLocaleString('vi-VN'),
                     timestamp: firebase.database.ServerValue.TIMESTAMP
-                }, () => { document.getElementById('save-status').innerText = `✅ Đã lưu kết quả lần ${count}!`; setTimeout(() => window.location.href = "index.html", 3000); });
+                }, () => {
+                    document.getElementById('save-status').innerText = `✅ Đã lưu kết quả lần ${attempt}!`;
+                    const msg = document.getElementById('save-status');
+                    const itv = setInterval(() => {
+                        count--;
+                        if (score >= 90) {
+                            msg.innerText = `🎆 Đang bắn pháo hoa chúc mừng! Về trang chủ sau ${count}s...`;
+                        } else {
+                            msg.innerText = `✅ Đã lưu kết quả! Về trang chủ sau ${count}s...`;
+                        }
+                        if (count <= 0) { clearInterval(itv); window.location.href = "index.html"; }
+                    }, 1000);
+                });
             });
         }
     </script>
