@@ -466,6 +466,57 @@
             align-items: center;
             z-index: 9999;
         }
+
+        #round-reminder-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 10000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(8px);
+        }
+
+        .reminder-box {
+            background: #1e293b;
+            border: 2px solid var(--p);
+            padding: 25px;
+            border-radius: 20px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 0 30px rgba(255, 152, 0, 0.3);
+            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .reminder-box h2 {
+            color: var(--p);
+            font-family: 'Bungee';
+            margin-top: 0;
+            text-align: center;
+            font-size: 1.4rem;
+        }
+
+        .reminder-content {
+            text-align: left;
+            line-height: 1.6;
+            margin: 20px 0;
+            font-size: 0.95rem;
+            color: #e2e8f0;
+        }
+
+        .reminder-content b {
+            color: var(--gold);
+        }
+
+        .reminder-step {
+            margin-bottom: 15px;
+            padding-left: 10px;
+            border-left: 3px solid var(--s);
+        }
     </style>
 
 </head>
@@ -526,6 +577,14 @@
                 onclick="closeNotifyAndNext()">TIẾP TỤC</button>
         </div>
     </div>
+
+    <div id="round-reminder-overlay" class="hidden">
+        <div class="reminder-box">
+            <h2 id="reminder-title">CÔNG THỨC</h2>
+            <div id="reminder-body" class="reminder-content"></div>
+            <button class="btn-action" onclick="closeReminder()">ĐÓNG & BẮT ĐẦU</button>
+        </div>
+    </div>
     <div class="game-footer">@ 2026 EduRobot.id.vn - Lê Thành Long </div>
     <script>const firebaseConfig = {
             databaseURL: "https://gamhoctap-default-rtdb.asia-southeast1.firebasedatabase.app"
@@ -556,12 +615,53 @@
 
         function startGame() {
             isPlaying = true;
-            startTime = Date.now();
             document.getElementById('start-screen').classList.add('hidden');
             document.getElementById('game-ui').classList.remove('hidden');
-            initStage1();
-            initStage2();
-            startTimer();
+            showRoundReminder(1);
+        }
+
+        let reminderCallback = null;
+        function showRoundReminder(round) {
+            const overlay = document.getElementById('round-reminder-overlay');
+            const body = document.getElementById('reminder-body');
+            const title = document.getElementById('reminder-title');
+
+            clearInterval(timerInterval);
+
+            if (round === 1) {
+                title.innerText = "4 BƯỚC GIẢI TOÁN TỔNG - TỈ";
+                body.innerHTML = `
+                    <div class="reminder-step"><b>Bước 1: Tìm tổng số phần bằng nhau:</b><br>Số phần số lớn + Số phần số bé = Tổng số phần.</div>
+                    <div class="reminder-step"><b>Bước 2: Tìm giá trị của một phần:</b><br>Tổng 2 số : Tổng số phần = Giá trị 1 phần.</div>
+                    <div class="reminder-step"><b>Bước 3: Tìm Số lớn:</b><br>Giá trị 1 phần × Số phần của số lớn = Số lớn.</div>
+                    <div class="reminder-step"><b>Bước 4: Tìm Số bé:</b><br>Giá trị 1 phần × Số phần của số bé = Số bé.</div>
+                `;
+                reminderCallback = () => {
+                    startTime = Date.now();
+                    initStage1();
+                    startTimer();
+                };
+            } else if (round === 2) {
+                title.innerText = "4 BƯỚC GIẢI TOÁN HIỆU - TỈ";
+                body.innerHTML = `
+                    <div class="reminder-step"><b>Bước 1: Tìm hiệu số phần bằng nhau:</b><br>Số phần số lớn - Số phần số bé = Hiệu số phần.</div>
+                    <div class="reminder-step"><b>Bước 2: Tìm giá trị của một phần:</b><br>Hiệu 2 số : Hiệu số phần = Giá trị 1 phần.</div>
+                    <div class="reminder-step"><b>Bước 3: Tìm Số lớn:</b><br>Giá trị 1 phần × Số phần của số lớn = Số lớn.</div>
+                    <div class="reminder-step"><b>Bước 4: Tìm Số bé:</b><br>Giá trị 1 phần × Số phần của số bé = Số bé.</div>
+                `;
+                reminderCallback = () => {
+                    initStage2();
+                    startTimer();
+                };
+            }
+
+            overlay.classList.remove('hidden');
+        }
+
+        function closeReminder() {
+            document.getElementById('round-reminder-overlay').classList.add('hidden');
+            if (reminderCallback) reminderCallback();
+            reminderCallback = null;
         }
 
         window.onbeforeunload = (e) => { if (isPlaying) { e.preventDefault(); e.returnValue = ''; } };
@@ -926,6 +1026,7 @@
                 document.getElementById('stage-2').classList.add('active');
                 document.getElementById('dot-1').classList.add('done');
                 document.getElementById('dot-2').classList.add('active');
+                showRoundReminder(2);
             }
 
             else if (num === 3) {
