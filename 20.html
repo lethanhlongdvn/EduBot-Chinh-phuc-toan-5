@@ -515,15 +515,8 @@
     </div>
     <div id="result-screen" class="hidden">
         <h2 style="color:var(--gold); font-family:'Bungee';">KẾT QUẢ THÁM HIỂM</h2>
-        document.getElementById('final-score').innerText = score;
-        document.getElementById('final-time-text').innerText = document.getElementById('timer').innerText;
-
-        // Hiệu ứng pháo hoa nếu điểm >= 90
-        if (score >= 90) {
-        if (typeof startFireworks === 'function') {
-        startFireworks();
-        }
-        }
+        <div class="score-circle" id="final-score">0</div>
+        <p style="font-size:1.2rem; color:#94a3b8;">⏱ Thời gian: <b id="final-time-text">--:--</b></p>
         <p class="auto-home-text" id="redirect-msg">Đang lưu điểm... Chuyển trang chủ sau 5s</p>
     </div>
     <div id="notify-overlay" class="hidden">
