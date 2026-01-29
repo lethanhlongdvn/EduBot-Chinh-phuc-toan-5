@@ -391,7 +391,7 @@
             charts[week] = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: ['0-29', '30-49', '50-69', '70-89', '90-100'],
+                    labels: ['50-59', '60-69', '70-79', '80-89', '90-100'],
                     datasets: [{
                         data: distribution,
                         backgroundColor: [
@@ -469,14 +469,17 @@
                     }
                 });
 
-                let sorted = Array.from(filteredMap.values()).sort((a, b) => (b.score !== a.score) ? b.score - a.score : (a.duration || 999) - (b.duration || 999));
+                // Chỉ lấy học sinh đạt từ 50 điểm trở lên
+                let sorted = Array.from(filteredMap.values())
+                    .filter(s => (s.score || 0) >= 50)
+                    .sort((a, b) => (b.score !== a.score) ? b.score - a.score : (a.duration || 999) - (b.duration || 999));
 
                 let dist = [0, 0, 0, 0, 0];
                 sorted.forEach(s => {
                     let sc = s.score || 0;
-                    if (sc <= 29) dist[0]++;
-                    else if (sc <= 49) dist[1]++;
-                    else if (sc <= 69) dist[2]++;
+                    if (sc <= 59) dist[0]++;
+                    else if (sc <= 69) dist[1]++;
+                    else if (sc <= 79) dist[2]++;
                     else if (sc <= 89) dist[3]++;
                     else dist[4]++;
                 });
