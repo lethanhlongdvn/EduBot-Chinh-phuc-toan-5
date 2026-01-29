@@ -300,6 +300,87 @@
             display: none !important;
         }
 
+        /* MODAL HƯỚNG DẪN */
+        .instruction-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+        }
+
+        .instruction-content {
+            background: var(--card);
+            padding: 25px 30px;
+            border-radius: 15px;
+            max-width: 500px;
+            width: 90%;
+            border: 2px solid var(--p);
+            box-shadow: 0 10px 40px rgba(255, 152, 0, 0.3);
+            text-align: left;
+        }
+
+        .instruction-content h2 {
+            color: var(--p);
+            margin: 0 0 15px 0;
+            font-size: 1.2rem;
+            text-align: center;
+            font-family: 'Bungee';
+        }
+
+        .instruction-content p {
+            margin: 8px 0;
+            line-height: 1.6;
+        }
+
+        .instruction-content .formula {
+            background: rgba(255, 152, 0, 0.15);
+            padding: 12px 15px;
+            border-radius: 8px;
+            border-left: 4px solid var(--p);
+            margin: 12px 0;
+            font-weight: 600;
+        }
+
+        .instruction-content .example {
+            background: rgba(33, 150, 243, 0.15);
+            padding: 12px 15px;
+            border-radius: 8px;
+            border-left: 4px solid var(--s);
+            margin: 12px 0;
+        }
+
+        .instruction-content .example-title {
+            color: var(--s);
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .btn-understood {
+            width: 100%;
+            padding: 12px;
+            background: var(--p);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: 15px;
+            text-transform: uppercase;
+            transition: all 0.3s;
+        }
+
+        .btn-understood:hover {
+            background: #e67e22;
+            transform: translateY(-2px);
+        }
+
         #start-screen {
             position: fixed;
             top: 0;
@@ -510,12 +591,71 @@
             startTimer();
         }
 
+        // Hiển thị hướng dẫn đầu vòng
+        function showRoundInstruction(roundNum) {
+            let modalHtml = '';
+
+            if (roundNum === 1) {
+                modalHtml = `
+                    <div class="instruction-modal" id="instruction-modal">
+                        <div class="instruction-content">
+                            <h2>📚 HƯỚNG DẪN VÒNG 1</h2>
+                            <p><strong>Tìm tỉ số phần trăm của số a so với số b, ta làm:</strong></p>
+                            <div class="formula">a : b × 100 = ……%</div>
+                            <div class="example">
+                                <div class="example-title">Ví dụ:</div>
+                                <p>Tìm tỉ số phần trăm của 4 và 5:</p>
+                                <p><strong>4 : 5 × 100 = 80%</strong></p>
+                            </div>
+                            <button class="btn-understood" onclick="closeInstruction()">ĐÃ HIỂU - BẮT ĐẦU LÀM BÀI</button>
+                        </div>
+                    </div>
+                `;
+            } else if (roundNum === 2) {
+                modalHtml = `
+                    <div class="instruction-modal" id="instruction-modal">
+                        <div class="instruction-content">
+                            <h2>📚 HƯỚNG DẪN VÒNG 2</h2>
+                            <p><strong>Tìm a% của số B ta làm như sau:</strong></p>
+                            <div class="formula">B × a% = ….</div>
+                            <p style="color:#aaa; font-size:0.9rem;">(tính B × a : 100 = ….)</p>
+                            <div class="example">
+                                <div class="example-title">Ví dụ:</div>
+                                <p>Tìm 15% của 100 000:</p>
+                                <p><strong>100 000 × 15% = 15 000</strong></p>
+                                <p style="color:#aaa; font-size:0.9rem;">(Tính 100 000 × 15 : 100 = 15 000)</p>
+                            </div>
+                            <button class="btn-understood" onclick="closeInstruction()">ĐÃ HIỂU - TIẾP TỤC</button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            if (modalHtml) {
+                document.body.insertAdjacentHTML('beforeend', modalHtml);
+            }
+        }
+
+        function closeInstruction() {
+            const modal = document.getElementById('instruction-modal');
+            if (modal) modal.remove();
+        }
+
         function renderQuestion() {
             if (currentQIdx >= gameData.length) { finishGame(); return; }
 
             const q = gameData[currentQIdx];
             const badge = document.getElementById('stage-badge');
             const content = document.getElementById('q-content');
+
+            // Hiển thị hướng dẫn đầu vòng 1 (câu đầu tiên)
+            if (currentQIdx === 0 && q.stage === 1) {
+                showRoundInstruction(1);
+            }
+            // Hiển thị hướng dẫn đầu vòng 2 (câu thứ 6, index 5)
+            if (currentQIdx === 5 && q.stage === 2) {
+                showRoundInstruction(2);
+            }
 
             // Cập nhật Badge
             if (q.stage === 1) badge.innerText = "VÒNG 1: XÂY MÓNG (5 câu - 8đ/câu)";
