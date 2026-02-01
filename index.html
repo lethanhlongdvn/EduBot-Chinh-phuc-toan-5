@@ -669,10 +669,15 @@
             if (n.length < 2 || !c || !s) return alert("Vui lòng điền đủ Họ tên, Lớp và Trường!");
 
             // Chặn đăng ký tên nháp hoặc tên quá ngắn (dưới 3 từ)
-            const draftKeywords = ['test', 'abc', 'nhap', 'nháp', '123', 'demo', 'đemo', 'xxx'];
+            const draftKeywords = ['test', 'abc', 'nhap', 'nháp', '123', 'demo', 'đemo', 'xxx', 'utc', 'bts', 'admin'];
             const nameLower = n.toLowerCase();
             const words = n.split(/\s+/).filter(w => w.length > 0);
-            if (draftKeywords.some(k => nameLower.includes(k)) || /^\d+$/.test(nameLower) || words.length < 3) {
+            if (
+                draftKeywords.some(k => nameLower.includes(k)) ||
+                /^\d+$/.test(nameLower) ||
+                words.length < 3 ||
+                words.some(w => w.length > 15)
+            ) {
                 return alert("Vui lòng nhập đầy đủ Họ và Tên thật (ít nhất 3 từ) để tham gia thám hiểm!");
             }
 
@@ -729,7 +734,7 @@
                 let all = []; for (let id in data) all.push(data[id]);
 
                 // Lọc bỏ tên nháp và tên không đủ Họ và Tên (phải từ 3 từ trở lên)
-                const draftKeywords = ['test', 'abc', 'nhap', 'nháp', '123', 'demo', 'đemo', 'xxx', '...', '---'];
+                const draftKeywords = ['test', 'abc', 'nhap', 'nháp', '123', 'demo', 'đemo', 'xxx', '...', '---', 'utc', 'bts', 'admin'];
                 all = all.filter(s => {
                     let nameValue = (s.fullName || s.name || "").trim();
                     let nameLower = nameValue.toLowerCase();
@@ -737,6 +742,7 @@
                     if (/^\d+$/.test(nameLower)) return false;
                     const words = nameValue.split(/\s+/).filter(w => w.length > 0);
                     if (words.length < 3) return false;
+                    if (words.some(w => w.length > 15)) return false;
                     return true;
                 });
 
