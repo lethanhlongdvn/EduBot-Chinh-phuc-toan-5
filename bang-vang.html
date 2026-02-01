@@ -469,9 +469,25 @@
                     }
                 });
 
-                // Chỉ lấy học sinh đạt từ 50 điểm trở lên
+                // Chỉ lấy học sinh đạt từ 50 điểm trở lên và không phải tên nháp
                 let sorted = Array.from(filteredMap.values())
-                    .filter(s => (s.score || 0) >= 50)
+                    .filter(s => {
+                        let nameValue = (s.fullName || s.name || "").trim();
+                        let nameLower = nameValue.toLowerCase();
+
+                        // 1. Lọc theo từ khóa nháp
+                        const draftKeywords = ['test', 'abc', 'nhap', 'nháp', '123', 'demo', 'đemo', 'xxx', '...', '---'];
+                        if (draftKeywords.some(k => nameLower.includes(k))) return false;
+
+                        // 2. Lọc nếu chỉ toàn số
+                        if (/^\d+$/.test(nameLower)) return false;
+
+                        // 3. Lọc tên không đủ Họ và Tên (phải từ 3 từ trở lên)
+                        const words = nameValue.split(/\s+/).filter(w => w.length > 0);
+                        if (words.length < 3) return false;
+
+                        return (s.score || 0) >= 50;
+                    })
                     .sort((a, b) => (b.score !== a.score) ? b.score - a.score : (a.duration || 999) - (b.duration || 999));
 
                 let dist = [0, 0, 0, 0, 0];
