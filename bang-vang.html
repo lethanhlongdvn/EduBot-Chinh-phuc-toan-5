@@ -475,8 +475,8 @@
                         let nameValue = (s.fullName || s.name || "").trim();
                         let nameLower = nameValue.toLowerCase();
 
-                        // 1. Lọc theo từ khóa nháp
-                        const draftKeywords = ['test', 'abc', 'nhap', 'nháp', '123', 'demo', 'đemo', 'xxx', '...', '---'];
+                        // 1. Lọc theo từ khóa nháp/spam
+                        const draftKeywords = ['test', 'abc', 'nhap', 'nháp', '123', 'demo', 'đemo', 'xxx', '...', '---', 'utc', 'bts', 'admin'];
                         if (draftKeywords.some(k => nameLower.includes(k))) return false;
 
                         // 2. Lọc nếu chỉ toàn số
@@ -485,6 +485,9 @@
                         // 3. Lọc tên không đủ Họ và Tên (phải từ 3 từ trở lên)
                         const words = nameValue.split(/\s+/).filter(w => w.length > 0);
                         if (words.length < 3) return false;
+
+                        // 4. Lọc tên vô nghĩa (có từ nào dài bất thường > 15 ký tự)
+                        if (words.some(w => w.length > 15)) return false;
 
                         return (s.score || 0) >= 50;
                     })
