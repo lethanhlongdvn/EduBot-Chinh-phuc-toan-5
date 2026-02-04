@@ -151,7 +151,7 @@
         const btn = document.getElementById('mortarBtn');
         const wrapper = document.getElementById('wrapper');
 
-        // Âm thanh pháo hoa
+        // Âm thanh pháo hoa (giữ nguyên để có không khí)
         const audioURL1 = 'https://cdn.jsdelivr.net/gh/Roelatriper/Arsene/music/fireworks.mp3';
         const audioURL2 = 'https://www.soundjay.com/misc/sounds/firework-show-01.mp3';
 
@@ -179,69 +179,65 @@
         window.addEventListener('resize', resizeCanvas);
         resizeCanvas();
 
-        class Star {
+        class Confetti {
             constructor(x, y) {
                 this.x = x;
                 this.y = y;
-                this.size = Math.random() * 5 + 3;
-                this.speedX = (Math.random() - 0.5) * 12;
-                this.speedY = Math.random() * -20 - 5;
-                this.gravity = 0.35;
+                this.sizeW = Math.random() * 10 + 5;
+                this.sizeH = Math.random() * 5 + 5;
+                this.speedX = (Math.random() - 0.5) * 15;
+                this.speedY = Math.random() * -15 - 8;
+                this.gravity = 0.4;
                 this.opacity = 1;
-                this.rotation = Math.random() * Math.PI * 2;
-                this.rotationSpeed = (Math.random() - 0.5) * 0.3;
+                this.rotation = Math.random() * 360;
+                this.rotationSpeed = (Math.random() - 0.5) * 10;
+                this.wobble = Math.random() * Math.PI * 2;
+                this.wobbleSpeed = Math.random() * 0.1 + 0.05;
 
-                const colorGroup = Math.random();
-                if (colorGroup < 0.33) {
-                    this.color = `hsl(${Math.random() * 30 + 35}, 100%, 65%)`; // Vàng Gold
-                } else if (colorGroup < 0.66) {
-                    this.color = `hsl(${Math.random() * 40 + 180}, 100%, 60%)`; // Xanh Cyan
-                } else {
-                    this.color = `hsl(${Math.random() * 40 + 300}, 100%, 60%)`; // Hồng Neon
-                }
+                const colors = ['#f1c40f', '#e74c3c', '#3498db', '#9b59b6', '#2ecc71', '#ff00cc', '#00ffff', '#ffffff'];
+                this.color = colors[Math.floor(Math.random() * colors.length)];
             }
 
             update() {
                 this.x += this.speedX;
                 this.y += this.speedY;
                 this.speedY += this.gravity;
-                this.opacity -= 0.007;
+                this.speedX *= 0.95; // Sức cản không khí
+
+                // Hiệu ứng lắc lư khi rơi
+                this.wobble += this.wobbleSpeed;
+                this.x += Math.cos(this.wobble) * 1.5;
+
                 this.rotation += this.rotationSpeed;
+
+                // Mờ dần khi sắp biến mất hoặc rơi xuống thấp
+                if (this.y > canvas.height - 100) {
+                    this.opacity -= 0.05;
+                }
             }
 
             draw() {
                 ctx.save();
                 ctx.translate(this.x, this.y);
-                ctx.rotate(this.rotation);
+                ctx.rotate(this.rotation * Math.PI / 180);
                 ctx.globalAlpha = this.opacity;
                 ctx.fillStyle = this.color;
-                ctx.shadowBlur = 20;
-                ctx.shadowColor = this.color;
-
-                ctx.beginPath();
-                for (let i = 0; i < 5; i++) {
-                    ctx.lineTo(0, -this.size);
-                    ctx.rotate(Math.PI / 5);
-                    ctx.lineTo(0, -this.size * 0.4);
-                    ctx.rotate(Math.PI / 5);
-                }
-                ctx.closePath();
-                ctx.fill();
+                // Vẽ hình chữ nhật đơn giản (nhẹ hơn vẽ sao)
+                ctx.fillRect(-this.sizeW / 2, -this.sizeH / 2, this.sizeW, this.sizeH);
                 ctx.restore();
             }
         }
 
-        let stars = [];
+        let particles = [];
 
         function animate() {
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.clearRect(0, 0, canvas.width, canvas.height); // Xóa sạch khung hình (nhẹ hơn fillRect đè lên)
 
-            for (let i = 0; i < stars.length; i++) {
-                stars[i].update();
-                stars[i].draw();
-                if (stars[i].opacity <= 0) {
-                    stars.splice(i, 1);
+            for (let i = 0; i < particles.length; i++) {
+                particles[i].update();
+                particles[i].draw();
+                if (particles[i].opacity <= 0 || particles[i].y > canvas.height) {
+                    particles.splice(i, 1);
                     i--;
                 }
             }
@@ -255,33 +251,30 @@
             // Phát âm thanh
             fireworkSound.currentTime = 0;
             fireworkSound.play()
-                .then(() => console.log("Đang phát âm thanh pháo hoa..."))
                 .catch(e => {
-                    console.error("Lỗi phát âm thanh:", e);
-                    // Hiển thị thông báo nhỏ nếu trình duyệt chặn autoplay
-                    if (e.name === 'NotAllowedError') {
-                        console.warn("Trình duyệt yêu cầu tương tác trước khi phát âm thanh.");
-                    }
+                    console.warn("Trình duyệt yêu cầu tương tác trước khi phát âm thanh.");
                 });
 
-            let timeLeft = 10;
-            const rainInterval = setInterval(() => {
+            // Bắn pháo giấy
+            const shootInterval = setInterval(() => {
                 const rect = btn.getBoundingClientRect();
                 const startX = rect.left + (rect.width / 2);
                 const startY = rect.top + 20;
 
-                for (let i = 0; i < 10; i++) {
-                    stars.push(new Star(startX, startY));
+                for (let i = 0; i < 8; i++) {
+                    particles.push(new Confetti(startX, startY));
                 }
-            }, 60);
+            }, 50);
 
-            // Tự động dừng sau 10 giây
+            // Dừng bắn sau 4 giây
             setTimeout(() => {
-                clearInterval(rainInterval);
+                clearInterval(shootInterval);
+            }, 4000);
+
+            // Kết thúc hiệu ứng sau 10 giây
+            setTimeout(() => {
                 btn.disabled = false;
                 wrapper.classList.remove('show');
-
-                // Dừng âm thanh
                 fireworkSound.pause();
             }, 10000);
         }
