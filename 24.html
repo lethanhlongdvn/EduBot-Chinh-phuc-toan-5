@@ -19,6 +19,7 @@
             --correct: #00b894;
             --wrong: #d63031;
             --bg: #0984e3;
+            --gold: #ffd700;
         }
 
         body {
@@ -378,7 +379,9 @@
         window.onload = () => {
             if (!localStorage.getItem('studentName') || !localStorage.getItem('studentClass')) {
                 document.getElementById('welcome-msg').innerHTML = "<b style='color:red'>⚠️ Em cần đăng ký ở bản đồ trước!</b>";
-                document.querySelector('#start-screen .opt-btn').onclick = () => window.location.href = "index.html";
+                const sBtn = document.querySelector('#start-screen .btn-start');
+                sBtn.innerText = "QUAY LẠI ĐĂNG KÝ";
+                sBtn.onclick = () => window.location.href = "index.html";
             } else {
                 document.getElementById('welcome-msg').innerText = `Thí sinh: ${savedName} - Lớp ${savedClass}`;
                 document.getElementById('user-name').innerText = savedName;
@@ -453,15 +456,14 @@
 
         function shuffle(arr) { return arr.sort(() => Math.random() - 0.5); }
 
-        function initGame() { // Renamed from initGame to initStage1 based on instruction, but keeping initGame for now.
+        function initGame() {
             // Select 5/10 from each round
             const r1 = shuffle([...questions.r1]).slice(0, 5).map(q => ({ ...q, points: 8, label: "VÒNG 1: HÌNH LẬP PHƯƠNG" }));
             const r2 = shuffle([...questions.r2]).slice(0, 5).map(q => ({ ...q, points: 8, label: "VÒNG 2: HÌNH HỘP CHỮ NHẬT" }));
             const r3 = shuffle([...questions.r3]).slice(0, 5).map(q => ({ ...q, points: 4, label: "VÒNG 3: HÌNH TRỤ" }));
 
             gameQueue = [...r1, ...r2, ...r3];
-            // renderQuestion();
-            // startTimer();
+            renderQuestion();
         }
 
         function renderQuestion() {
